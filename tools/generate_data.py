@@ -29,7 +29,25 @@ def normalize_realm(value: str) -> str:
 
 
 def lua_string(value: str) -> str:
-    return json.dumps(value, ensure_ascii=True)
+    escaped = []
+    for char in value:
+        codepoint = ord(char)
+        if char == "\\":
+            escaped.append("\\\\")
+        elif char == '"':
+            escaped.append('\\"')
+        elif char == "\n":
+            escaped.append("\\n")
+        elif char == "\r":
+            escaped.append("\\r")
+        elif char == "\t":
+            escaped.append("\\t")
+        elif codepoint < 32:
+            escaped.append(f"\\{codepoint:03d}")
+        else:
+            escaped.append(char)
+
+    return '"' + "".join(escaped) + '"'
 
 
 def load_characters(document: dict[str, Any]) -> list[dict[str, Any]]:
