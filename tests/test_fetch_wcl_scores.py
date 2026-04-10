@@ -36,6 +36,34 @@ class FetchWclScoresTests(unittest.TestCase):
 
         self.assertEqual(entry, ("Voidless", "Dreamscythe", 94.8, 126.0))
 
+    def test_extract_zone_rankings_uses_rank_percent_and_best_rank_item_level(self) -> None:
+        encounter_raw = fetch_wcl_scores.extract_zone_rankings(
+            {
+                "rankings": [
+                    {
+                        "encounter": {"id": 50652, "name": "Attumen"},
+                        "rankPercent": 94.4,
+                        "bestRank": {"ilvl": 126},
+                    }
+                ]
+            },
+            1047,
+            "Dreamscythe",
+            "Voidless",
+        )
+
+        self.assertEqual(
+            encounter_raw,
+            {
+                "1047:50652": [("Voidless", "Dreamscythe", 94.4, 126.0)],
+            },
+        )
+
+    def test_server_characters_page_limit_clamps_to_api_cap(self) -> None:
+        args = SimpleNamespace(page_size=1000, effective_page_size=1000)
+
+        self.assertEqual(fetch_wcl_scores.server_characters_page_limit(args), 100)
+
     def test_scores_from_state_averages_stored_percentiles_and_keeps_best_duplicate(self) -> None:
         state = fetch_wcl_scores.new_state()
         state["encounterEntries"] = {
@@ -244,12 +272,12 @@ class FetchWclScoresTests(unittest.TestCase):
         self.assertEqual(scores[("Dreamscythe", "Voidless")]["encounters"]["1047:50652"], 95.0)
 
     def test_incremental_state_resets_when_score_policy_changes(self) -> None:
-        original_fetch_chunk = fetch_wcl_scores.fetch_chunk
+        original_fetch_realm_character_chunk = fetch_wcl_scores.fetch_realm_character_chunk
 
-        def fake_fetch_chunk(_args, _token, _region, _realm, _zone_id, _start_page):
+        def fake_fetch_realm_character_chunk(_args, _token, _region, _realm, _zone_ids, _start_page):
             return {"1047:649": [("Vocoder", "Dreamscythe", 74.7, 126.0)]}, True
 
-        fetch_wcl_scores.fetch_chunk = fake_fetch_chunk
+        fetch_wcl_scores.fetch_realm_character_chunk = fake_fetch_realm_character_chunk
         try:
             with tempfile.TemporaryDirectory() as tmpdir:
                 state_file = Path(tmpdir) / "state.json"
@@ -271,12 +299,47 @@ class FetchWclScoresTests(unittest.TestCase):
 
                 state = fetch_wcl_scores.load_state(state_file)
         finally:
-            fetch_wcl_scores.fetch_chunk = original_fetch_chunk
+            fetch_wcl_scores.fetch_realm_character_chunk = original_fetch_realm_character_chunk
 
         self.assertTrue(complete)
         self.assertEqual(state["scorePolicyVersion"], fetch_wcl_scores.SCORE_POLICY_VERSION)
         self.assertNotIn("old", state["encounterEntries"])
         self.assertEqual(state["encounterEntries"]["1047:649"][0], ["Vocoder", "Dreamscythe", 74.7, 126.0])
+
+    def test_incremental_fetches_only_one_realm_chunk_per_run(self) -> None:
+        original_fetch_realm_character_chunk = fetch_wcl_scores.fetch_realm_character_chunk
+        calls: list[str] = []
+
+        def fake_fetch_realm_character_chunk(_args, _token, _region, realm, _zone_ids, _start_page):
+            calls.append(realm["name"])
+            return {"1047:649": [("Vocoder", realm["name"], 74.7, 126.0)]}, True
+
+        fetch_wcl_scores.fetch_realm_character_chunk = fake_fetch_realm_character_chunk
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                state_file = Path(tmpdir) / "state.json"
+                args = SimpleNamespace(state_file=state_file, max_pages=20, pages_per_chunk=1)
+
+                with redirect_stdout(io.StringIO()):
+                    complete = fetch_wcl_scores.run_incremental(
+                        args,
+                        [1047],
+                        "us",
+                        [
+                            {"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"},
+                            {"name": "Nightslayer", "slug": "nightslayer", "region": "us"},
+                        ],
+                        "token",
+                    )
+
+                state = fetch_wcl_scores.load_state(state_file)
+        finally:
+            fetch_wcl_scores.fetch_realm_character_chunk = original_fetch_realm_character_chunk
+
+        self.assertFalse(complete)
+        self.assertEqual(calls, ["Dreamscythe"])
+        self.assertTrue(state["progress"]["us/dreamscythe"]["done"])
+        self.assertFalse(state["progress"].get("us/nightslayer", {}).get("done", False))
 
 
 if __name__ == "__main__":
