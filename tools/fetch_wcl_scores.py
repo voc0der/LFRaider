@@ -69,36 +69,6 @@ query LFRaiderRankings(
 }
 """
 
-SERVER_CHARACTERS_QUERY = """
-query LFRaiderServerCharacters(
-  $serverRegion: String!
-  $serverSlug: String!
-  $page: Int!
-  $limit: Int!
-) {
-  worldData {
-    server(region: $serverRegion, slug: $serverSlug) {
-      name
-      characters(page: $page, limit: $limit) {
-        data {
-          name
-        }
-        current_page
-        has_more_pages
-        last_page
-        total
-      }
-    }
-  }
-  rateLimitData {
-    limitPerHour
-    pointsSpentThisHour
-    pointsResetIn
-  }
-}
-"""
-
-
 def require_distribution_permission(args: argparse.Namespace) -> None:
     approved = args.distribution_approved or os.getenv("LFR_WCL_DISTRIBUTION_APPROVED") == "true"
     if approved:
@@ -144,6 +114,57 @@ def format_page_size(value: int | None) -> str:
 def server_characters_page_limit(args: argparse.Namespace) -> int:
     requested_size = active_page_size(args) or DEFAULT_PAGE_SIZE
     return min(requested_size, SERVER_CHARACTERS_MAX_LIMIT)
+
+
+def build_server_characters_query(metric: str | None, include_partition: bool, zone_ids: list[int]) -> str:
+    variables = [
+        "  $serverRegion: String!",
+        "  $serverSlug: String!",
+        "  $page: Int!",
+        "  $limit: Int!",
+    ]
+    if metric:
+        variables.append("  $metric: CharacterPageRankingMetricType")
+    if include_partition:
+        variables.append("  $partition: Int")
+
+    zone_fields: list[str] = []
+    for zone_id in zone_ids:
+        arguments = [f"zoneID: {zone_id}", "timeframe: Historical"]
+        if metric:
+            arguments.append("metric: $metric")
+        if include_partition:
+            arguments.append("partition: $partition")
+        zone_fields.append(f"          zone_{zone_id}: zoneRankings({', '.join(arguments)})")
+
+    query_lines = [
+        "query LFRaiderServerCharacters(",
+        *variables,
+        ") {",
+        "  worldData {",
+        "    server(region: $serverRegion, slug: $serverSlug) {",
+        "      name",
+        "      characters(page: $page, limit: $limit) {",
+        "        data {",
+        "          name",
+        "          hidden",
+        *zone_fields,
+        "        }",
+        "        current_page",
+        "        has_more_pages",
+        "        last_page",
+        "        total",
+        "      }",
+        "    }",
+        "  }",
+        "  rateLimitData {",
+        "    limitPerHour",
+        "    pointsSpentThisHour",
+        "    pointsResetIn",
+        "  }",
+        "}",
+    ]
+    return "\n".join(query_lines) + "\n"
 
 
 def page_size_candidates(requested_size: int | None) -> list[int | None]:
@@ -579,18 +600,25 @@ def fetch_server_characters_page(
     realm_region: str,
     realm_slug: str,
     realm_name: str,
+    zone_ids: list[int],
     page: int,
-) -> tuple[list[dict[str, str]], bool, int, int | None]:
+) -> tuple[dict[str, list[tuple[str, str, float, float | None]]], int, bool, int, int | None, float | None, int | None, int | None]:
+    variables: dict[str, Any] = {
+        "serverRegion": realm_region,
+        "serverSlug": realm_slug,
+        "page": page,
+        "limit": server_characters_page_limit(args),
+    }
+    if args.metric:
+        variables["metric"] = args.metric
+    if args.partition is not None:
+        variables["partition"] = args.partition
+
     data = graphql(
         args.graphql_url,
         token,
-        SERVER_CHARACTERS_QUERY,
-        {
-            "serverRegion": realm_region,
-            "serverSlug": realm_slug,
-            "page": page,
-            "limit": server_characters_page_limit(args),
-        },
+        build_server_characters_query(args.metric, args.partition is not None, zone_ids),
+        variables,
     )
     world_data = data.get("worldData") or {}
     server = world_data.get("server") or {}
@@ -599,16 +627,40 @@ def fetch_server_characters_page(
 
     characters_payload = server.get("characters") or {}
     items = pagination_items(characters_payload)
-    characters = [
-        {"name": str(item["name"]), "slug": realm_slug, "region": realm_region, "realm": realm_name}
-        for item in items
-        if item.get("name")
-    ]
+    encounter_raw: dict[str, list[tuple[str, str, float, float | None]]] = {}
+    ranked_characters = 0
+    for item in items:
+        if not isinstance(item, dict) or not item.get("name") or item.get("hidden"):
+            continue
+        character_entries: dict[str, list[tuple[str, str, float, float | None]]] = {}
+        character_name = str(item["name"])
+        for zone_id in zone_ids:
+            merge_encounter_raw(
+                character_entries,
+                extract_zone_rankings(item.get(f"zone_{zone_id}"), zone_id, realm_name, character_name),
+            )
+        if character_entries:
+            ranked_characters += 1
+            merge_encounter_raw(encounter_raw, character_entries)
+
     last_page = pagination_last_page(characters_payload, page)
     total = None
     if isinstance(characters_payload, dict) and characters_payload.get("total") is not None:
         total = int(characters_payload["total"])
-    return characters, pagination_has_more(characters_payload), last_page, total
+    rate_limit = data.get("rateLimitData") or {}
+    spent = float(rate_limit["pointsSpentThisHour"]) if rate_limit.get("pointsSpentThisHour") is not None else None
+    limit = int(rate_limit["limitPerHour"]) if rate_limit.get("limitPerHour") is not None else None
+    reset_in = int(rate_limit["pointsResetIn"]) if rate_limit.get("pointsResetIn") is not None else None
+    return (
+        encounter_raw,
+        len(items),
+        pagination_has_more(characters_payload),
+        last_page,
+        total,
+        spent,
+        limit,
+        reset_in,
+    )
 
 
 def fetch_character_batch_entries(
@@ -673,33 +725,31 @@ def fetch_realm_character_chunk(
 
     end_page = min(start_page + args.pages_per_chunk - 1, args.max_pages)
     for page in range(start_page, end_page + 1):
-        characters, has_more_pages, last_page, total = fetch_server_characters_page(
+        (
+            page_entries,
+            page_character_count,
+            has_more_pages,
+            last_page,
+            total,
+            spent,
+            limit,
+            reset_in,
+        ) = fetch_server_characters_page(
             args,
             token,
             realm_region,
             realm_slug,
             realm_name,
+            zone_ids,
             page,
         )
-        page_entries: dict[str, list[tuple[str, str, float, float | None]]] = {}
-        ranked_characters = 0
-        for batch in chunked(characters, args.character_query_batch_size):
-            batch_entries, batch_ranked_characters = fetch_character_batch_entries(
-                args,
-                token,
-                zone_ids,
-                realm_name,
-                batch,
-            )
-            ranked_characters += batch_ranked_characters
-            merge_encounter_raw(page_entries, batch_entries)
-
+        ranked_characters = len({(realm_name, name) for rows in page_entries.values() for name, _, _, _ in rows})
         merge_encounter_raw(encounter_raw, page_entries)
         encounter_rows = sum(len(rows) for rows in page_entries.values())
         print(
             f"realm {realm_region}/{realm_name} page {page}: "
-            f"{len(characters)} characters, {ranked_characters} with rankings, "
-            f"{encounter_rows} encounter rows, total {total}"
+            f"{page_character_count} characters, {ranked_characters} with rankings, "
+            f"{encounter_rows} encounter rows, total {total}, rate {spent}/{limit}, reset {reset_in}s"
         )
 
         if args.sleep_seconds > 0:
