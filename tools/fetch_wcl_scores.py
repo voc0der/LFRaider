@@ -241,13 +241,13 @@ def payload_count(payload: Any) -> int | None:
     return int(value)
 
 
-def percentile_from_ranking(ranking: dict[str, Any], total_count: int | None = None) -> float | None:
+def percentile_from_ranking(ranking: dict[str, Any], total_count: int | None = None, fallback_rank: int | None = None) -> float | None:
     for key in ("rankPercent", "percentile", "historicalPercent", "bracketPercent", "percent"):
         value = ranking.get(key)
         if value is not None:
             return float(value)
 
-    rank = ranking.get("rank")
+    rank = ranking.get("rank") or fallback_rank
     out_of = ranking.get("outOf") or ranking.get("total") or ranking.get("totalCount") or total_count
     if rank is None or out_of is None:
         return None
@@ -367,12 +367,14 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
             any_more = any_more or payload_has_more(rankings_payload)
             total_rankings = payload_count(rankings_payload)
 
-            for ranking in ranking_entries(rankings_payload):
+            entries = ranking_entries(rankings_payload)
+            for ranking_idx, ranking in enumerate(entries, 1):
                 page_rankings += 1
                 if first_ranking_shape == "no rankings":
                     first_ranking_shape = payload_shape(ranking)
                 name = name_from_ranking(ranking)
-                percentile = percentile_from_ranking(ranking, total_rankings)
+                fallback_rank = ((page - 1) * len(entries)) + ranking_idx
+                percentile = percentile_from_ranking(ranking, total_rankings, fallback_rank)
                 if not name:
                     missing_name += 1
                     continue
