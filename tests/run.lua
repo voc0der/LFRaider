@@ -41,6 +41,28 @@ local function new_font_string(text)
     return font
 end
 
+local function install_fixture_data()
+    _G.LFRaiderData = {
+        generatedAt = "test-fixture",
+        source = "tests",
+        scoreScale = 10,
+        itemScoreScale = 1,
+        totalCharacters = 1,
+        fields = {
+            wclOverall = 1,
+            itemScore = 2,
+        },
+        realms = {
+            dreamscythe = {
+                vocoder = { 747, 126 },
+            },
+        },
+        realmNames = {
+            dreamscythe = "Dreamscythe",
+        },
+    }
+end
+
 local function setup_env(opts)
     opts = opts or {}
 
@@ -280,6 +302,7 @@ local function setup_env(opts)
     end
 
     assert(loadfile("LFRaider_Data.lua"))()
+    install_fixture_data()
     assert(loadfile("LFRaider.lua"))("LFRaider")
 
     local frame = state.frames[#state.frames]

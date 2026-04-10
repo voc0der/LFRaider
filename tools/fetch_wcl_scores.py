@@ -170,6 +170,9 @@ def graphql(graphql_url: str, token: str, query: str, variables: dict[str, Any])
 
 
 def ranking_entries(payload: Any) -> list[dict[str, Any]]:
+    if isinstance(payload, list):
+        return [entry for entry in payload if isinstance(entry, dict)]
+
     if not isinstance(payload, dict):
         return []
 
@@ -232,7 +235,7 @@ def realm_from_ranking(ranking: dict[str, Any], fallback: str) -> str:
 
 def load_realms(path: Path) -> tuple[str, list[dict[str, str]]]:
     document = json.loads(path.read_text(encoding="utf-8"))
-    region = str(document.get("region") or "US")
+    region = str(document.get("region") or "us").strip().lower()
     realms = document.get("realms")
     if not isinstance(realms, list) or not realms:
         raise ValueError(f"{path} must contain a non-empty realms[] list")
