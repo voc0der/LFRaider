@@ -13,6 +13,8 @@ ignore:
   - RELEASING.md
   - README.md
   - .github
+  - .claude
+  - assets
   - data
   - dist
   - tests

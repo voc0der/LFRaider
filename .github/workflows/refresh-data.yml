@@ -33,7 +33,7 @@ jobs:
       WCL_PARTITION: ${{ vars.WCL_PARTITION }}
       WCL_GRAPHQL_URL: ${{ vars.WCL_GRAPHQL_URL || 'https://www.warcraftlogs.com/api/v2/client' }}
       WCL_PAGES_PER_CHUNK: ${{ vars.WCL_PAGES_PER_CHUNK || '20' }}
-      WCL_MAX_PAGES: ${{ vars.WCL_MAX_PAGES || '200' }}
+      WCL_MAX_PAGES: ${{ vars.WCL_MAX_PAGES || '20' }}
       WCL_SLEEP_SECONDS: ${{ vars.WCL_SLEEP_SECONDS || '1.0' }}
       LFR_WCL_DISTRIBUTION_APPROVED: ${{ vars.LFR_WCL_DISTRIBUTION_APPROVED }}
 
@@ -78,9 +78,10 @@ jobs:
         id: mode
         shell: bash
         run: |
-          # workflow_dispatch can override; scheduled runs always chunk
+          # workflow_dispatch can override; the Tuesday cron runs a full one-shot refresh.
           INPUT_MODE="${{ github.event.inputs.mode }}"
-          if [[ "${INPUT_MODE}" == "full" ]]; then
+          SCHEDULE="${{ github.event.schedule }}"
+          if [[ "${INPUT_MODE}" == "full" || "${SCHEDULE}" == "17 10 * * 2" ]]; then
             echo "mode=full" >> "$GITHUB_OUTPUT"
           else
             echo "mode=chunk" >> "$GITHUB_OUTPUT"
@@ -98,6 +99,7 @@ jobs:
             --output data/scores.json \
             --state-file data/fetch_state.json \
             --pages-per-chunk "${WCL_PAGES_PER_CHUNK}" \
+            --max-pages "${WCL_MAX_PAGES}" \
             --zone-ids "${WCL_ZONE_IDS:-${WCL_ZONE_ID}}" \
             --metric "${WCL_METRIC}" 2>&1 | tee "$tmpfile"
           if grep -q "^CYCLE_COMPLETE$" "$tmpfile"; then
@@ -114,6 +116,7 @@ jobs:
           python3 tools/fetch_wcl_scores.py \
             --realms data/realms.json \
             --output data/scores.json \
+            --max-pages "${WCL_MAX_PAGES}" \
             --zone-ids "${WCL_ZONE_IDS:-${WCL_ZONE_ID}}" \
             --metric "${WCL_METRIC}"
 

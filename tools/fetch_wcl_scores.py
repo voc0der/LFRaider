@@ -25,6 +25,7 @@ from typing import Any
 TOKEN_URL = "https://www.warcraftlogs.com/oauth/token"
 GRAPHQL_URL = "https://www.warcraftlogs.com/api/v2/client"
 TERMS_URL = "https://www.archon.gg/wow/articles/help/rpg-logs-api-terms-of-service"
+API_MAX_PAGE = 20
 
 RANKINGS_QUERY = """
 query LFRaiderRankings(
@@ -555,7 +556,15 @@ def fetch_chunk(
     zone_name = "unknown"
     exhausted = False
 
-    for page in range(start_page, start_page + args.pages_per_chunk):
+    if start_page > args.max_pages:
+        print(
+            f"zone {zone_id} {region}/{realm_name}: "
+            f"start page {start_page} exceeds max page {args.max_pages}; marking exhausted"
+        )
+        return encounter_raw, True
+
+    end_page = min(start_page + args.pages_per_chunk - 1, args.max_pages)
+    for page in range(start_page, end_page + 1):
         variables = {
             "zoneID": zone_id,
             "serverRegion": region,
@@ -629,6 +638,9 @@ def fetch_chunk(
         if not any_more or not any_entries:
             exhausted = True
             break
+
+    if not exhausted and end_page >= args.max_pages:
+        exhausted = True
 
     return encounter_raw, exhausted
 
@@ -704,6 +716,10 @@ def main() -> int:
     parser.add_argument("--graphql-url", default=env_str("WCL_GRAPHQL_URL", GRAPHQL_URL))
     parser.add_argument("--distribution-approved", action="store_true")
     args = parser.parse_args()
+
+    if args.max_pages > API_MAX_PAGE:
+        print(f"clamping --max-pages from {args.max_pages} to Warcraft Logs API max page {API_MAX_PAGE}")
+        args.max_pages = API_MAX_PAGE
 
     try:
         zone_ids = parse_zone_ids(args.zone_ids)
