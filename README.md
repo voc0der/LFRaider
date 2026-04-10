@@ -1,3 +1,11 @@
+<p align="center">
+  <img src="assets/lfraidler-icon.png" alt="LFRaider icon" width="180" />
+</p>
+
+<p align="center">
+  Warcraft Logs score signals in player tooltips, LFG rows, and <code>/who</code> results.
+</p>
+
 # LFRaider
 
 - Adds bundled Warcraft Logs and last-known item score signals to player tooltips
