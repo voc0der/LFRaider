@@ -439,6 +439,7 @@ def should_retry_with_smaller_page_size(message: str, attempted_size: int | None
         marker in text
         for marker in (
             "unknown argument",
+            "invalid",
             "invalid value",
             "expected type",
             "must be",
@@ -447,6 +448,34 @@ def should_retry_with_smaller_page_size(message: str, attempted_size: int | None
         )
     )
     return mentions_size and mentions_validation
+
+
+def retryable_rankings_payload_error(data: dict[str, Any], attempted_size: int | None) -> str | None:
+    world_data = data.get("worldData") or {}
+    if not isinstance(world_data, dict):
+        return None
+
+    zone = world_data.get("zone") or {}
+    if not isinstance(zone, dict):
+        return None
+
+    encounters = zone.get("encounters") or []
+    if not isinstance(encounters, list):
+        return None
+
+    for encounter in encounters:
+        if not isinstance(encounter, dict):
+            continue
+        rankings_error = payload_error(encounter.get("characterRankings"))
+        if rankings_error and should_retry_with_smaller_page_size(rankings_error, attempted_size):
+            encounter_id = int(encounter.get("id") or 0)
+            zone_name = zone.get("name") or "unknown"
+            return (
+                f"Warcraft Logs characterRankings failed for zone {zone.get('id') or 'unknown'} "
+                f"{zone_name}, encounter {encounter_id}: {rankings_error}"
+            )
+
+    return None
 
 
 def graphql_rankings_page(
@@ -480,6 +509,18 @@ def graphql_rankings_page(
             )
             continue
 
+        embedded_error = retryable_rankings_payload_error(data, candidate)
+        if embedded_error:
+            last_error = RuntimeError(embedded_error)
+            if index + 1 >= len(candidates):
+                return data
+            next_candidate = candidates[index + 1]
+            print(
+                f"zone {zone_id} {region}/{realm_name} page {page}: "
+                f"page size {format_page_size(candidate)} failed ({embedded_error}); "
+                f"retrying with {format_page_size(next_candidate)}"
+            )
+            continue
         if candidate != requested_page_size:
             print(
                 f"zone {zone_id} {region}/{realm_name}: "
