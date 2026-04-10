@@ -321,7 +321,14 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
     realm_name = realm["name"]
     region = realm.get("region") or default_region
     realm_slug = realm.get("slug") or realm_name.lower().replace(" ", "")
-    by_character: dict[tuple[str, str], dict[str, Any]] = {}
+
+    # Pass 1: collect raw entries per encounter across all pages.
+    # WCL returns characters sorted best-first, so position in the full list == global rank.
+    # We cannot use payload_count() as the total because it returns the per-page size (100),
+    # not the total number of ranked characters. Instead we track global rank ourselves and
+    # compute percentiles after all pages are fetched, using the final rank as the total.
+    encounter_raw: dict[str, list[tuple[int, str, str, float | None]]] = {}
+    zone_name = "unknown"
 
     for page in range(1, args.max_pages + 1):
         variables = {
@@ -335,7 +342,7 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
         data = graphql(args.graphql_url, token, RANKINGS_QUERY, variables)
         world_data = data.get("worldData") or {}
         zone = world_data.get("zone") or {}
-        zone_name = zone.get("name") or "unknown"
+        zone_name = zone.get("name") or zone_name
         encounters = zone.get("encounters") or []
         if not isinstance(encounters, list):
             raise RuntimeError(f"unexpected encounters payload for {realm_name}: {encounters!r}")
@@ -345,9 +352,7 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
         first_payload_shape = "no encounters"
         first_ranking_shape = "no rankings"
         page_rankings = 0
-        usable_rankings = 0
         missing_name = 0
-        missing_percentile = 0
 
         for encounter in encounters:
             if not isinstance(encounter, dict):
@@ -365,41 +370,30 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
                     f"{zone_name}, realm {realm_name}, encounter {encounter_id}: {rankings_error}"
                 )
             any_more = any_more or payload_has_more(rankings_payload)
-            total_rankings = payload_count(rankings_payload)
 
             entries = ranking_entries(rankings_payload)
+            raw_list = encounter_raw.setdefault(encounter_key, [])
             for ranking_idx, ranking in enumerate(entries, 1):
                 page_rankings += 1
                 if first_ranking_shape == "no rankings":
                     first_ranking_shape = payload_shape(ranking)
                 name = name_from_ranking(ranking)
-                fallback_rank = ((page - 1) * len(entries)) + ranking_idx
-                percentile = percentile_from_ranking(ranking, total_rankings, fallback_rank)
                 if not name:
                     missing_name += 1
                     continue
-                if percentile is None:
-                    missing_percentile += 1
-                    continue
-
-                any_entries = True
-                usable_rankings += 1
+                global_rank = (page - 1) * len(entries) + ranking_idx
                 resolved_realm = realm_from_ranking(ranking, realm_name)
-                key = (resolved_realm, name)
-                character = by_character.setdefault(key, {"encounters": {}, "itemScores": []})
-                character["encounters"][encounter_key] = max(character["encounters"].get(encounter_key, 0), percentile)
                 item_score = item_score_from_ranking(ranking)
-                if item_score and item_score > 0:
-                    character["itemScores"].append(item_score)
+                raw_list.append((global_rank, name, resolved_realm, item_score))
+                any_entries = True
 
         rate_limit = data.get("rateLimitData") or {}
         spent = rate_limit.get("pointsSpentThisHour")
         limit = rate_limit.get("limitPerHour")
         print(
             f"zone {zone_id} {zone_name} {region}/{realm_name} page {page}: "
-            f"{len(by_character)} characters, {len(encounters)} encounters, "
-            f"{page_rankings} rankings, {usable_rankings} usable, "
-            f"missing name {missing_name}, missing percentile {missing_percentile}, "
+            f"{len(encounter_raw)} encounters, {page_rankings} rankings, "
+            f"missing name {missing_name}, "
             f"payload {first_payload_shape}, first ranking {first_ranking_shape}, rate {spent}/{limit}"
         )
 
@@ -408,6 +402,20 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
 
         if not any_more or not any_entries:
             break
+
+    # Pass 2: compute positional percentiles now that we know the total fetched per encounter.
+    by_character: dict[tuple[str, str], dict[str, Any]] = {}
+    for encounter_key, raw_list in encounter_raw.items():
+        if not raw_list:
+            continue
+        total = raw_list[-1][0]
+        for global_rank, name, resolved_realm, item_score in raw_list:
+            percentile = max(0.0, min(100.0, (1.0 - (global_rank - 1) / max(total - 1, 1)) * 100.0))
+            key = (resolved_realm, name)
+            character = by_character.setdefault(key, {"encounters": {}, "itemScores": []})
+            character["encounters"][encounter_key] = max(character["encounters"].get(encounter_key, 0), percentile)
+            if item_score and item_score > 0:
+                character["itemScores"].append(item_score)
 
     return by_character
 
