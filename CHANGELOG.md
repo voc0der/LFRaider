@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+### Fixed
+- Refuse empty Warcraft Logs refresh results so CI cannot publish a zero-character dataset
+
 ## [0.1.1] - 2026-04-10
 
 ### Changed

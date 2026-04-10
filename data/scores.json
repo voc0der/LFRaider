@@ -1,11 +1,12 @@
 {
-  "characters": [],
-  "generatedAt": "2026-04-10T12:35:45Z",
-  "metric": "dps",
-  "scorePolicy": "Mean of each character's best encounter rank percentiles across the configured zone IDs.",
-  "source": "warcraftlogs-api-v2",
-  "zoneIDs": [
-    1047,
-    1048
+  "generatedAt": "2026-04-10T00:00:00Z",
+  "source": "manual-seed",
+  "characters": [
+    {
+      "itemScore": 126,
+      "name": "Vocoder",
+      "realm": "Dreamscythe",
+      "score": 74.7
+    }
   ]
 }

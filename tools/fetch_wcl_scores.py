@@ -169,7 +169,33 @@ def graphql(graphql_url: str, token: str, query: str, variables: dict[str, Any])
     return response.get("data") or {}
 
 
+def decode_json_payload(payload: Any) -> Any:
+    if not isinstance(payload, str):
+        return payload
+
+    text = payload.strip()
+    if not text:
+        return payload
+
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        return payload
+
+
+def payload_shape(payload: Any) -> str:
+    payload = decode_json_payload(payload)
+    if isinstance(payload, dict):
+        keys = ",".join(sorted(str(key) for key in payload.keys())[:6])
+        return f"dict({keys})"
+    if isinstance(payload, list):
+        return f"list({len(payload)})"
+    return type(payload).__name__
+
+
 def ranking_entries(payload: Any) -> list[dict[str, Any]]:
+    payload = decode_json_payload(payload)
+
     if isinstance(payload, list):
         return [entry for entry in payload if isinstance(entry, dict)]
 
@@ -185,6 +211,8 @@ def ranking_entries(payload: Any) -> list[dict[str, Any]]:
 
 
 def payload_has_more(payload: Any) -> bool:
+    payload = decode_json_payload(payload)
+
     if not isinstance(payload, dict):
         return False
 
@@ -259,12 +287,14 @@ def collect_realm_scores(args: argparse.Namespace, token: str, region: str, real
         data = graphql(args.graphql_url, token, RANKINGS_QUERY, variables)
         world_data = data.get("worldData") or {}
         zone = world_data.get("zone") or {}
+        zone_name = zone.get("name") or "unknown"
         encounters = zone.get("encounters") or []
         if not isinstance(encounters, list):
             raise RuntimeError(f"unexpected encounters payload for {realm_name}: {encounters!r}")
 
         any_more = False
         any_entries = False
+        first_payload_shape = "no encounters"
 
         for encounter in encounters:
             if not isinstance(encounter, dict):
@@ -273,6 +303,8 @@ def collect_realm_scores(args: argparse.Namespace, token: str, region: str, real
             encounter_id = int(encounter.get("id") or 0)
             encounter_key = f"{zone_id}:{encounter_id}"
             rankings_payload = encounter.get("characterRankings")
+            if first_payload_shape == "no encounters":
+                first_payload_shape = payload_shape(rankings_payload)
             any_more = any_more or payload_has_more(rankings_payload)
 
             for ranking in ranking_entries(rankings_payload):
@@ -293,7 +325,11 @@ def collect_realm_scores(args: argparse.Namespace, token: str, region: str, real
         rate_limit = data.get("rateLimitData") or {}
         spent = rate_limit.get("pointsSpentThisHour")
         limit = rate_limit.get("limitPerHour")
-        print(f"zone {zone_id} {realm_name} page {page}: {len(by_character)} characters, rate {spent}/{limit}")
+        print(
+            f"zone {zone_id} {zone_name} {realm_name} page {page}: "
+            f"{len(by_character)} characters, {len(encounters)} encounters, "
+            f"payload {first_payload_shape}, rate {spent}/{limit}"
+        )
 
         if args.sleep_seconds > 0:
             time.sleep(args.sleep_seconds)
@@ -362,6 +398,12 @@ def main() -> int:
         if character["itemScores"]:
             entry["itemScore"] = round(max(character["itemScores"]), 1)
         characters.append(entry)
+
+    if not characters:
+        raise SystemExit(
+            "Warcraft Logs returned 0 characters for the configured realms and zone IDs. "
+            "Refusing to replace the bundled dataset with an empty dump."
+        )
 
     document = {
         "generatedAt": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
