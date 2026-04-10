@@ -1,0 +1,25 @@
+{
+  "region": "US",
+  "realms": [
+    {
+      "name": "Dreamscythe",
+      "slug": "dreamscythe"
+    },
+    {
+      "name": "Nightslayer",
+      "slug": "nightslayer"
+    },
+    {
+      "name": "Maladath",
+      "slug": "maladath"
+    },
+    {
+      "name": "Thunderstrike",
+      "slug": "thunderstrike"
+    },
+    {
+      "name": "Spineshatter",
+      "slug": "spineshatter"
+    }
+  ]
+}

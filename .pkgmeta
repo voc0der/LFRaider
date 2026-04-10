@@ -1,0 +1,22 @@
+package-as: LFRaider
+
+enable-nolib-creation: no
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
+ignore:
+  - CHANGELOG.md
+  - CONTRIBUTING.md
+  - LICENSE
+  - RELEASING.md
+  - README.md
+  - .github
+  - data
+  - dist
+  - tests
+  - tools
+  - .gitignore
+
+wowi-archive-previous: no

@@ -1,0 +1,78 @@
+name: Tag from TOC version
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tag-from-toc
+  cancel-in-progress: true
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_PAT: ${{ secrets.RELEASE_PAT }}
+
+    steps:
+      - name: Checkout (use PAT so tag push triggers other workflows)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ env.RELEASE_PAT != '' && env.RELEASE_PAT || github.token }}
+
+      - name: Warn when RELEASE_PAT is missing
+        if: ${{ env.RELEASE_PAT == '' }}
+        shell: bash
+        run: |
+          echo "::warning::RELEASE_PAT is not configured. This workflow can still create a tag, but tag-triggered workflows may not run. Add RELEASE_PAT for fully automated releases."
+
+      - name: Read version from TOC
+        id: ver
+        shell: bash
+        run: |
+          set -euo pipefail
+          v="$(grep -E '^## Version:' LFRaider.toc | sed -E 's/^## Version:\s*//')"
+          if [[ -z "$v" ]]; then
+            echo "Could not find ## Version: in LFRaider.toc" >&2
+            exit 1
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "tag=v$v" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch tags
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --tags --force origin
+
+      - name: Check if tag already exists
+        id: exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git rev-parse -q --verify "refs/tags/${{ steps.ver.outputs.tag }}" >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create + push tag
+        if: steps.exists.outputs.exists != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.ver.outputs.tag }}" -m "${{ steps.ver.outputs.tag }}"
+          git push origin "${{ steps.ver.outputs.tag }}"
+
+      - name: Explain skip when tag already exists
+        if: steps.exists.outputs.exists == 'true'
+        shell: bash
+        run: |
+          echo "Tag ${{ steps.ver.outputs.tag }} already exists."
+          echo "Bump ## Version in LFRaider.toc before pushing to main."

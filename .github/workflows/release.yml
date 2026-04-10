@@ -1,0 +1,30 @@
+name: Package and Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify release package contents
+        shell: bash
+        run: bash ./.github/scripts/verify-release-package.sh
+
+      - name: Package and release
+        uses: BigWigsMods/packager@v2
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}

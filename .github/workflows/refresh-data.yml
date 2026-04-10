@@ -1,0 +1,121 @@
+name: Refresh Score Data
+
+on:
+  schedule:
+    - cron: "17 10 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-score-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_PAT: ${{ secrets.RELEASE_PAT }}
+      WCL_CLIENT_ID: ${{ secrets.WCL_CLIENT_ID }}
+      WCL_CLIENT_SECRET: ${{ secrets.WCL_CLIENT_SECRET }}
+      WCL_ZONE_IDS: ${{ vars.WCL_ZONE_IDS }}
+      WCL_ZONE_ID: ${{ vars.WCL_ZONE_ID }}
+      WCL_METRIC: ${{ vars.WCL_METRIC || 'dps' }}
+      WCL_PARTITION: ${{ vars.WCL_PARTITION }}
+      WCL_GRAPHQL_URL: ${{ vars.WCL_GRAPHQL_URL || 'https://www.warcraftlogs.com/api/v2/client' }}
+      WCL_MAX_PAGES: ${{ vars.WCL_MAX_PAGES || '200' }}
+      WCL_SLEEP_SECONDS: ${{ vars.WCL_SLEEP_SECONDS || '1.0' }}
+      LFR_WCL_DISTRIBUTION_APPROVED: ${{ vars.LFR_WCL_DISTRIBUTION_APPROVED }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ env.RELEASE_PAT != '' && env.RELEASE_PAT || github.token }}
+
+      - name: Check API redistribution approval
+        id: gate
+        shell: bash
+        run: |
+          if [[ "${LFR_WCL_DISTRIBUTION_APPROVED}" == "true" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "::warning::LFR_WCL_DISTRIBUTION_APPROVED is not true. Skipping WCL collection until redistribution permission is confirmed."
+          echo "run=false" >> "$GITHUB_OUTPUT"
+
+      - name: Validate required settings
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "${WCL_CLIENT_ID}" ]] || { echo "WCL_CLIENT_ID secret is required" >&2; exit 1; }
+          [[ -n "${WCL_CLIENT_SECRET}" ]] || { echo "WCL_CLIENT_SECRET secret is required" >&2; exit 1; }
+          [[ -n "${WCL_ZONE_IDS}" || -n "${WCL_ZONE_ID}" ]] || { echo "WCL_ZONE_IDS or WCL_ZONE_ID repository variable is required" >&2; exit 1; }
+
+      - name: Install Lua
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y lua5.4
+
+      - name: Fetch Warcraft Logs scores
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/fetch_wcl_scores.py \
+            --realms data/realms.json \
+            --output data/scores.json \
+            --zone-ids "${WCL_ZONE_IDS:-${WCL_ZONE_ID}}" \
+            --metric "${WCL_METRIC}"
+
+      - name: Generate runtime Lua data
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/generate_data.py data/scores.json LFRaider_Data.lua
+
+      - name: Check for data changes
+        if: steps.gate.outputs.run == 'true'
+        id: changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- data/scores.json LFRaider_Data.lua; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No data changes."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bump addon version
+        if: steps.changed.outputs.changed == 'true'
+        shell: bash
+        run: python3 tools/bump_version.py --message "Refreshed bundled score dataset."
+
+      - name: Verify addon
+        if: steps.changed.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua tests/run.lua
+          luac -p LFRaider.lua LFRaider_Data.lua tests/run.lua
+          bash ./.github/scripts/verify-release-package.sh
+
+      - name: Commit refreshed data
+        if: steps.changed.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/scores.json LFRaider_Data.lua LFRaider.toc README.md CHANGELOG.md
+          git commit -m "chore(data): refresh score dataset"
+          git push
