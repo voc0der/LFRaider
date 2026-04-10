@@ -275,7 +275,11 @@ class FetchWclScoresTests(unittest.TestCase):
         original_fetch_realm_character_chunk = fetch_wcl_scores.fetch_realm_character_chunk
 
         def fake_fetch_realm_character_chunk(_args, _token, _region, _realm, _zone_ids, _start_page):
-            return {"1047:649": [("Vocoder", "Dreamscythe", 74.7, 126.0)]}, True
+            return fetch_wcl_scores.RealmChunkResult(
+                {"1047:649": [("Vocoder", "Dreamscythe", 74.7, 126.0)]},
+                True,
+                21,
+            )
 
         fetch_wcl_scores.fetch_realm_character_chunk = fake_fetch_realm_character_chunk
         try:
@@ -312,7 +316,11 @@ class FetchWclScoresTests(unittest.TestCase):
 
         def fake_fetch_realm_character_chunk(_args, _token, _region, realm, _zone_ids, _start_page):
             calls.append(realm["name"])
-            return {"1047:649": [("Vocoder", realm["name"], 74.7, 126.0)]}, True
+            return fetch_wcl_scores.RealmChunkResult(
+                {"1047:649": [("Vocoder", realm["name"], 74.7, 126.0)]},
+                True,
+                2,
+            )
 
         fetch_wcl_scores.fetch_realm_character_chunk = fake_fetch_realm_character_chunk
         try:
@@ -340,6 +348,88 @@ class FetchWclScoresTests(unittest.TestCase):
         self.assertEqual(calls, ["Dreamscythe"])
         self.assertTrue(state["progress"]["us/dreamscythe"]["done"])
         self.assertFalse(state["progress"].get("us/nightslayer", {}).get("done", False))
+
+    def test_fetch_realm_character_chunk_keeps_partial_pages_when_rate_limited(self) -> None:
+        original_fetch_server_characters_page = fetch_wcl_scores.fetch_server_characters_page
+        calls: list[int] = []
+
+        def fake_fetch_server_characters_page(_args, _token, _realm_region, _realm_slug, realm_name, _zone_ids, page):
+            calls.append(page)
+            if page == 3:
+                raise fetch_wcl_scores.RateLimitExceededError("quota exceeded")
+            return (
+                {"1047:649": [(f"Vocoder-{page}", realm_name, 70.0 + page, 126.0)]},
+                100,
+                True,
+                20,
+                154693,
+                float(page * 1000),
+                3600,
+                3500 - page,
+            )
+
+        fetch_wcl_scores.fetch_server_characters_page = fake_fetch_server_characters_page
+        try:
+            args = SimpleNamespace(max_pages=20, pages_per_chunk=5, sleep_seconds=0)
+
+            with redirect_stdout(io.StringIO()):
+                result = fetch_wcl_scores.fetch_realm_character_chunk(
+                    args,
+                    "token",
+                    "us",
+                    {"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"},
+                    [1047],
+                    1,
+                )
+        finally:
+            fetch_wcl_scores.fetch_server_characters_page = original_fetch_server_characters_page
+
+        self.assertEqual(calls, [1, 2, 3])
+        self.assertTrue(result.rate_limited)
+        self.assertFalse(result.exhausted)
+        self.assertEqual(result.next_page, 3)
+        self.assertEqual(
+            result.encounter_raw["1047:649"],
+            [
+                ("Vocoder-1", "Dreamscythe", 71.0, 126.0),
+                ("Vocoder-2", "Dreamscythe", 72.0, 126.0),
+            ],
+        )
+
+    def test_incremental_saves_partial_progress_when_rate_limited(self) -> None:
+        original_fetch_realm_character_chunk = fetch_wcl_scores.fetch_realm_character_chunk
+
+        def fake_fetch_realm_character_chunk(_args, _token, _region, _realm, _zone_ids, _start_page):
+            return fetch_wcl_scores.RealmChunkResult(
+                {"1047:649": [("Vocoder", "Dreamscythe", 74.7, 126.0)]},
+                False,
+                5,
+                True,
+            )
+
+        fetch_wcl_scores.fetch_realm_character_chunk = fake_fetch_realm_character_chunk
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                state_file = Path(tmpdir) / "state.json"
+                args = SimpleNamespace(state_file=state_file, max_pages=20, pages_per_chunk=20)
+
+                with redirect_stdout(io.StringIO()):
+                    complete = fetch_wcl_scores.run_incremental(
+                        args,
+                        [1047],
+                        "us",
+                        [{"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"}],
+                        "token",
+                    )
+
+                state = fetch_wcl_scores.load_state(state_file)
+        finally:
+            fetch_wcl_scores.fetch_realm_character_chunk = original_fetch_realm_character_chunk
+
+        self.assertFalse(complete)
+        self.assertEqual(state["progress"]["us/dreamscythe"]["nextPage"], 5)
+        self.assertFalse(state["progress"]["us/dreamscythe"]["done"])
+        self.assertEqual(state["encounterEntries"]["1047:649"][0], ["Vocoder", "Dreamscythe", 74.7, 126.0])
 
 
 if __name__ == "__main__":

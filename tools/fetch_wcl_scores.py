@@ -19,7 +19,7 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 
 TOKEN_URL = "https://www.warcraftlogs.com/oauth/token"
@@ -36,6 +36,16 @@ SCORE_POLICY = "Mean of WCL per-encounter rank percentiles across the configured
 
 class RateLimitExceededError(RuntimeError):
     """Raised when Warcraft Logs rejects a request for quota reasons."""
+
+
+class RealmChunkResult(NamedTuple):
+    """The incremental fetch result for one realm's current chunk."""
+
+    encounter_raw: dict[str, list[tuple[str, str, float, float | None]]]
+    exhausted: bool
+    next_page: int
+    rate_limited: bool = False
+
 
 RANKINGS_QUERY = """
 query LFRaiderRankings(
@@ -714,44 +724,53 @@ def fetch_realm_character_chunk(
     realm: dict[str, str],
     zone_ids: list[int],
     start_page: int,
-) -> tuple[dict[str, list[tuple[str, str, float, float | None]]], bool]:
+) -> RealmChunkResult:
     realm_name = realm["name"]
     realm_region = realm.get("region") or default_region
     realm_slug = realm.get("slug") or realm_name.lower().replace(" ", "")
+    combo_key = f"{realm_region}/{realm_slug}"
 
     encounter_raw: dict[str, list[tuple[str, str, float, float | None]]] = {}
     exhausted = False
+    next_page = start_page
+    rate_limited = False
 
     if start_page > args.max_pages:
         print(
             f"realm {realm_region}/{realm_name}: "
             f"start page {start_page} exceeds max page {args.max_pages}; marking exhausted"
         )
-        return encounter_raw, True
+        return RealmChunkResult(encounter_raw, True, start_page)
 
     end_page = min(start_page + args.pages_per_chunk - 1, args.max_pages)
     for page in range(start_page, end_page + 1):
-        (
-            page_entries,
-            page_character_count,
-            has_more_pages,
-            last_page,
-            total,
-            spent,
-            limit,
-            reset_in,
-        ) = fetch_server_characters_page(
-            args,
-            token,
-            realm_region,
-            realm_slug,
-            realm_name,
-            zone_ids,
-            page,
-        )
+        try:
+            (
+                page_entries,
+                page_character_count,
+                has_more_pages,
+                last_page,
+                total,
+                spent,
+                limit,
+                reset_in,
+            ) = fetch_server_characters_page(
+                args,
+                token,
+                realm_region,
+                realm_slug,
+                realm_name,
+                zone_ids,
+                page,
+            )
+        except RateLimitExceededError as exc:
+            print(f"rate limited while fetching {combo_key}: {exc}")
+            rate_limited = True
+            break
         ranked_characters = len({(realm_name, name) for rows in page_entries.values() for name, _, _, _ in rows})
         merge_encounter_raw(encounter_raw, page_entries)
         encounter_rows = sum(len(rows) for rows in page_entries.values())
+        next_page = page + 1
         print(
             f"realm {realm_region}/{realm_name} page {page}: "
             f"{page_character_count} characters, {ranked_characters} with rankings, "
@@ -768,7 +787,7 @@ def fetch_realm_character_chunk(
     if not exhausted and end_page >= args.max_pages:
         exhausted = True
 
-    return encounter_raw, exhausted
+    return RealmChunkResult(encounter_raw, exhausted, next_page, rate_limited)
 
 
 def build_rankings_variables(
@@ -1188,18 +1207,22 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
 
         all_done = False
         start_page = combo["nextPage"]
-        try:
-            encounter_raw, exhausted = fetch_realm_character_chunk(args, token, region, realm, zone_ids, start_page)
-        except RateLimitExceededError as exc:
-            print(f"rate limited while fetching {combo_key}: {exc}")
-            break
-        merge_state_entries(enc_entries, encounter_raw)
+        chunk = fetch_realm_character_chunk(args, token, region, realm, zone_ids, start_page)
+        merge_state_entries(enc_entries, chunk.encounter_raw)
 
-        combo["nextPage"] = start_page + args.pages_per_chunk
-        if exhausted:
+        if chunk.next_page > start_page:
+            combo["nextPage"] = chunk.next_page
+            processed_combo = True
+        if chunk.exhausted:
             combo["done"] = True
             print(f"combo {combo_key} exhausted")
-        processed_combo = True
+            processed_combo = True
+        if chunk.rate_limited and chunk.next_page > start_page:
+            pages_fetched = chunk.next_page - start_page
+            print(
+                f"saved partial progress for {combo_key}: "
+                f"{pages_fetched} page(s), resume from page {chunk.next_page} next run"
+            )
         break
 
     all_combos_done = all(combo.get("done", False) for _, _, combo in realm_progress) and bool(realm_progress)
@@ -1309,11 +1332,28 @@ def main() -> int:
     for realm in realms:
         start_page = 1
         while start_page <= args.max_pages:
-            encounter_raw, exhausted = fetch_realm_character_chunk(args, token, region, realm, zone_ids, start_page)
-            merge_state_entries(enc_entries, encounter_raw)
-            if exhausted:
+            chunk = fetch_realm_character_chunk(args, token, region, realm, zone_ids, start_page)
+            merge_state_entries(enc_entries, chunk.encounter_raw)
+            if chunk.rate_limited:
+                realm_name = realm["name"]
+                realm_region = realm.get("region") or region
+                realm_slug = realm.get("slug") or realm_name.lower().replace(" ", "")
+                if chunk.next_page <= start_page:
+                    raise SystemExit(
+                        f"Rate limited before any pages could be fetched for {realm_region}/{realm_slug}. "
+                        "Retry later or use --state-file chunked mode."
+                    )
+                raise SystemExit(
+                    f"Rate limited after fetching through page {chunk.next_page - 1} for {realm_region}/{realm_slug}. "
+                    "Retry later or use --state-file chunked mode."
+                )
+            if chunk.exhausted:
                 break
-            start_page += args.pages_per_chunk
+            if chunk.next_page <= start_page:
+                raise SystemExit(
+                    f"Fetcher made no progress for {realm.get('region') or region}/{realm.get('slug') or realm['name'].lower().replace(' ', '')}."
+                )
+            start_page = chunk.next_page
 
     characters = scores_from_state(full_state, zone_ids, args.metric)
 
