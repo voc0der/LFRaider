@@ -498,18 +498,24 @@ def scores_from_state(state: dict[str, Any], zone_ids: list[int], metric: str) -
     for enc_key, raw_entries in state.get("encounterEntries", {}).items():
         if not raw_entries:
             continue
-        # Reconstruct tuples from stored lists.
-        as_tuples: list[tuple[str, str, str, float, float | None]] = [
-            (e[0], e[1], e[2], float(e[3]), float(e[4]) if e[4] is not None else None)
-            for e in raw_entries
-        ]
-        percentiles = spec_percentile(as_tuples)
-        for (realm, name), percentile in percentiles.items():
-            key = (realm, name)
-            char = by_character.setdefault(key, {"encounters": {}, "itemScores": []})
-            char["encounters"][enc_key] = max(char["encounters"].get(enc_key, 0), percentile)
+        # Group by realm so percentiles are within-realm (matching WCL's display).
+        by_realm: dict[str, list[tuple[str, str, str, float, float | None]]] = {}
+        for e in raw_entries:
+            realm = e[1]
+            by_realm.setdefault(realm, []).append(
+                (e[0], e[1], e[2], float(e[3]), float(e[4]) if e[4] is not None else None)
+            )
 
-        for name, realm, _spec, _amount, item_score in as_tuples:
+        for realm_entries in by_realm.values():
+            percentiles = spec_percentile(realm_entries)
+            for (realm, name), percentile in percentiles.items():
+                key = (realm, name)
+                char = by_character.setdefault(key, {"encounters": {}, "itemScores": []})
+                char["encounters"][enc_key] = max(char["encounters"].get(enc_key, 0), percentile)
+
+        for e in raw_entries:
+            name, realm = e[0], e[1]
+            item_score = float(e[4]) if e[4] is not None else None
             if item_score and item_score > 0:
                 key = (realm, name)
                 if key in by_character:
