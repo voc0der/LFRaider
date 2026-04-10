@@ -207553,7 +207553,7 @@
       "score": 0.0
     }
   ],
-  "generatedAt": "2026-04-10T12:58:23Z",
+  "generatedAt": "2026-04-10T13:20:59Z",
   "metric": "dps",
   "scorePolicy": "Mean of each character's best encounter rank percentiles across the configured zone IDs.",
   "source": "warcraftlogs-api-v2",
