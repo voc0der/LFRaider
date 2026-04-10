@@ -3,22 +3,27 @@
   "realms": [
     {
       "name": "Dreamscythe",
+      "region": "us",
       "slug": "dreamscythe"
     },
     {
       "name": "Nightslayer",
+      "region": "us",
       "slug": "nightslayer"
     },
     {
       "name": "Maladath",
+      "region": "us",
       "slug": "maladath"
     },
     {
       "name": "Thunderstrike",
+      "region": "eu",
       "slug": "thunderstrike"
     },
     {
       "name": "Spineshatter",
+      "region": "eu",
       "slug": "spineshatter"
     }
   ]

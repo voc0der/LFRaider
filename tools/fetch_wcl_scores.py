@@ -276,11 +276,22 @@ def load_realms(path: Path) -> tuple[str, list[dict[str, str]]]:
     realms = document.get("realms")
     if not isinstance(realms, list) or not realms:
         raise ValueError(f"{path} must contain a non-empty realms[] list")
-    return region, realms
+
+    normalized_realms = []
+    for realm in realms:
+        if not isinstance(realm, dict):
+            raise ValueError(f"realm entries in {path} must be objects")
+
+        realm_copy = dict(realm)
+        realm_copy["region"] = str(realm_copy.get("region") or region).strip().lower()
+        normalized_realms.append(realm_copy)
+
+    return region, normalized_realms
 
 
-def collect_realm_scores(args: argparse.Namespace, token: str, region: str, realm: dict[str, str], zone_id: int) -> dict[tuple[str, str], dict[str, Any]]:
+def collect_realm_scores(args: argparse.Namespace, token: str, default_region: str, realm: dict[str, str], zone_id: int) -> dict[tuple[str, str], dict[str, Any]]:
     realm_name = realm["name"]
+    region = realm.get("region") or default_region
     realm_slug = realm.get("slug") or realm_name.lower().replace(" ", "")
     by_character: dict[tuple[str, str], dict[str, Any]] = {}
 
@@ -304,6 +315,11 @@ def collect_realm_scores(args: argparse.Namespace, token: str, region: str, real
         any_more = False
         any_entries = False
         first_payload_shape = "no encounters"
+        first_ranking_shape = "no rankings"
+        page_rankings = 0
+        usable_rankings = 0
+        missing_name = 0
+        missing_percentile = 0
 
         for encounter in encounters:
             if not isinstance(encounter, dict):
@@ -323,12 +339,20 @@ def collect_realm_scores(args: argparse.Namespace, token: str, region: str, real
             any_more = any_more or payload_has_more(rankings_payload)
 
             for ranking in ranking_entries(rankings_payload):
+                page_rankings += 1
+                if first_ranking_shape == "no rankings":
+                    first_ranking_shape = payload_shape(ranking)
                 name = name_from_ranking(ranking)
                 percentile = percentile_from_ranking(ranking)
-                if not name or percentile is None:
+                if not name:
+                    missing_name += 1
+                    continue
+                if percentile is None:
+                    missing_percentile += 1
                     continue
 
                 any_entries = True
+                usable_rankings += 1
                 resolved_realm = realm_from_ranking(ranking, realm_name)
                 key = (resolved_realm, name)
                 character = by_character.setdefault(key, {"encounters": {}, "itemScores": []})
@@ -341,9 +365,11 @@ def collect_realm_scores(args: argparse.Namespace, token: str, region: str, real
         spent = rate_limit.get("pointsSpentThisHour")
         limit = rate_limit.get("limitPerHour")
         print(
-            f"zone {zone_id} {zone_name} {realm_name} page {page}: "
+            f"zone {zone_id} {zone_name} {region}/{realm_name} page {page}: "
             f"{len(by_character)} characters, {len(encounters)} encounters, "
-            f"payload {first_payload_shape}, rate {spent}/{limit}"
+            f"{page_rankings} rankings, {usable_rankings} usable, "
+            f"missing name {missing_name}, missing percentile {missing_percentile}, "
+            f"payload {first_payload_shape}, first ranking {first_ranking_shape}, rate {spent}/{limit}"
         )
 
         if args.sleep_seconds > 0:
