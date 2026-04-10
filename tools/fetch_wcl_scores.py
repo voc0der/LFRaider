@@ -67,6 +67,29 @@ query LFRaiderRankings(
 }
 """
 
+CHARACTER_DEBUG_QUERY = """
+query LFRaiderCharacterDebug(
+  $name: String!
+  $serverRegion: String!
+  $serverSlug: String!
+) {
+  characterData {
+    character(name: $name, serverRegion: $serverRegion, serverSlug: $serverSlug) {
+      name
+      hidden
+      zone1047: zoneRankings(zoneID: 1047, timeframe: Historical)
+      zone1048: zoneRankings(zoneID: 1048, timeframe: Historical)
+      attumenDps: encounterRankings(encounterID: 50652, timeframe: Historical, metric: dps)
+      attumenHps: encounterRankings(encounterID: 50652, timeframe: Historical, metric: hps)
+      netherspiteDps: encounterRankings(encounterID: 50662, timeframe: Historical, metric: dps)
+      netherspiteHps: encounterRankings(encounterID: 50662, timeframe: Historical, metric: hps)
+      gruulDps: encounterRankings(encounterID: 50650, timeframe: Historical, metric: dps)
+      gruulHps: encounterRankings(encounterID: 50650, timeframe: Historical, metric: hps)
+    }
+  }
+}
+"""
+
 
 def require_distribution_permission(args: argparse.Namespace) -> None:
     approved = args.distribution_approved or os.getenv("LFR_WCL_DISTRIBUTION_APPROVED") == "true"
@@ -445,6 +468,28 @@ def debug_target_ranking(
         details["bracketData"] = ranking["bracketData"]
 
     print("DEBUG_TARGET " + json.dumps(details, sort_keys=True))
+
+
+def debug_character_lookup(args: argparse.Namespace, token: str) -> None:
+    debug_targets = (
+        ("Voidless", "dreamscythe", "us"),
+        ("Vocoder", "dreamscythe", "us"),
+    )
+    for name, server_slug, server_region in debug_targets:
+        try:
+            data = graphql(
+                args.graphql_url,
+                token,
+                CHARACTER_DEBUG_QUERY,
+                {
+                    "name": name,
+                    "serverSlug": server_slug,
+                    "serverRegion": server_region,
+                },
+            )
+            print("DEBUG_CHARACTER " + json.dumps(data, sort_keys=True))
+        except Exception as exc:
+            print(f"DEBUG_CHARACTER_ERROR {name} {server_region}/{server_slug}: {exc}")
 
 
 def build_rankings_variables(
@@ -948,6 +993,7 @@ def main() -> int:
 
     region, realms = load_realms(args.realms)
     token = get_access_token(client_id, client_secret, args.token_url)
+    debug_character_lookup(args, token)
 
     # ── Incremental / chunked mode ────────────────────────────────────────────
     if args.state_file:
