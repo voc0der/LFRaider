@@ -393,6 +393,60 @@ def remember_character_score(
         character["itemScores"].append(item_score)
 
 
+def debug_target_ranking(
+    zone_id: int,
+    encounter_id: int,
+    page: int,
+    realm_name: str,
+    total_rankings: int | None,
+    fallback_rank: int | None,
+    ranking: dict[str, Any],
+) -> None:
+    name = name_from_ranking(ranking)
+    resolved_realm = realm_from_ranking(ranking, realm_name)
+    if resolved_realm != "Dreamscythe" or name not in {"Voidless", "Vocoder"}:
+        return
+
+    details: dict[str, Any] = {
+        "zoneID": zone_id,
+        "encounterID": encounter_id,
+        "page": page,
+        "realm": resolved_realm,
+        "name": name,
+        "totalRankings": total_rankings,
+        "fallbackRank": fallback_rank,
+    }
+    for key in (
+        "rankPercent",
+        "percentile",
+        "historicalPercent",
+        "bracketPercent",
+        "percent",
+        "rank",
+        "outOf",
+        "total",
+        "totalCount",
+        "amount",
+        "itemLevel",
+        "itemScore",
+        "ilvl",
+        "gearScore",
+        "class",
+        "spec",
+        "faction",
+    ):
+        if key in ranking:
+            details[key] = ranking.get(key)
+    if "server" in ranking:
+        details["server"] = ranking["server"]
+    if "character" in ranking:
+        details["character"] = ranking["character"]
+    if "bracketData" in ranking:
+        details["bracketData"] = ranking["bracketData"]
+
+    print("DEBUG_TARGET " + json.dumps(details, sort_keys=True))
+
+
 def build_rankings_variables(
     zone_id: int,
     region: str,
@@ -592,6 +646,7 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
                     missing_name += 1
                     continue
                 fallback_rank = ((page - 1) * len(entries)) + ranking_idx
+                debug_target_ranking(zone_id, encounter_id, page, realm_name, total_rankings, fallback_rank, ranking)
                 score_entry = make_score_entry(ranking, realm_name, total_rankings, fallback_rank)
                 if not score_entry:
                     missing_percentile += 1
@@ -746,6 +801,7 @@ def fetch_chunk(
                     missing_name += 1
                     continue
                 fallback_rank = ((page - 1) * len(entries)) + ranking_idx
+                debug_target_ranking(zone_id, encounter_id, page, realm_name, total_rankings, fallback_rank, ranking)
                 score_entry = make_score_entry(ranking, realm_name, total_rankings, fallback_rank)
                 if not score_entry:
                     missing_percentile += 1
