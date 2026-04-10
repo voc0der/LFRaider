@@ -186,11 +186,20 @@ def decode_json_payload(payload: Any) -> Any:
 def payload_shape(payload: Any) -> str:
     payload = decode_json_payload(payload)
     if isinstance(payload, dict):
+        if payload.get("error"):
+            return f"error({payload['error']})"
         keys = ",".join(sorted(str(key) for key in payload.keys())[:6])
         return f"dict({keys})"
     if isinstance(payload, list):
         return f"list({len(payload)})"
     return type(payload).__name__
+
+
+def payload_error(payload: Any) -> str | None:
+    payload = decode_json_payload(payload)
+    if isinstance(payload, dict) and payload.get("error"):
+        return str(payload["error"])
+    return None
 
 
 def ranking_entries(payload: Any) -> list[dict[str, Any]]:
@@ -305,6 +314,12 @@ def collect_realm_scores(args: argparse.Namespace, token: str, region: str, real
             rankings_payload = encounter.get("characterRankings")
             if first_payload_shape == "no encounters":
                 first_payload_shape = payload_shape(rankings_payload)
+            rankings_error = payload_error(rankings_payload)
+            if rankings_error:
+                raise RuntimeError(
+                    f"Warcraft Logs characterRankings failed for zone {zone_id} "
+                    f"{zone_name}, realm {realm_name}, encounter {encounter_id}: {rankings_error}"
+                )
             any_more = any_more or payload_has_more(rankings_payload)
 
             for ranking in ranking_entries(rankings_payload):
