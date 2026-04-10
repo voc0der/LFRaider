@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+## [0.1.2] - 2026-04-10
+
+### Changed
+- Refreshed bundled score dataset.
+
 ### Fixed
 - Refuse empty Warcraft Logs refresh results so CI cannot publish a zero-character dataset
 
