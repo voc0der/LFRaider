@@ -119,6 +119,66 @@ class FetchWclScoresTests(unittest.TestCase):
         self.assertEqual(calls[0]["pageSize"], 1000)
         self.assertEqual(scores[("Dreamscythe", "Voidless")]["encounters"]["1047:649"], 95.0)
 
+    def test_collect_realm_scores_falls_back_to_api_default_when_explicit_sizes_fail(self) -> None:
+        calls: list[dict[str, object]] = []
+        original_graphql = fetch_wcl_scores.graphql
+
+        def fake_graphql(_url: str, _token: str, _query: str, variables: dict[str, object]) -> dict[str, object]:
+            calls.append(dict(variables))
+            if "pageSize" in variables:
+                raise RuntimeError("Unknown argument 'size' on field 'characterRankings'.")
+            return {
+                "worldData": {
+                    "zone": {
+                        "name": "The Burning Crusade",
+                        "encounters": [
+                            {
+                                "id": 649,
+                                "name": "High King Maulgar",
+                                "characterRankings": {
+                                    "hasMorePages": False,
+                                    "rankings": [
+                                        {
+                                            "name": "Voidless",
+                                            "serverName": "Dreamscythe",
+                                            "rankPercent": 95.0,
+                                        }
+                                    ],
+                                },
+                            }
+                        ],
+                    }
+                },
+                "rateLimitData": {"limitPerHour": 10000, "pointsSpentThisHour": 1},
+            }
+
+        fetch_wcl_scores.graphql = fake_graphql
+        try:
+            args = SimpleNamespace(
+                graphql_url="https://example.invalid/graphql",
+                max_pages=20,
+                page_size=1000,
+                effective_page_size=1000,
+                metric="dps",
+                partition=None,
+                sleep_seconds=0,
+            )
+            with redirect_stdout(io.StringIO()):
+                scores = fetch_wcl_scores.collect_realm_scores(
+                    args,
+                    "token",
+                    "us",
+                    {"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"},
+                    1047,
+                )
+        finally:
+            fetch_wcl_scores.graphql = original_graphql
+
+        attempted_sizes = [call.get("pageSize") for call in calls]
+        self.assertEqual(attempted_sizes, [1000, 500, 200, 100, None])
+        self.assertIsNone(args.effective_page_size)
+        self.assertEqual(scores[("Dreamscythe", "Voidless")]["encounters"]["1047:649"], 95.0)
+
     def test_incremental_state_resets_when_score_policy_changes(self) -> None:
         original_fetch_chunk = fetch_wcl_scores.fetch_chunk
 

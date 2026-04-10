@@ -27,6 +27,7 @@ GRAPHQL_URL = "https://www.warcraftlogs.com/api/v2/client"
 TERMS_URL = "https://www.archon.gg/wow/articles/help/rpg-logs-api-terms-of-service"
 API_MAX_PAGE = 20
 DEFAULT_PAGE_SIZE = 1000
+PAGE_SIZE_FALLBACKS: tuple[int | None, ...] = (500, 200, 100, None)
 SCORE_POLICY_VERSION = 2
 SCORE_POLICY = "Mean of WCL per-encounter rank percentiles across the configured zone IDs."
 
@@ -99,6 +100,30 @@ def clamp_page_size(value: int) -> int:
     return value
 
 
+def active_page_size(args: argparse.Namespace) -> int | None:
+    return getattr(args, "effective_page_size", getattr(args, "page_size", None))
+
+
+def format_page_size(value: int | None) -> str:
+    if value is None:
+        return "API default"
+    return str(value)
+
+
+def page_size_candidates(requested_size: int | None) -> list[int | None]:
+    candidates: list[int | None] = [requested_size]
+    for candidate in PAGE_SIZE_FALLBACKS:
+        if candidate is not None and requested_size is not None and candidate >= requested_size:
+            continue
+        candidates.append(candidate)
+
+    ordered: list[int | None] = []
+    for candidate in candidates:
+        if candidate not in ordered:
+            ordered.append(candidate)
+    return ordered
+
+
 def env_str(name: str, default: str | None = None) -> str | None:
     value = os.getenv(name)
     if value is None or value == "":
@@ -151,6 +176,8 @@ def request_json(url: str, body: dict[str, Any] | bytes, headers: dict[str, str]
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
         raise RuntimeError(f"{url} returned HTTP {exc.code}: {detail}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"{url} request failed: {exc.reason}") from exc
 
 
 def get_access_token(client_id: str, client_secret: str, token_url: str) -> str:
@@ -361,6 +388,111 @@ def remember_character_score(
         character["itemScores"].append(item_score)
 
 
+def build_rankings_variables(
+    zone_id: int,
+    region: str,
+    realm_slug: str,
+    page: int,
+    page_size: int | None,
+    metric: str | None,
+    partition: int | None,
+) -> dict[str, Any]:
+    variables: dict[str, Any] = {
+        "zoneID": zone_id,
+        "serverRegion": region,
+        "serverSlug": realm_slug,
+        "page": page,
+        "metric": metric,
+        "partition": partition,
+    }
+    if page_size is not None:
+        variables["pageSize"] = page_size
+    return variables
+
+
+def should_retry_with_smaller_page_size(message: str, attempted_size: int | None) -> bool:
+    if attempted_size is None:
+        return False
+
+    text = message.lower()
+    if any(
+        marker in text
+        for marker in (
+            "http 413",
+            "http 429",
+            "http 500",
+            "http 502",
+            "http 503",
+            "http 504",
+            "timed out",
+            "timeout",
+            "bad gateway",
+            "gateway timeout",
+            "service unavailable",
+            "payload too large",
+        )
+    ):
+        return True
+
+    mentions_size = any(marker in text for marker in ("size", "page size", "pagesize", "$pagesize"))
+    mentions_validation = any(
+        marker in text
+        for marker in (
+            "unknown argument",
+            "invalid value",
+            "expected type",
+            "must be",
+            "cannot be",
+            "too large",
+        )
+    )
+    return mentions_size and mentions_validation
+
+
+def graphql_rankings_page(
+    args: argparse.Namespace,
+    token: str,
+    zone_id: int,
+    region: str,
+    realm_name: str,
+    realm_slug: str,
+    page: int,
+) -> dict[str, Any]:
+    requested_page_size = active_page_size(args)
+    candidates = page_size_candidates(requested_page_size)
+    last_error: RuntimeError | None = None
+
+    for index, candidate in enumerate(candidates):
+        variables = build_rankings_variables(zone_id, region, realm_slug, page, candidate, args.metric, args.partition)
+        try:
+            data = graphql(args.graphql_url, token, RANKINGS_QUERY, variables)
+        except RuntimeError as exc:
+            last_error = exc
+            if not should_retry_with_smaller_page_size(str(exc), candidate):
+                raise
+            if index + 1 >= len(candidates):
+                raise
+            next_candidate = candidates[index + 1]
+            print(
+                f"zone {zone_id} {region}/{realm_name} page {page}: "
+                f"page size {format_page_size(candidate)} failed ({exc}); "
+                f"retrying with {format_page_size(next_candidate)}"
+            )
+            continue
+
+        if candidate != requested_page_size:
+            print(
+                f"zone {zone_id} {region}/{realm_name}: "
+                f"using page size {format_page_size(candidate)} after "
+                f"{format_page_size(requested_page_size)} failed"
+            )
+        args.effective_page_size = candidate
+        return data
+
+    assert last_error is not None
+    raise last_error
+
+
 def collect_realm_scores(args: argparse.Namespace, token: str, default_region: str, realm: dict[str, str], zone_id: int) -> dict[tuple[str, str], dict[str, Any]]:
     realm_name = realm["name"]
     region = realm.get("region") or default_region
@@ -370,16 +502,7 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
     zone_name = "unknown"
 
     for page in range(1, args.max_pages + 1):
-        variables = {
-            "zoneID": zone_id,
-            "serverRegion": region,
-            "serverSlug": realm_slug,
-            "page": page,
-            "pageSize": args.page_size,
-            "metric": args.metric,
-            "partition": args.partition,
-        }
-        data = graphql(args.graphql_url, token, RANKINGS_QUERY, variables)
+        data = graphql_rankings_page(args, token, zone_id, region, realm_name, realm_slug, page)
         world_data = data.get("worldData") or {}
         zone = world_data.get("zone") or {}
         zone_name = zone.get("name") or zone_name
@@ -439,7 +562,8 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
             f"{len(by_character)} characters, {len(encounters)} encounters, "
             f"{page_rankings} rankings, {usable_rankings} usable, "
             f"missing name {missing_name}, missing percentile {missing_percentile}, "
-            f"payload {first_payload_shape}, first ranking {first_ranking_shape}, rate {spent}/{limit}"
+            f"payload {first_payload_shape}, first ranking {first_ranking_shape}, "
+            f"page size {format_page_size(active_page_size(args))}, rate {spent}/{limit}"
         )
 
         if args.sleep_seconds > 0:
@@ -532,16 +656,7 @@ def fetch_chunk(
 
     end_page = min(start_page + args.pages_per_chunk - 1, args.max_pages)
     for page in range(start_page, end_page + 1):
-        variables = {
-            "zoneID": zone_id,
-            "serverRegion": region,
-            "serverSlug": realm_slug,
-            "page": page,
-            "pageSize": args.page_size,
-            "metric": args.metric,
-            "partition": args.partition,
-        }
-        data = graphql(args.graphql_url, token, RANKINGS_QUERY, variables)
+        data = graphql_rankings_page(args, token, zone_id, region, realm_name, realm_slug, page)
         world_data = data.get("worldData") or {}
         zone = world_data.get("zone") or {}
         zone_name = zone.get("name") or zone_name
@@ -599,7 +714,8 @@ def fetch_chunk(
             f"{len(encounter_raw)} encounters, {page_rankings} rankings, "
             f"{usable_rankings} usable, missing name {missing_name}, "
             f"missing percentile {missing_percentile}, "
-            f"payload {first_payload_shape}, first ranking {first_ranking_shape}, rate {spent}/{limit}"
+            f"payload {first_payload_shape}, first ranking {first_ranking_shape}, "
+            f"page size {format_page_size(active_page_size(args))}, rate {spent}/{limit}"
         )
 
         if args.sleep_seconds > 0:
@@ -708,6 +824,7 @@ def main() -> int:
         args.page_size = clamp_page_size(args.page_size)
     except ValueError as exc:
         raise SystemExit(str(exc)) from exc
+    args.effective_page_size = args.page_size
 
     try:
         zone_ids = parse_zone_ids(args.zone_ids)
@@ -745,9 +862,10 @@ def main() -> int:
             "scorePolicyVersion": SCORE_POLICY_VERSION,
             "zoneIDs": zone_ids,
             "metric": args.metric,
-            "pageSize": args.page_size,
             "characters": characters,
         }
+        if active_page_size(args) is not None:
+            document["pageSize"] = active_page_size(args)
         if len(zone_ids) == 1:
             document["zoneID"] = zone_ids[0]
         args.output.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -796,9 +914,10 @@ def main() -> int:
         "scorePolicyVersion": SCORE_POLICY_VERSION,
         "zoneIDs": zone_ids,
         "metric": args.metric,
-        "pageSize": args.page_size,
         "characters": characters,
     }
+    if active_page_size(args) is not None:
+        document["pageSize"] = active_page_size(args)
     if len(zone_ids) == 1:
         document["zoneID"] = zone_ids[0]
 
