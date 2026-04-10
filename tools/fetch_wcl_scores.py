@@ -228,11 +228,39 @@ def payload_has_more(payload: Any) -> bool:
     return bool(payload.get("hasMorePages") or payload.get("has_more_pages"))
 
 
-def percentile_from_ranking(ranking: dict[str, Any]) -> float | None:
-    for key in ("rankPercent", "percentile", "historicalPercent", "bracketPercent"):
+def payload_count(payload: Any) -> int | None:
+    payload = decode_json_payload(payload)
+
+    if not isinstance(payload, dict):
+        return None
+
+    value = payload.get("count") or payload.get("total") or payload.get("totalCount")
+    if value is None:
+        return None
+
+    return int(value)
+
+
+def percentile_from_ranking(ranking: dict[str, Any], total_count: int | None = None) -> float | None:
+    for key in ("rankPercent", "percentile", "historicalPercent", "bracketPercent", "percent"):
         value = ranking.get(key)
         if value is not None:
             return float(value)
+
+    rank = ranking.get("rank")
+    out_of = ranking.get("outOf") or ranking.get("total") or ranking.get("totalCount") or total_count
+    if rank is None or out_of is None:
+        return None
+
+    rank = float(rank)
+    out_of = float(out_of)
+    if rank <= 0 or out_of <= 0:
+        return None
+
+    if out_of == 1:
+        return 100.0
+
+    return max(0.0, min(100.0, (1.0 - ((rank - 1.0) / (out_of - 1.0))) * 100.0))
     return None
 
 
@@ -337,13 +365,14 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
                     f"{zone_name}, realm {realm_name}, encounter {encounter_id}: {rankings_error}"
                 )
             any_more = any_more or payload_has_more(rankings_payload)
+            total_rankings = payload_count(rankings_payload)
 
             for ranking in ranking_entries(rankings_payload):
                 page_rankings += 1
                 if first_ranking_shape == "no rankings":
                     first_ranking_shape = payload_shape(ranking)
                 name = name_from_ranking(ranking)
-                percentile = percentile_from_ranking(ranking)
+                percentile = percentile_from_ranking(ranking, total_rankings)
                 if not name:
                     missing_name += 1
                     continue
