@@ -2,8 +2,16 @@ name: Refresh Score Data
 
 on:
   schedule:
+    # Chunk fetch: every 2 hours — stays well under the WCL rate limit (~880 points per run)
+    - cron: "7 */2 * * *"
+    # Weekly full one-shot reset (clears state, starts fresh cycle) — Tuesday 10:17 UTC
     - cron: "17 10 * * 2"
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "'chunk' (default) or 'full' (one-shot, ignores state)"
+        required: false
+        default: chunk
 
 permissions:
   contents: write
@@ -24,7 +32,8 @@ jobs:
       WCL_METRIC: ${{ vars.WCL_METRIC || 'dps' }}
       WCL_PARTITION: ${{ vars.WCL_PARTITION }}
       WCL_GRAPHQL_URL: ${{ vars.WCL_GRAPHQL_URL || 'https://www.warcraftlogs.com/api/v2/client' }}
-      WCL_MAX_PAGES: ${{ vars.WCL_MAX_PAGES || '20' }}
+      WCL_PAGES_PER_CHUNK: ${{ vars.WCL_PAGES_PER_CHUNK || '20' }}
+      WCL_MAX_PAGES: ${{ vars.WCL_MAX_PAGES || '200' }}
       WCL_SLEEP_SECONDS: ${{ vars.WCL_SLEEP_SECONDS || '1.0' }}
       LFR_WCL_DISTRIBUTION_APPROVED: ${{ vars.LFR_WCL_DISTRIBUTION_APPROVED }}
 
@@ -64,8 +73,41 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lua5.4
 
-      - name: Fetch Warcraft Logs scores
+      - name: Determine run mode
         if: steps.gate.outputs.run == 'true'
+        id: mode
+        shell: bash
+        run: |
+          # workflow_dispatch can override; scheduled runs always chunk
+          INPUT_MODE="${{ github.event.inputs.mode }}"
+          if [[ "${INPUT_MODE}" == "full" ]]; then
+            echo "mode=full" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=chunk" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch Warcraft Logs scores (chunk)
+        if: steps.gate.outputs.run == 'true' && steps.mode.outputs.mode == 'chunk'
+        id: chunk
+        shell: bash
+        run: |
+          set -euo pipefail
+          output=$(python3 tools/fetch_wcl_scores.py \
+            --realms data/realms.json \
+            --output data/scores.json \
+            --state-file data/fetch_state.json \
+            --pages-per-chunk "${WCL_PAGES_PER_CHUNK}" \
+            --zone-ids "${WCL_ZONE_IDS:-${WCL_ZONE_ID}}" \
+            --metric "${WCL_METRIC}" 2>&1)
+          echo "$output"
+          if echo "$output" | grep -q "^CYCLE_COMPLETE$"; then
+            echo "cycle_complete=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "cycle_complete=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch Warcraft Logs scores (full one-shot)
+        if: steps.gate.outputs.run == 'true' && steps.mode.outputs.mode == 'full'
         shell: bash
         run: |
           set -euo pipefail
@@ -88,34 +130,36 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- data/scores.json LFRaider_Data.lua; then
+          if git diff --quiet -- data/scores.json data/fetch_state.json LFRaider_Data.lua; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No data changes."
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Bump addon version
-        if: steps.changed.outputs.changed == 'true'
-        shell: bash
-        run: python3 tools/bump_version.py --message "Refreshed bundled score dataset."
-
-      - name: Verify addon
-        if: steps.changed.outputs.changed == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          lua tests/run.lua
-          luac -p LFRaider.lua LFRaider_Data.lua tests/run.lua
-          bash ./.github/scripts/verify-release-package.sh
-
-      - name: Commit refreshed data
+      - name: Commit updated data
         if: steps.changed.outputs.changed == 'true'
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/scores.json LFRaider_Data.lua LFRaider.toc README.md CHANGELOG.md
+          git add data/scores.json data/fetch_state.json LFRaider_Data.lua
           git commit -m "chore(data): refresh score dataset"
+          git push
+
+      - name: Bump addon version and release (cycle complete or full mode)
+        if: |
+          steps.changed.outputs.changed == 'true' &&
+          (steps.mode.outputs.mode == 'full' ||
+           steps.chunk.outputs.cycle_complete == 'true')
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/bump_version.py --message "Refreshed bundled score dataset."
+          lua tests/run.lua
+          luac -p LFRaider.lua LFRaider_Data.lua tests/run.lua
+          bash ./.github/scripts/verify-release-package.sh
+          git add LFRaider.toc README.md CHANGELOG.md
+          git commit -m "chore(data): release refreshed score dataset"
           git push

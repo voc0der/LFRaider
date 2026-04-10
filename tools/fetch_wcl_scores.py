@@ -420,21 +420,215 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
     return by_character
 
 
+def load_state(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {"cycle": 1, "complete": False, "progress": {}, "encounterTotals": {}, "characters": {}}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def save_state(path: Path, state: dict[str, Any]) -> None:
+    path.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def scores_from_state(state: dict[str, Any], zone_ids: list[int], metric: str) -> list[dict[str, Any]]:
+    """Rebuild the scores character list from raw ranks stored in state."""
+    totals = state.get("encounterTotals", {})
+    characters = []
+    for char_key, char_data in state.get("characters", {}).items():
+        realm, name = char_key.split("|", 1)
+        ranks: dict[str, int] = char_data.get("ranks", {})
+        item_scores: list[float] = char_data.get("itemScores", [])
+        if not ranks:
+            continue
+        percentiles: dict[str, float] = {}
+        for enc_key, rank in ranks.items():
+            total = totals.get(enc_key, rank)
+            percentiles[enc_key] = max(0.0, min(100.0, (1.0 - (rank - 1) / max(total - 1, 1)) * 100.0))
+        score = statistics.fmean(percentiles.values())
+        entry: dict[str, Any] = {
+            "name": name,
+            "realm": realm,
+            "score": round(score, 1),
+            "encounters": len(percentiles),
+        }
+        if item_scores:
+            entry["itemScore"] = round(max(item_scores), 1)
+        characters.append(entry)
+    return sorted(characters, key=lambda c: (c["realm"], c["name"]))
+
+
+def fetch_chunk(
+    args: argparse.Namespace,
+    token: str,
+    default_region: str,
+    realm: dict[str, str],
+    zone_id: int,
+    start_page: int,
+) -> tuple[dict[str, list[tuple[int, str, str, float | None]]], bool]:
+    """Fetch one chunk of pages for a single realm+zone. Returns (encounter_raw, exhausted)."""
+    realm_name = realm["name"]
+    region = realm.get("region") or default_region
+    realm_slug = realm.get("slug") or realm_name.lower().replace(" ", "")
+    encounter_raw: dict[str, list[tuple[int, str, str, float | None]]] = {}
+    zone_name = "unknown"
+    exhausted = False
+
+    for page in range(start_page, start_page + args.pages_per_chunk):
+        variables = {
+            "zoneID": zone_id,
+            "serverRegion": region,
+            "serverSlug": realm_slug,
+            "page": page,
+            "metric": args.metric,
+            "partition": args.partition,
+        }
+        data = graphql(args.graphql_url, token, RANKINGS_QUERY, variables)
+        world_data = data.get("worldData") or {}
+        zone = world_data.get("zone") or {}
+        zone_name = zone.get("name") or zone_name
+        encounters = zone.get("encounters") or []
+        if not isinstance(encounters, list):
+            raise RuntimeError(f"unexpected encounters payload for {realm_name}: {encounters!r}")
+
+        any_more = False
+        any_entries = False
+        first_payload_shape = "no encounters"
+        first_ranking_shape = "no rankings"
+        page_rankings = 0
+        missing_name = 0
+
+        for encounter in encounters:
+            if not isinstance(encounter, dict):
+                continue
+            encounter_id = int(encounter.get("id") or 0)
+            encounter_key = f"{zone_id}:{encounter_id}"
+            rankings_payload = encounter.get("characterRankings")
+            if first_payload_shape == "no encounters":
+                first_payload_shape = payload_shape(rankings_payload)
+            rankings_error = payload_error(rankings_payload)
+            if rankings_error:
+                raise RuntimeError(
+                    f"Warcraft Logs characterRankings failed for zone {zone_id} "
+                    f"{zone_name}, realm {realm_name}, encounter {encounter_id}: {rankings_error}"
+                )
+            any_more = any_more or payload_has_more(rankings_payload)
+            entries = ranking_entries(rankings_payload)
+            raw_list = encounter_raw.setdefault(encounter_key, [])
+            for ranking_idx, ranking in enumerate(entries, 1):
+                page_rankings += 1
+                if first_ranking_shape == "no rankings":
+                    first_ranking_shape = payload_shape(ranking)
+                name = name_from_ranking(ranking)
+                if not name:
+                    missing_name += 1
+                    continue
+                global_rank = (page - 1) * len(entries) + ranking_idx
+                resolved_realm = realm_from_ranking(ranking, realm_name)
+                item_score = item_score_from_ranking(ranking)
+                raw_list.append((global_rank, name, resolved_realm, item_score))
+                any_entries = True
+
+        rate_limit = data.get("rateLimitData") or {}
+        spent = rate_limit.get("pointsSpentThisHour")
+        limit = rate_limit.get("limitPerHour")
+        print(
+            f"zone {zone_id} {zone_name} {region}/{realm_name} page {page}: "
+            f"{len(encounter_raw)} encounters, {page_rankings} rankings, "
+            f"missing name {missing_name}, "
+            f"payload {first_payload_shape}, first ranking {first_ranking_shape}, rate {spent}/{limit}"
+        )
+
+        if args.sleep_seconds > 0:
+            time.sleep(args.sleep_seconds)
+
+        if not any_more or not any_entries:
+            exhausted = True
+            break
+
+    return encounter_raw, exhausted
+
+
+def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, realms: list[dict[str, str]], token: str) -> bool:
+    """Fetch next chunk for all realm+zone combos. Returns True when the full cycle is complete."""
+    state = load_state(args.state_file)
+
+    if state.get("complete"):
+        print("Cycle complete — resetting state for new cycle.")
+        state = {"cycle": state.get("cycle", 1) + 1, "complete": False, "progress": {}, "encounterTotals": {}, "characters": {}}
+
+    progress: dict[str, Any] = state.setdefault("progress", {})
+    totals: dict[str, int] = state.setdefault("encounterTotals", {})
+    char_state: dict[str, Any] = state.setdefault("characters", {})
+
+    all_done = True
+    for zone_id in zone_ids:
+        for realm in realms:
+            realm_name = realm["name"]
+            realm_region = realm.get("region") or region
+            realm_slug = realm.get("slug") or realm_name.lower().replace(" ", "")
+            combo_key = f"{realm_region}/{realm_slug}/{zone_id}"
+
+            combo = progress.setdefault(combo_key, {"nextPage": 1, "done": False})
+            if combo["done"]:
+                continue
+
+            all_done = False
+            start_page = combo["nextPage"]
+            encounter_raw, exhausted = fetch_chunk(args, token, region, realm, zone_id, start_page)
+
+            # Merge new entries into state.
+            pages_fetched = 0
+            for enc_key, raw_list in encounter_raw.items():
+                if not raw_list:
+                    continue
+                # global_rank from this chunk is relative to the start of ALL pages.
+                last_rank = raw_list[-1][0]
+                totals[enc_key] = max(totals.get(enc_key, 0), last_rank)
+                pages_fetched = max(pages_fetched, (last_rank + 99) // 100)
+                for global_rank, name, resolved_realm, item_score in raw_list:
+                    char_key = f"{resolved_realm}|{name}"
+                    char = char_state.setdefault(char_key, {"ranks": {}, "itemScores": []})
+                    # Keep the best (lowest) rank per encounter per character.
+                    existing = char["ranks"].get(enc_key)
+                    if existing is None or global_rank < existing:
+                        char["ranks"][enc_key] = global_rank
+                    if item_score and item_score > 0:
+                        char["itemScores"].append(item_score)
+
+            combo["nextPage"] = start_page + args.pages_per_chunk
+            if exhausted:
+                combo["done"] = True
+                print(f"combo {combo_key} exhausted after page {combo['nextPage'] - 1}")
+
+    all_combos_done = all(c.get("done", False) for c in progress.values()) and bool(progress)
+    if all_done and not all_combos_done:
+        # All were already done before this run — shouldn't happen unless state is malformed.
+        all_combos_done = True
+    state["complete"] = all_combos_done
+
+    print(f"state: {sum(1 for c in progress.values() if c.get('done'))} / {len(progress)} combos done, {len(char_state)} characters accumulated")
+    save_state(args.state_file, state)
+    return all_combos_done
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--realms", default="data/realms.json", type=Path)
     parser.add_argument("--output", default="data/scores.json", type=Path)
+    parser.add_argument("--state-file", default=None, type=Path,
+                        help="Path to incremental fetch state file. When set, runs in chunked mode.")
+    parser.add_argument("--pages-per-chunk", default=env_int("WCL_PAGES_PER_CHUNK") or 20, type=int,
+                        help="Pages to fetch per realm+zone per run in chunked mode.")
     parser.add_argument("--zone-id", default=env_int("WCL_ZONE_ID"), type=int)
     parser.add_argument("--zone-ids", default=env_str("WCL_ZONE_IDS"), help="Comma-separated Warcraft Logs zone IDs. Overrides --zone-id when set.")
     parser.add_argument("--metric", default=env_str("WCL_METRIC", "dps"))
     parser.add_argument("--partition", default=env_int("WCL_PARTITION"), type=int)
-    parser.add_argument("--max-pages", default=env_int("WCL_MAX_PAGES") or 20, type=int)
+    parser.add_argument("--max-pages", default=env_int("WCL_MAX_PAGES") or 200, type=int)
     parser.add_argument("--sleep-seconds", default=env_float("WCL_SLEEP_SECONDS", 1.0), type=float)
     parser.add_argument("--token-url", default=env_str("WCL_TOKEN_URL", TOKEN_URL))
     parser.add_argument("--graphql-url", default=env_str("WCL_GRAPHQL_URL", GRAPHQL_URL))
     parser.add_argument("--distribution-approved", action="store_true")
     args = parser.parse_args()
-
 
     try:
         zone_ids = parse_zone_ids(args.zone_ids)
@@ -455,6 +649,34 @@ def main() -> int:
     region, realms = load_realms(args.realms)
     token = get_access_token(client_id, client_secret, args.token_url)
 
+    # ── Incremental / chunked mode ────────────────────────────────────────────
+    if args.state_file:
+        cycle_complete = run_incremental(args, zone_ids, region, realms, token)
+
+        state = load_state(args.state_file)
+        characters = scores_from_state(state, zone_ids, args.metric)
+        if not characters:
+            print("No characters accumulated yet — skipping scores.json update.")
+            return 0
+
+        document: dict[str, Any] = {
+            "generatedAt": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "source": "warcraftlogs-api-v2",
+            "scorePolicy": "Mean of each character's best encounter rank percentiles across the configured zone IDs.",
+            "zoneIDs": zone_ids,
+            "metric": args.metric,
+            "characters": characters,
+        }
+        if len(zone_ids) == 1:
+            document["zoneID"] = zone_ids[0]
+        args.output.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        print(f"wrote {args.output} with {len(characters)} characters")
+
+        if cycle_complete:
+            print("CYCLE_COMPLETE")  # workflow can detect this to trigger a full release
+        return 0
+
+    # ── Full / one-shot mode (original behaviour) ─────────────────────────────
     combined: dict[tuple[str, str], dict[str, Any]] = {}
     for zone_id in zone_ids:
         for realm in realms:
@@ -470,7 +692,7 @@ def main() -> int:
         if not encounter_scores:
             continue
         score = statistics.fmean(encounter_scores.values())
-        entry = {
+        entry: dict[str, Any] = {
             "name": name,
             "realm": realm,
             "score": round(score, 1),
