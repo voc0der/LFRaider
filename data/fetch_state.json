@@ -1,7 +1,62 @@
 {
-  "complete": false,
+  "complete": true,
   "cycle": 1,
-  "encounterEntries": {},
-  "progress": {},
+  "encounterEntries": {
+    "1047:50652": [],
+    "1047:50653": [],
+    "1047:50654": [],
+    "1047:50655": [],
+    "1047:50656": [],
+    "1047:50657": [],
+    "1047:50658": [],
+    "1047:50659": [],
+    "1047:50661": [],
+    "1047:50662": [],
+    "1048:50649": [],
+    "1048:50650": [],
+    "1048:50651": []
+  },
+  "progress": {
+    "eu/spineshatter/1047": {
+      "done": true,
+      "nextPage": 21
+    },
+    "eu/spineshatter/1048": {
+      "done": true,
+      "nextPage": 21
+    },
+    "eu/thunderstrike/1047": {
+      "done": true,
+      "nextPage": 21
+    },
+    "eu/thunderstrike/1048": {
+      "done": true,
+      "nextPage": 21
+    },
+    "us/dreamscythe/1047": {
+      "done": true,
+      "nextPage": 21
+    },
+    "us/dreamscythe/1048": {
+      "done": true,
+      "nextPage": 21
+    },
+    "us/maladath/1047": {
+      "done": true,
+      "nextPage": 21
+    },
+    "us/maladath/1048": {
+      "done": true,
+      "nextPage": 21
+    },
+    "us/nightslayer/1047": {
+      "done": true,
+      "nextPage": 21
+    },
+    "us/nightslayer/1048": {
+      "done": true,
+      "nextPage": 21
+    }
+  },
   "scorePolicyVersion": 2
 }
