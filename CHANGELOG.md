@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+## [0.1.1] - 2026-04-10
+
+### Changed
+- Refreshed bundled score dataset.
+
 ### Added
 - Added a draggable minimap button with a toggle menu for each display surface and score mode
 - Added separate display modes for Warcraft Logs overall ranking and last-known item score

@@ -8,7 +8,7 @@
 - Keeps the runtime addon small: one Lua lookup file plus one generated Lua data file
 - Includes CI plumbing for weekly data refreshes and release packaging
 
-Current version: `0.1.0`
+Current version: `0.1.1`
 
 ## Status
 
