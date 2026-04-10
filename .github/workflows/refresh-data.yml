@@ -31,7 +31,7 @@ jobs:
       WCL_ZONE_ID: ${{ vars.WCL_ZONE_ID }}
       WCL_METRIC: ${{ vars.WCL_METRIC || 'dps' }}
       WCL_PARTITION: ${{ vars.WCL_PARTITION }}
-      WCL_GRAPHQL_URL: ${{ vars.WCL_GRAPHQL_URL || 'https://www.warcraftlogs.com/api/v2/client' }}
+      WCL_GRAPHQL_URL: https://www.warcraftlogs.com/api/v2/client
       WCL_PAGES_PER_CHUNK: ${{ vars.WCL_PAGES_PER_CHUNK || '20' }}
       WCL_MAX_PAGES: ${{ vars.WCL_MAX_PAGES || '20' }}
       WCL_PAGE_SIZE: ${{ vars.WCL_PAGE_SIZE || '1000' }}
