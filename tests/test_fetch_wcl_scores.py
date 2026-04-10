@@ -36,6 +36,29 @@ class FetchWclScoresTests(unittest.TestCase):
 
         self.assertEqual(entry, ("Voidless", "Dreamscythe", 94.8, 126.0))
 
+    def test_extract_zone_rankings_uses_rank_percent_and_best_rank_item_level(self) -> None:
+        encounter_raw = fetch_wcl_scores.extract_zone_rankings(
+            {
+                "rankings": [
+                    {
+                        "encounter": {"id": 50652, "name": "Attumen"},
+                        "rankPercent": 94.4,
+                        "bestRank": {"ilvl": 126},
+                    }
+                ]
+            },
+            1047,
+            "Dreamscythe",
+            "Voidless",
+        )
+
+        self.assertEqual(
+            encounter_raw,
+            {
+                "1047:50652": [("Voidless", "Dreamscythe", 94.4, 126.0)],
+            },
+        )
+
     def test_scores_from_state_averages_stored_percentiles_and_keeps_best_duplicate(self) -> None:
         state = fetch_wcl_scores.new_state()
         state["encounterEntries"] = {
@@ -244,12 +267,12 @@ class FetchWclScoresTests(unittest.TestCase):
         self.assertEqual(scores[("Dreamscythe", "Voidless")]["encounters"]["1047:50652"], 95.0)
 
     def test_incremental_state_resets_when_score_policy_changes(self) -> None:
-        original_fetch_chunk = fetch_wcl_scores.fetch_chunk
+        original_fetch_realm_character_chunk = fetch_wcl_scores.fetch_realm_character_chunk
 
-        def fake_fetch_chunk(_args, _token, _region, _realm, _zone_id, _start_page):
+        def fake_fetch_realm_character_chunk(_args, _token, _region, _realm, _zone_ids, _start_page):
             return {"1047:649": [("Vocoder", "Dreamscythe", 74.7, 126.0)]}, True
 
-        fetch_wcl_scores.fetch_chunk = fake_fetch_chunk
+        fetch_wcl_scores.fetch_realm_character_chunk = fake_fetch_realm_character_chunk
         try:
             with tempfile.TemporaryDirectory() as tmpdir:
                 state_file = Path(tmpdir) / "state.json"
@@ -271,7 +294,7 @@ class FetchWclScoresTests(unittest.TestCase):
 
                 state = fetch_wcl_scores.load_state(state_file)
         finally:
-            fetch_wcl_scores.fetch_chunk = original_fetch_chunk
+            fetch_wcl_scores.fetch_realm_character_chunk = original_fetch_realm_character_chunk
 
         self.assertTrue(complete)
         self.assertEqual(state["scorePolicyVersion"], fetch_wcl_scores.SCORE_POLICY_VERSION)
