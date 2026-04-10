@@ -420,12 +420,16 @@ def main() -> int:
     parser.add_argument("--zone-ids", default=env_str("WCL_ZONE_IDS"), help="Comma-separated Warcraft Logs zone IDs. Overrides --zone-id when set.")
     parser.add_argument("--metric", default=env_str("WCL_METRIC", "dps"))
     parser.add_argument("--partition", default=env_int("WCL_PARTITION"), type=int)
-    parser.add_argument("--max-pages", default=env_int("WCL_MAX_PAGES") or 200, type=int)
+    parser.add_argument("--max-pages", default=env_int("WCL_MAX_PAGES") or 20, type=int)
     parser.add_argument("--sleep-seconds", default=env_float("WCL_SLEEP_SECONDS", 1.0), type=float)
     parser.add_argument("--token-url", default=env_str("WCL_TOKEN_URL", TOKEN_URL))
     parser.add_argument("--graphql-url", default=env_str("WCL_GRAPHQL_URL", GRAPHQL_URL))
     parser.add_argument("--distribution-approved", action="store_true")
     args = parser.parse_args()
+
+    if args.max_pages > 20:
+        print(f"WCL max-pages {args.max_pages} is above the API limit; capping at 20")
+        args.max_pages = 20
 
     try:
         zone_ids = parse_zone_ids(args.zone_ids)

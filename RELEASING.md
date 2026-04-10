@@ -33,7 +33,7 @@ Only configure these after Warcraft Logs/RPGLogs approves redistribution for thi
 - Optional repository variable `WCL_METRIC`, default `dps`
 - Optional repository variable `WCL_PARTITION`
 - Optional repository variable `WCL_GRAPHQL_URL`, default `https://www.warcraftlogs.com/api/v2/client`
-- Optional repository variable `WCL_MAX_PAGES`, default `200`
+- Optional repository variable `WCL_MAX_PAGES`, default `20`, which is the current WCL API maximum
 - Optional repository variable `WCL_SLEEP_SECONDS`, default `1.0`
 
 ## Automated Release Process
