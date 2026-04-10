@@ -261,7 +261,6 @@ def percentile_from_ranking(ranking: dict[str, Any], total_count: int | None = N
         return 100.0
 
     return max(0.0, min(100.0, (1.0 - ((rank - 1.0) / (out_of - 1.0))) * 100.0))
-    return None
 
 
 def item_score_from_ranking(ranking: dict[str, Any]) -> float | None:
@@ -270,6 +269,25 @@ def item_score_from_ranking(ranking: dict[str, Any]) -> float | None:
         if value is not None:
             return float(value)
     return None
+
+
+def spec_from_ranking(ranking: dict[str, Any]) -> str:
+    """Return a spec/class identifier for grouping within-spec percentiles."""
+    spec = ranking.get("spec")
+    if spec:
+        return str(spec)
+    # Fall back to class ID so we still get class-normalised percentiles.
+    cls = ranking.get("class")
+    if cls is not None:
+        return f"class:{cls}"
+    return "unknown"
+
+
+def amount_from_ranking(ranking: dict[str, Any]) -> float | None:
+    value = ranking.get("amount")
+    if value is None:
+        return None
+    return float(value)
 
 
 def name_from_ranking(ranking: dict[str, Any]) -> str | None:
@@ -317,17 +335,50 @@ def load_realms(path: Path) -> tuple[str, list[dict[str, str]]]:
     return region, normalized_realms
 
 
+def spec_percentile(enc_entries: list[tuple[str, str, str, float, float | None]]) -> dict[tuple[str, str], float]:
+    """Given a list of (name, realm, spec, amount, item_score) for one encounter,
+    return a mapping of (realm, name) -> spec-normalised percentile (0–100).
+
+    Characters are ranked by DPS amount within their spec, matching WCL's
+    'Best Perf. Avg' which is always spec-relative, not cross-spec.
+    """
+    # Group amounts by spec.
+    by_spec: dict[str, list[float]] = {}
+    for _name, _realm, spec, amount, _item_score in enc_entries:
+        by_spec.setdefault(spec, []).append(amount)
+
+    # For each spec: sort descending so index 0 = best.
+    sorted_by_spec: dict[str, list[float]] = {s: sorted(amts, reverse=True) for s, amts in by_spec.items()}
+
+    result: dict[tuple[str, str], float] = {}
+    for name, realm, spec, amount, _item_score in enc_entries:
+        spec_amounts = sorted_by_spec[spec]
+        total = len(spec_amounts)
+        # bisect from the right to find position of this amount in the sorted list.
+        # Since sorted descending, we search for the insertion point in the reversed sense.
+        rank = 0
+        for i, a in enumerate(spec_amounts):
+            if a <= amount:
+                rank = i
+                break
+        else:
+            rank = total - 1
+        percentile = max(0.0, min(100.0, (1.0 - rank / max(total - 1, 1)) * 100.0))
+        key = (realm, name)
+        # Keep the best percentile if the same character appears more than once.
+        if key not in result or percentile > result[key]:
+            result[key] = percentile
+    return result
+
+
 def collect_realm_scores(args: argparse.Namespace, token: str, default_region: str, realm: dict[str, str], zone_id: int) -> dict[tuple[str, str], dict[str, Any]]:
     realm_name = realm["name"]
     region = realm.get("region") or default_region
     realm_slug = realm.get("slug") or realm_name.lower().replace(" ", "")
 
-    # Pass 1: collect raw entries per encounter across all pages.
-    # WCL returns characters sorted best-first, so position in the full list == global rank.
-    # We cannot use payload_count() as the total because it returns the per-page size (100),
-    # not the total number of ranked characters. Instead we track global rank ourselves and
-    # compute percentiles after all pages are fetched, using the final rank as the total.
-    encounter_raw: dict[str, list[tuple[int, str, str, float | None]]] = {}
+    # Pass 1: collect (name, realm, spec, amount, item_score) per encounter across all pages.
+    # WCL returns characters sorted best-first within each page.
+    encounter_raw: dict[str, list[tuple[str, str, str, float, float | None]]] = {}
     zone_name = "unknown"
 
     for page in range(1, args.max_pages + 1):
@@ -373,7 +424,7 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
 
             entries = ranking_entries(rankings_payload)
             raw_list = encounter_raw.setdefault(encounter_key, [])
-            for ranking_idx, ranking in enumerate(entries, 1):
+            for ranking in entries:
                 page_rankings += 1
                 if first_ranking_shape == "no rankings":
                     first_ranking_shape = payload_shape(ranking)
@@ -381,10 +432,13 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
                 if not name:
                     missing_name += 1
                     continue
-                global_rank = (page - 1) * len(entries) + ranking_idx
+                amount = amount_from_ranking(ranking)
+                if amount is None:
+                    continue
                 resolved_realm = realm_from_ranking(ranking, realm_name)
+                spec = spec_from_ranking(ranking)
                 item_score = item_score_from_ranking(ranking)
-                raw_list.append((global_rank, name, resolved_realm, item_score))
+                raw_list.append((name, resolved_realm, spec, amount, item_score))
                 any_entries = True
 
         rate_limit = data.get("rateLimitData") or {}
@@ -403,26 +457,29 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
         if not any_more or not any_entries:
             break
 
-    # Pass 2: compute positional percentiles now that we know the total fetched per encounter.
+    # Pass 2: compute spec-normalised percentiles across all fetched data.
     by_character: dict[tuple[str, str], dict[str, Any]] = {}
     for encounter_key, raw_list in encounter_raw.items():
         if not raw_list:
             continue
-        total = raw_list[-1][0]
-        for global_rank, name, resolved_realm, item_score in raw_list:
-            percentile = max(0.0, min(100.0, (1.0 - (global_rank - 1) / max(total - 1, 1)) * 100.0))
+        percentiles = spec_percentile(raw_list)
+        for (resolved_realm, name), percentile in percentiles.items():
             key = (resolved_realm, name)
             character = by_character.setdefault(key, {"encounters": {}, "itemScores": []})
             character["encounters"][encounter_key] = max(character["encounters"].get(encounter_key, 0), percentile)
+
+        for name, resolved_realm, _spec, _amount, item_score in raw_list:
             if item_score and item_score > 0:
-                character["itemScores"].append(item_score)
+                key = (resolved_realm, name)
+                if key in by_character:
+                    by_character[key]["itemScores"].append(item_score)
 
     return by_character
 
 
 def load_state(path: Path) -> dict[str, Any]:
     if not path.exists():
-        return {"cycle": 1, "complete": False, "progress": {}, "encounterTotals": {}, "characters": {}}
+        return {"cycle": 1, "complete": False, "progress": {}, "encounterEntries": {}}
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -431,30 +488,48 @@ def save_state(path: Path, state: dict[str, Any]) -> None:
 
 
 def scores_from_state(state: dict[str, Any], zone_ids: list[int], metric: str) -> list[dict[str, Any]]:
-    """Rebuild the scores character list from raw ranks stored in state."""
-    totals = state.get("encounterTotals", {})
-    characters = []
-    for char_key, char_data in state.get("characters", {}).items():
-        realm, name = char_key.split("|", 1)
-        ranks: dict[str, int] = char_data.get("ranks", {})
-        item_scores: list[float] = char_data.get("itemScores", [])
-        if not ranks:
+    """Rebuild the character score list from accumulated encounter entries in state.
+
+    Each encounter's entries are a list of [name, realm, spec, amount, itemScore|null].
+    Percentiles are computed within-spec, matching WCL's 'Best Perf. Avg'.
+    """
+    by_character: dict[tuple[str, str], dict[str, Any]] = {}
+
+    for enc_key, raw_entries in state.get("encounterEntries", {}).items():
+        if not raw_entries:
             continue
-        percentiles: dict[str, float] = {}
-        for enc_key, rank in ranks.items():
-            total = totals.get(enc_key, rank)
-            percentiles[enc_key] = max(0.0, min(100.0, (1.0 - (rank - 1) / max(total - 1, 1)) * 100.0))
-        score = statistics.fmean(percentiles.values())
+        # Reconstruct tuples from stored lists.
+        as_tuples: list[tuple[str, str, str, float, float | None]] = [
+            (e[0], e[1], e[2], float(e[3]), float(e[4]) if e[4] is not None else None)
+            for e in raw_entries
+        ]
+        percentiles = spec_percentile(as_tuples)
+        for (realm, name), percentile in percentiles.items():
+            key = (realm, name)
+            char = by_character.setdefault(key, {"encounters": {}, "itemScores": []})
+            char["encounters"][enc_key] = max(char["encounters"].get(enc_key, 0), percentile)
+
+        for name, realm, _spec, _amount, item_score in as_tuples:
+            if item_score and item_score > 0:
+                key = (realm, name)
+                if key in by_character:
+                    by_character[key]["itemScores"].append(item_score)
+
+    characters = []
+    for (realm, name), char in sorted(by_character.items()):
+        if not char["encounters"]:
+            continue
+        score = statistics.fmean(char["encounters"].values())
         entry: dict[str, Any] = {
             "name": name,
             "realm": realm,
             "score": round(score, 1),
-            "encounters": len(percentiles),
+            "encounters": len(char["encounters"]),
         }
-        if item_scores:
-            entry["itemScore"] = round(max(item_scores), 1)
+        if char["itemScores"]:
+            entry["itemScore"] = round(max(char["itemScores"]), 1)
         characters.append(entry)
-    return sorted(characters, key=lambda c: (c["realm"], c["name"]))
+    return characters
 
 
 def fetch_chunk(
@@ -464,12 +539,13 @@ def fetch_chunk(
     realm: dict[str, str],
     zone_id: int,
     start_page: int,
-) -> tuple[dict[str, list[tuple[int, str, str, float | None]]], bool]:
+) -> tuple[dict[str, list[tuple[str, str, str, float, float | None]]], bool]:
     """Fetch one chunk of pages for a single realm+zone. Returns (encounter_raw, exhausted)."""
     realm_name = realm["name"]
     region = realm.get("region") or default_region
     realm_slug = realm.get("slug") or realm_name.lower().replace(" ", "")
-    encounter_raw: dict[str, list[tuple[int, str, str, float | None]]] = {}
+    # Entries: (name, realm, spec, amount, item_score)
+    encounter_raw: dict[str, list[tuple[str, str, str, float, float | None]]] = {}
     zone_name = "unknown"
     exhausted = False
 
@@ -514,7 +590,7 @@ def fetch_chunk(
             any_more = any_more or payload_has_more(rankings_payload)
             entries = ranking_entries(rankings_payload)
             raw_list = encounter_raw.setdefault(encounter_key, [])
-            for ranking_idx, ranking in enumerate(entries, 1):
+            for ranking in entries:
                 page_rankings += 1
                 if first_ranking_shape == "no rankings":
                     first_ranking_shape = payload_shape(ranking)
@@ -522,10 +598,13 @@ def fetch_chunk(
                 if not name:
                     missing_name += 1
                     continue
-                global_rank = (page - 1) * len(entries) + ranking_idx
+                amount = amount_from_ranking(ranking)
+                if amount is None:
+                    continue
                 resolved_realm = realm_from_ranking(ranking, realm_name)
+                spec = spec_from_ranking(ranking)
                 item_score = item_score_from_ranking(ranking)
-                raw_list.append((global_rank, name, resolved_realm, item_score))
+                raw_list.append((name, resolved_realm, spec, amount, item_score))
                 any_entries = True
 
         rate_limit = data.get("rateLimitData") or {}
@@ -554,11 +633,11 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
 
     if state.get("complete"):
         print("Cycle complete — resetting state for new cycle.")
-        state = {"cycle": state.get("cycle", 1) + 1, "complete": False, "progress": {}, "encounterTotals": {}, "characters": {}}
+        state = {"cycle": state.get("cycle", 1) + 1, "complete": False, "progress": {}, "encounterEntries": {}}
 
     progress: dict[str, Any] = state.setdefault("progress", {})
-    totals: dict[str, int] = state.setdefault("encounterTotals", {})
-    char_state: dict[str, Any] = state.setdefault("characters", {})
+    # encounterEntries: enc_key -> list of [name, realm, spec, amount, itemScore|null]
+    enc_entries: dict[str, list[list[Any]]] = state.setdefault("encounterEntries", {})
 
     all_done = True
     for zone_id in zone_ids:
@@ -576,37 +655,27 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
             start_page = combo["nextPage"]
             encounter_raw, exhausted = fetch_chunk(args, token, region, realm, zone_id, start_page)
 
-            # Merge new entries into state.
-            pages_fetched = 0
             for enc_key, raw_list in encounter_raw.items():
-                if not raw_list:
-                    continue
-                # global_rank from this chunk is relative to the start of ALL pages.
-                last_rank = raw_list[-1][0]
-                totals[enc_key] = max(totals.get(enc_key, 0), last_rank)
-                pages_fetched = max(pages_fetched, (last_rank + 99) // 100)
-                for global_rank, name, resolved_realm, item_score in raw_list:
-                    char_key = f"{resolved_realm}|{name}"
-                    char = char_state.setdefault(char_key, {"ranks": {}, "itemScores": []})
-                    # Keep the best (lowest) rank per encounter per character.
-                    existing = char["ranks"].get(enc_key)
-                    if existing is None or global_rank < existing:
-                        char["ranks"][enc_key] = global_rank
-                    if item_score and item_score > 0:
-                        char["itemScores"].append(item_score)
+                stored = enc_entries.setdefault(enc_key, [])
+                # Index existing entries by (realm, name) to avoid duplicates across chunks.
+                existing_keys: set[tuple[str, str]] = {(e[1], e[0]) for e in stored}
+                for name, resolved_realm, spec, amount, item_score in raw_list:
+                    if (resolved_realm, name) not in existing_keys:
+                        stored.append([name, resolved_realm, spec, amount, item_score])
+                        existing_keys.add((resolved_realm, name))
 
             combo["nextPage"] = start_page + args.pages_per_chunk
             if exhausted:
                 combo["done"] = True
-                print(f"combo {combo_key} exhausted after page {combo['nextPage'] - 1}")
+                print(f"combo {combo_key} exhausted")
 
     all_combos_done = all(c.get("done", False) for c in progress.values()) and bool(progress)
     if all_done and not all_combos_done:
-        # All were already done before this run — shouldn't happen unless state is malformed.
         all_combos_done = True
     state["complete"] = all_combos_done
 
-    print(f"state: {sum(1 for c in progress.values() if c.get('done'))} / {len(progress)} combos done, {len(char_state)} characters accumulated")
+    total_chars = len({(e[1], e[0]) for entries in enc_entries.values() for e in entries})
+    print(f"state: {sum(1 for c in progress.values() if c.get('done'))} / {len(progress)} combos done, ~{total_chars} characters accumulated")
     save_state(args.state_file, state)
     return all_combos_done
 
