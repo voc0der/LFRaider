@@ -273,7 +273,7 @@ def payload_count(payload: Any) -> int | None:
     if not isinstance(payload, dict):
         return None
 
-    value = payload.get("total") or payload.get("totalCount") or payload.get("outOf")
+    value = payload.get("count") or payload.get("total") or payload.get("totalCount") or payload.get("outOf")
     if value is None:
         return None
 
@@ -359,12 +359,17 @@ def normalize_score(value: float) -> float:
     return max(0.0, min(100.0, float(value)))
 
 
-def make_score_entry(ranking: dict[str, Any], realm_name: str, total_rankings: int | None) -> tuple[str, str, float, float | None] | None:
+def make_score_entry(
+    ranking: dict[str, Any],
+    realm_name: str,
+    total_rankings: int | None,
+    fallback_rank: int | None = None,
+) -> tuple[str, str, float, float | None] | None:
     name = name_from_ranking(ranking)
     if not name:
         return None
 
-    percentile = percentile_from_ranking(ranking, total_rankings)
+    percentile = percentile_from_ranking(ranking, total_rankings, fallback_rank)
     if percentile is None:
         return None
 
@@ -579,14 +584,15 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
             total_rankings = payload_count(rankings_payload)
 
             entries = ranking_entries(rankings_payload)
-            for ranking in entries:
+            for ranking_idx, ranking in enumerate(entries, 1):
                 page_rankings += 1
                 if first_ranking_shape == "no rankings":
                     first_ranking_shape = payload_shape(ranking)
                 if not name_from_ranking(ranking):
                     missing_name += 1
                     continue
-                score_entry = make_score_entry(ranking, realm_name, total_rankings)
+                fallback_rank = ((page - 1) * len(entries)) + ranking_idx
+                score_entry = make_score_entry(ranking, realm_name, total_rankings, fallback_rank)
                 if not score_entry:
                     missing_percentile += 1
                     continue
@@ -732,14 +738,15 @@ def fetch_chunk(
             total_rankings = payload_count(rankings_payload)
             entries = ranking_entries(rankings_payload)
             raw_list = encounter_raw.setdefault(encounter_key, [])
-            for ranking in entries:
+            for ranking_idx, ranking in enumerate(entries, 1):
                 page_rankings += 1
                 if first_ranking_shape == "no rankings":
                     first_ranking_shape = payload_shape(ranking)
                 if not name_from_ranking(ranking):
                     missing_name += 1
                     continue
-                score_entry = make_score_entry(ranking, realm_name, total_rankings)
+                fallback_rank = ((page - 1) * len(entries)) + ranking_idx
+                score_entry = make_score_entry(ranking, realm_name, total_rankings, fallback_rank)
                 if not score_entry:
                     missing_percentile += 1
                     continue

@@ -36,6 +36,19 @@ class FetchWclScoresTests(unittest.TestCase):
 
         self.assertEqual(entry, ("Voidless", "Dreamscythe", 94.8, 126.0))
 
+    def test_make_score_entry_can_fall_back_to_rank_and_count(self) -> None:
+        entry = fetch_wcl_scores.make_score_entry(
+            {
+                "name": "Voidless",
+                "serverName": "Dreamscythe",
+            },
+            "Dreamscythe",
+            18,
+            2,
+        )
+
+        self.assertEqual(entry, ("Voidless", "Dreamscythe", 94.11764705882352, None))
+
     def test_scores_from_state_averages_stored_percentiles_and_keeps_best_duplicate(self) -> None:
         state = fetch_wcl_scores.new_state()
         state["encounterEntries"] = {
@@ -242,6 +255,57 @@ class FetchWclScoresTests(unittest.TestCase):
         self.assertEqual(attempted_sizes, [1000, 500, 200, 100, None])
         self.assertIsNone(args.effective_page_size)
         self.assertEqual(scores[("Dreamscythe", "Voidless")]["encounters"]["1047:50652"], 95.0)
+
+    def test_collect_realm_scores_uses_count_and_row_order_when_percentile_is_missing(self) -> None:
+        original_graphql = fetch_wcl_scores.graphql
+
+        def fake_graphql(_url: str, _token: str, _query: str, _variables: dict[str, object]) -> dict[str, object]:
+            return {
+                "worldData": {
+                    "zone": {
+                        "name": "Karazhan",
+                        "encounters": [
+                            {
+                                "id": 50652,
+                                "name": "Attumen",
+                                "characterRankings": {
+                                    "count": 18,
+                                    "hasMorePages": False,
+                                    "rankings": [
+                                        {"name": "Topdog", "serverName": "Dreamscythe"},
+                                        {"name": "Voidless", "serverName": "Dreamscythe"},
+                                    ],
+                                },
+                            }
+                        ],
+                    }
+                },
+                "rateLimitData": {"limitPerHour": 10000, "pointsSpentThisHour": 1},
+            }
+
+        fetch_wcl_scores.graphql = fake_graphql
+        try:
+            args = SimpleNamespace(
+                graphql_url="https://example.invalid/graphql",
+                max_pages=20,
+                page_size=1000,
+                effective_page_size=1000,
+                metric="dps",
+                partition=None,
+                sleep_seconds=0,
+            )
+            with redirect_stdout(io.StringIO()):
+                scores = fetch_wcl_scores.collect_realm_scores(
+                    args,
+                    "token",
+                    "us",
+                    {"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"},
+                    1047,
+                )
+        finally:
+            fetch_wcl_scores.graphql = original_graphql
+
+        self.assertEqual(scores[("Dreamscythe", "Voidless")]["encounters"]["1047:50652"], 94.11764705882352)
 
     def test_incremental_state_resets_when_score_policy_changes(self) -> None:
         original_fetch_chunk = fetch_wcl_scores.fetch_chunk
