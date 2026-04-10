@@ -435,9 +435,6 @@ def main() -> int:
     parser.add_argument("--distribution-approved", action="store_true")
     args = parser.parse_args()
 
-    if args.max_pages > 20:
-        print(f"WCL max-pages {args.max_pages} is above the API limit; capping at 20")
-        args.max_pages = 20
 
     try:
         zone_ids = parse_zone_ids(args.zone_ids)
