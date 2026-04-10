@@ -28,6 +28,7 @@ TERMS_URL = "https://www.archon.gg/wow/articles/help/rpg-logs-api-terms-of-servi
 API_MAX_PAGE = 20
 DEFAULT_PAGE_SIZE = 1000
 DEFAULT_CHARACTER_QUERY_BATCH_SIZE = 25
+SERVER_CHARACTERS_MAX_LIMIT = 100
 PAGE_SIZE_FALLBACKS: tuple[int | None, ...] = (500, 200, 100, None)
 SCORE_POLICY_VERSION = 3
 SCORE_POLICY = "Mean of WCL per-encounter rank percentiles across the configured zone IDs."
@@ -138,6 +139,11 @@ def format_page_size(value: int | None) -> str:
     if value is None:
         return "API default"
     return str(value)
+
+
+def server_characters_page_limit(args: argparse.Namespace) -> int:
+    requested_size = active_page_size(args) or DEFAULT_PAGE_SIZE
+    return min(requested_size, SERVER_CHARACTERS_MAX_LIMIT)
 
 
 def page_size_candidates(requested_size: int | None) -> list[int | None]:
@@ -583,7 +589,7 @@ def fetch_server_characters_page(
             "serverRegion": realm_region,
             "serverSlug": realm_slug,
             "page": page,
-            "limit": active_page_size(args) or DEFAULT_PAGE_SIZE,
+            "limit": server_characters_page_limit(args),
         },
     )
     world_data = data.get("worldData") or {}
@@ -1156,7 +1162,7 @@ def main() -> int:
     parser.add_argument("--partition", default=env_int("WCL_PARTITION"), type=int)
     parser.add_argument("--max-pages", default=env_int("WCL_MAX_PAGES") or 200, type=int)
     parser.add_argument("--page-size", default=env_int("WCL_PAGE_SIZE") or DEFAULT_PAGE_SIZE, type=int,
-                        help="Characters to request per server pagination page.")
+                        help=f"Characters to request per server pagination page (Warcraft Logs caps this at {SERVER_CHARACTERS_MAX_LIMIT}).")
     parser.add_argument("--character-query-batch-size", default=env_int("WCL_CHARACTER_QUERY_BATCH_SIZE") or DEFAULT_CHARACTER_QUERY_BATCH_SIZE, type=int,
                         help="Number of character zone ranking lookups to batch into one GraphQL query.")
     parser.add_argument("--sleep-seconds", default=env_float("WCL_SLEEP_SECONDS", 1.0), type=float)

@@ -59,6 +59,11 @@ class FetchWclScoresTests(unittest.TestCase):
             },
         )
 
+    def test_server_characters_page_limit_clamps_to_api_cap(self) -> None:
+        args = SimpleNamespace(page_size=1000, effective_page_size=1000)
+
+        self.assertEqual(fetch_wcl_scores.server_characters_page_limit(args), 100)
+
     def test_scores_from_state_averages_stored_percentiles_and_keeps_best_duplicate(self) -> None:
         state = fetch_wcl_scores.new_state()
         state["encounterEntries"] = {
