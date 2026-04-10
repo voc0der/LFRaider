@@ -2,14 +2,14 @@ name: Refresh Score Data
 
 on:
   schedule:
-    # Chunk fetch: every 2 hours — stays well under the WCL rate limit (~880 points per run)
+    # Chunk fetch: every 2 hours.
     - cron: "7 */2 * * *"
-    # Weekly full one-shot reset (clears state, starts fresh cycle) — Tuesday 10:17 UTC
+    # Weekly cycle reset (clears state, starts a fresh chunked cycle) — Tuesday 10:17 UTC
     - cron: "17 10 * * 2"
   workflow_dispatch:
     inputs:
       mode:
-        description: "'chunk' (default) or 'full' (one-shot, ignores state)"
+        description: "'chunk' (default) or 'full' (reset incremental state and restart the cycle)"
         required: false
         default: chunk
 
@@ -79,17 +79,24 @@ jobs:
         id: mode
         shell: bash
         run: |
-          # workflow_dispatch can override; the Tuesday cron runs a full one-shot refresh.
+          # workflow_dispatch can override; the Tuesday cron resets the incremental cycle.
           INPUT_MODE="${{ github.event.inputs.mode }}"
           SCHEDULE="${{ github.event.schedule }}"
           if [[ "${INPUT_MODE}" == "full" || "${SCHEDULE}" == "17 10 * * 2" ]]; then
-            echo "mode=full" >> "$GITHUB_OUTPUT"
+            echo "reset_state=true" >> "$GITHUB_OUTPUT"
           else
-            echo "mode=chunk" >> "$GITHUB_OUTPUT"
+            echo "reset_state=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Reset incremental fetch state
+        if: steps.gate.outputs.run == 'true' && steps.mode.outputs.reset_state == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f data/fetch_state.json
+
       - name: Fetch Warcraft Logs scores (chunk)
-        if: steps.gate.outputs.run == 'true' && steps.mode.outputs.mode == 'chunk'
+        if: steps.gate.outputs.run == 'true'
         id: chunk
         shell: bash
         run: |
@@ -109,19 +116,6 @@ jobs:
           else
             echo "cycle_complete=false" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Fetch Warcraft Logs scores (full one-shot)
-        if: steps.gate.outputs.run == 'true' && steps.mode.outputs.mode == 'full'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tools/fetch_wcl_scores.py \
-            --realms data/realms.json \
-            --output data/scores.json \
-            --max-pages "${WCL_MAX_PAGES}" \
-            --page-size "${WCL_PAGE_SIZE}" \
-            --zone-ids "${WCL_ZONE_IDS:-${WCL_ZONE_ID}}" \
-            --metric "${WCL_METRIC}"
 
       - name: Generate runtime Lua data
         if: steps.gate.outputs.run == 'true'
@@ -154,11 +148,10 @@ jobs:
           git commit -m "chore(data): refresh score dataset"
           git push
 
-      - name: Bump addon version and release (cycle complete or full mode)
+      - name: Bump addon version and release (cycle complete)
         if: |
           steps.changed.outputs.changed == 'true' &&
-          (steps.mode.outputs.mode == 'full' ||
-           steps.chunk.outputs.cycle_complete == 'true')
+          steps.chunk.outputs.cycle_complete == 'true'
         shell: bash
         run: |
           set -euo pipefail

@@ -33,6 +33,10 @@ PAGE_SIZE_FALLBACKS: tuple[int | None, ...] = (500, 200, 100, None)
 SCORE_POLICY_VERSION = 3
 SCORE_POLICY = "Mean of WCL per-encounter rank percentiles across the configured zone IDs."
 
+
+class RateLimitExceededError(RuntimeError):
+    """Raised when Warcraft Logs rejects a request for quota reasons."""
+
 RANKINGS_QUERY = """
 query LFRaiderRankings(
   $zoneID: Int!
@@ -232,6 +236,8 @@ def request_json(url: str, body: dict[str, Any] | bytes, headers: dict[str, str]
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
+        if exc.code == 429:
+            raise RateLimitExceededError(detail) from exc
         raise RuntimeError(f"{url} returned HTTP {exc.code}: {detail}") from exc
     except urllib.error.URLError as exc:
         raise RuntimeError(f"{url} request failed: {exc.reason}") from exc
@@ -1165,31 +1171,42 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
     state["scorePolicyVersion"] = SCORE_POLICY_VERSION
     # encounterEntries: enc_key -> list of [name, realm, percentile, itemScore|null]
     enc_entries: dict[str, list[list[Any]]] = state.setdefault("encounterEntries", {})
-
-    all_done = True
+    realm_progress: list[tuple[dict[str, str], str, dict[str, Any]]] = []
     for realm in realms:
         realm_name = realm["name"]
         realm_region = realm.get("region") or region
         realm_slug = realm.get("slug") or realm_name.lower().replace(" ", "")
         combo_key = f"{realm_region}/{realm_slug}"
-
         combo = progress.setdefault(combo_key, {"nextPage": 1, "done": False})
+        realm_progress.append((realm, combo_key, combo))
+
+    all_done = True
+    processed_combo = False
+    for realm, combo_key, combo in realm_progress:
         if combo["done"]:
             continue
 
         all_done = False
         start_page = combo["nextPage"]
-        encounter_raw, exhausted = fetch_realm_character_chunk(args, token, region, realm, zone_ids, start_page)
+        try:
+            encounter_raw, exhausted = fetch_realm_character_chunk(args, token, region, realm, zone_ids, start_page)
+        except RateLimitExceededError as exc:
+            print(f"rate limited while fetching {combo_key}: {exc}")
+            break
         merge_state_entries(enc_entries, encounter_raw)
 
         combo["nextPage"] = start_page + args.pages_per_chunk
         if exhausted:
             combo["done"] = True
             print(f"combo {combo_key} exhausted")
+        processed_combo = True
+        break
 
-    all_combos_done = all(c.get("done", False) for c in progress.values()) and bool(progress)
+    all_combos_done = all(combo.get("done", False) for _, _, combo in realm_progress) and bool(realm_progress)
     if all_done and not all_combos_done:
         all_combos_done = True
+    if not processed_combo and not all_done:
+        print("No progress this run; keeping fetch state as-is.")
     state["complete"] = all_combos_done
 
     total_chars = len({(e[1], e[0]) for entries in enc_entries.values() for e in entries})
@@ -1205,7 +1222,7 @@ def main() -> int:
     parser.add_argument("--state-file", default=None, type=Path,
                         help="Path to incremental fetch state file. When set, runs in chunked mode.")
     parser.add_argument("--pages-per-chunk", default=env_int("WCL_PAGES_PER_CHUNK") or 20, type=int,
-                        help="Pages to fetch per realm+zone per run in chunked mode.")
+                        help="Pages to fetch for one realm per run in chunked mode.")
     parser.add_argument("--zone-id", default=env_int("WCL_ZONE_ID"), type=int)
     parser.add_argument("--zone-ids", default=env_str("WCL_ZONE_IDS"), help="Comma-separated Warcraft Logs zone IDs. Overrides --zone-id when set.")
     parser.add_argument("--metric", default=env_str("WCL_METRIC", "dps"))
@@ -1256,11 +1273,14 @@ def main() -> int:
     # ── Incremental / chunked mode ────────────────────────────────────────────
     if args.state_file:
         cycle_complete = run_incremental(args, zone_ids, region, realms, token)
+        if not cycle_complete:
+            print("Cycle incomplete — leaving existing scores.json unchanged.")
+            return 0
 
         state = load_state(args.state_file)
         characters = scores_from_state(state, zone_ids, args.metric)
         if not characters:
-            print("No characters accumulated yet — skipping scores.json update.")
+            print("Cycle complete, but no characters accumulated — leaving existing scores.json unchanged.")
             return 0
 
         document: dict[str, Any] = {

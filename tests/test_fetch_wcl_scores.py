@@ -306,6 +306,41 @@ class FetchWclScoresTests(unittest.TestCase):
         self.assertNotIn("old", state["encounterEntries"])
         self.assertEqual(state["encounterEntries"]["1047:649"][0], ["Vocoder", "Dreamscythe", 74.7, 126.0])
 
+    def test_incremental_fetches_only_one_realm_chunk_per_run(self) -> None:
+        original_fetch_realm_character_chunk = fetch_wcl_scores.fetch_realm_character_chunk
+        calls: list[str] = []
+
+        def fake_fetch_realm_character_chunk(_args, _token, _region, realm, _zone_ids, _start_page):
+            calls.append(realm["name"])
+            return {"1047:649": [("Vocoder", realm["name"], 74.7, 126.0)]}, True
+
+        fetch_wcl_scores.fetch_realm_character_chunk = fake_fetch_realm_character_chunk
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                state_file = Path(tmpdir) / "state.json"
+                args = SimpleNamespace(state_file=state_file, max_pages=20, pages_per_chunk=1)
+
+                with redirect_stdout(io.StringIO()):
+                    complete = fetch_wcl_scores.run_incremental(
+                        args,
+                        [1047],
+                        "us",
+                        [
+                            {"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"},
+                            {"name": "Nightslayer", "slug": "nightslayer", "region": "us"},
+                        ],
+                        "token",
+                    )
+
+                state = fetch_wcl_scores.load_state(state_file)
+        finally:
+            fetch_wcl_scores.fetch_realm_character_chunk = original_fetch_realm_character_chunk
+
+        self.assertFalse(complete)
+        self.assertEqual(calls, ["Dreamscythe"])
+        self.assertTrue(state["progress"]["us/dreamscythe"]["done"])
+        self.assertFalse(state["progress"].get("us/nightslayer", {}).get("done", False))
+
 
 if __name__ == "__main__":
     unittest.main()
