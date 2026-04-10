@@ -26,6 +26,9 @@ TOKEN_URL = "https://www.warcraftlogs.com/oauth/token"
 GRAPHQL_URL = "https://www.warcraftlogs.com/api/v2/client"
 TERMS_URL = "https://www.archon.gg/wow/articles/help/rpg-logs-api-terms-of-service"
 API_MAX_PAGE = 20
+DEFAULT_PAGE_SIZE = 1000
+SCORE_POLICY_VERSION = 2
+SCORE_POLICY = "Mean of WCL per-encounter rank percentiles across the configured zone IDs."
 
 RANKINGS_QUERY = """
 query LFRaiderRankings(
@@ -33,6 +36,7 @@ query LFRaiderRankings(
   $serverRegion: String!
   $serverSlug: String!
   $page: Int!
+  $pageSize: Int
   $metric: CharacterRankingMetricType
   $partition: Int
 ) {
@@ -47,6 +51,7 @@ query LFRaiderRankings(
           serverRegion: $serverRegion
           serverSlug: $serverSlug
           page: $page
+          size: $pageSize
           metric: $metric
           partition: $partition
         )
@@ -86,6 +91,12 @@ def env_float(name: str, default: float) -> float:
     if value is None or value == "":
         return default
     return float(value)
+
+
+def clamp_page_size(value: int) -> int:
+    if value <= 0:
+        raise ValueError("page size must be a positive integer")
+    return value
 
 
 def env_str(name: str, default: str | None = None) -> str | None:
@@ -235,7 +246,7 @@ def payload_count(payload: Any) -> int | None:
     if not isinstance(payload, dict):
         return None
 
-    value = payload.get("count") or payload.get("total") or payload.get("totalCount")
+    value = payload.get("total") or payload.get("totalCount") or payload.get("outOf")
     if value is None:
         return None
 
@@ -270,25 +281,6 @@ def item_score_from_ranking(ranking: dict[str, Any]) -> float | None:
         if value is not None:
             return float(value)
     return None
-
-
-def spec_from_ranking(ranking: dict[str, Any]) -> str:
-    """Return a spec/class identifier for grouping within-spec percentiles."""
-    spec = ranking.get("spec")
-    if spec:
-        return str(spec)
-    # Fall back to class ID so we still get class-normalised percentiles.
-    cls = ranking.get("class")
-    if cls is not None:
-        return f"class:{cls}"
-    return "unknown"
-
-
-def amount_from_ranking(ranking: dict[str, Any]) -> float | None:
-    value = ranking.get("amount")
-    if value is None:
-        return None
-    return float(value)
 
 
 def name_from_ranking(ranking: dict[str, Any]) -> str | None:
@@ -336,40 +328,37 @@ def load_realms(path: Path) -> tuple[str, list[dict[str, str]]]:
     return region, normalized_realms
 
 
-def spec_percentile(enc_entries: list[tuple[str, str, str, float, float | None]]) -> dict[tuple[str, str], float]:
-    """Given a list of (name, realm, spec, amount, item_score) for one encounter,
-    return a mapping of (realm, name) -> spec-normalised percentile (0–100).
+def normalize_score(value: float) -> float:
+    return max(0.0, min(100.0, float(value)))
 
-    Characters are ranked by DPS amount within their spec, matching WCL's
-    'Best Perf. Avg' which is always spec-relative, not cross-spec.
-    """
-    # Group amounts by spec.
-    by_spec: dict[str, list[float]] = {}
-    for _name, _realm, spec, amount, _item_score in enc_entries:
-        by_spec.setdefault(spec, []).append(amount)
 
-    # For each spec: sort descending so index 0 = best.
-    sorted_by_spec: dict[str, list[float]] = {s: sorted(amts, reverse=True) for s, amts in by_spec.items()}
+def make_score_entry(ranking: dict[str, Any], realm_name: str, total_rankings: int | None) -> tuple[str, str, float, float | None] | None:
+    name = name_from_ranking(ranking)
+    if not name:
+        return None
 
-    result: dict[tuple[str, str], float] = {}
-    for name, realm, spec, amount, _item_score in enc_entries:
-        spec_amounts = sorted_by_spec[spec]
-        total = len(spec_amounts)
-        # bisect from the right to find position of this amount in the sorted list.
-        # Since sorted descending, we search for the insertion point in the reversed sense.
-        rank = 0
-        for i, a in enumerate(spec_amounts):
-            if a <= amount:
-                rank = i
-                break
-        else:
-            rank = total - 1
-        percentile = max(0.0, min(100.0, (1.0 - rank / max(total - 1, 1)) * 100.0))
-        key = (realm, name)
-        # Keep the best percentile if the same character appears more than once.
-        if key not in result or percentile > result[key]:
-            result[key] = percentile
-    return result
+    percentile = percentile_from_ranking(ranking, total_rankings)
+    if percentile is None:
+        return None
+
+    resolved_realm = realm_from_ranking(ranking, realm_name)
+    item_score = item_score_from_ranking(ranking)
+    return (name, resolved_realm, normalize_score(percentile), item_score)
+
+
+def remember_character_score(
+    by_character: dict[tuple[str, str], dict[str, Any]],
+    encounter_key: str,
+    name: str,
+    realm: str,
+    percentile: float,
+    item_score: float | None,
+) -> None:
+    key = (realm, name)
+    character = by_character.setdefault(key, {"encounters": {}, "itemScores": []})
+    character["encounters"][encounter_key] = max(character["encounters"].get(encounter_key, 0), percentile)
+    if item_score and item_score > 0:
+        character["itemScores"].append(item_score)
 
 
 def collect_realm_scores(args: argparse.Namespace, token: str, default_region: str, realm: dict[str, str], zone_id: int) -> dict[tuple[str, str], dict[str, Any]]:
@@ -377,9 +366,7 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
     region = realm.get("region") or default_region
     realm_slug = realm.get("slug") or realm_name.lower().replace(" ", "")
 
-    # Pass 1: collect (name, realm, spec, amount, item_score) per encounter across all pages.
-    # WCL returns characters sorted best-first within each page.
-    encounter_raw: dict[str, list[tuple[str, str, str, float, float | None]]] = {}
+    by_character: dict[tuple[str, str], dict[str, Any]] = {}
     zone_name = "unknown"
 
     for page in range(1, args.max_pages + 1):
@@ -388,6 +375,7 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
             "serverRegion": region,
             "serverSlug": realm_slug,
             "page": page,
+            "pageSize": args.page_size,
             "metric": args.metric,
             "partition": args.partition,
         }
@@ -404,7 +392,9 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
         first_payload_shape = "no encounters"
         first_ranking_shape = "no rankings"
         page_rankings = 0
+        usable_rankings = 0
         missing_name = 0
+        missing_percentile = 0
 
         for encounter in encounters:
             if not isinstance(encounter, dict):
@@ -422,24 +412,23 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
                     f"{zone_name}, realm {realm_name}, encounter {encounter_id}: {rankings_error}"
                 )
             any_more = any_more or payload_has_more(rankings_payload)
+            total_rankings = payload_count(rankings_payload)
 
             entries = ranking_entries(rankings_payload)
-            raw_list = encounter_raw.setdefault(encounter_key, [])
             for ranking in entries:
                 page_rankings += 1
                 if first_ranking_shape == "no rankings":
                     first_ranking_shape = payload_shape(ranking)
-                name = name_from_ranking(ranking)
-                if not name:
+                if not name_from_ranking(ranking):
                     missing_name += 1
                     continue
-                amount = amount_from_ranking(ranking)
-                if amount is None:
+                score_entry = make_score_entry(ranking, realm_name, total_rankings)
+                if not score_entry:
+                    missing_percentile += 1
                     continue
-                resolved_realm = realm_from_ranking(ranking, realm_name)
-                spec = spec_from_ranking(ranking)
-                item_score = item_score_from_ranking(ranking)
-                raw_list.append((name, resolved_realm, spec, amount, item_score))
+                usable_rankings += 1
+                name, resolved_realm, percentile, item_score = score_entry
+                remember_character_score(by_character, encounter_key, name, resolved_realm, percentile, item_score)
                 any_entries = True
 
         rate_limit = data.get("rateLimitData") or {}
@@ -447,8 +436,9 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
         limit = rate_limit.get("limitPerHour")
         print(
             f"zone {zone_id} {zone_name} {region}/{realm_name} page {page}: "
-            f"{len(encounter_raw)} encounters, {page_rankings} rankings, "
-            f"missing name {missing_name}, "
+            f"{len(by_character)} characters, {len(encounters)} encounters, "
+            f"{page_rankings} rankings, {usable_rankings} usable, "
+            f"missing name {missing_name}, missing percentile {missing_percentile}, "
             f"payload {first_payload_shape}, first ranking {first_ranking_shape}, rate {spent}/{limit}"
         )
 
@@ -458,29 +448,22 @@ def collect_realm_scores(args: argparse.Namespace, token: str, default_region: s
         if not any_more or not any_entries:
             break
 
-    # Pass 2: compute spec-normalised percentiles across all fetched data.
-    by_character: dict[tuple[str, str], dict[str, Any]] = {}
-    for encounter_key, raw_list in encounter_raw.items():
-        if not raw_list:
-            continue
-        percentiles = spec_percentile(raw_list)
-        for (resolved_realm, name), percentile in percentiles.items():
-            key = (resolved_realm, name)
-            character = by_character.setdefault(key, {"encounters": {}, "itemScores": []})
-            character["encounters"][encounter_key] = max(character["encounters"].get(encounter_key, 0), percentile)
-
-        for name, resolved_realm, _spec, _amount, item_score in raw_list:
-            if item_score and item_score > 0:
-                key = (resolved_realm, name)
-                if key in by_character:
-                    by_character[key]["itemScores"].append(item_score)
-
     return by_character
+
+
+def new_state(cycle: int = 1) -> dict[str, Any]:
+    return {
+        "cycle": cycle,
+        "complete": False,
+        "progress": {},
+        "encounterEntries": {},
+        "scorePolicyVersion": SCORE_POLICY_VERSION,
+    }
 
 
 def load_state(path: Path) -> dict[str, Any]:
     if not path.exists():
-        return {"cycle": 1, "complete": False, "progress": {}, "encounterEntries": {}}
+        return new_state()
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -491,36 +474,20 @@ def save_state(path: Path, state: dict[str, Any]) -> None:
 def scores_from_state(state: dict[str, Any], zone_ids: list[int], metric: str) -> list[dict[str, Any]]:
     """Rebuild the character score list from accumulated encounter entries in state.
 
-    Each encounter's entries are a list of [name, realm, spec, amount, itemScore|null].
-    Percentiles are computed within-spec, matching WCL's 'Best Perf. Avg'.
+    Each encounter's entries are a list of [name, realm, percentile, itemScore|null].
     """
     by_character: dict[tuple[str, str], dict[str, Any]] = {}
 
     for enc_key, raw_entries in state.get("encounterEntries", {}).items():
         if not raw_entries:
             continue
-        # Group by realm so percentiles are within-realm (matching WCL's display).
-        by_realm: dict[str, list[tuple[str, str, str, float, float | None]]] = {}
         for e in raw_entries:
-            realm = e[1]
-            by_realm.setdefault(realm, []).append(
-                (e[0], e[1], e[2], float(e[3]), float(e[4]) if e[4] is not None else None)
-            )
-
-        for realm_entries in by_realm.values():
-            percentiles = spec_percentile(realm_entries)
-            for (realm, name), percentile in percentiles.items():
-                key = (realm, name)
-                char = by_character.setdefault(key, {"encounters": {}, "itemScores": []})
-                char["encounters"][enc_key] = max(char["encounters"].get(enc_key, 0), percentile)
-
-        for e in raw_entries:
-            name, realm = e[0], e[1]
-            item_score = float(e[4]) if e[4] is not None else None
-            if item_score and item_score > 0:
-                key = (realm, name)
-                if key in by_character:
-                    by_character[key]["itemScores"].append(item_score)
+            if len(e) < 4:
+                continue
+            name, realm = str(e[0]), str(e[1])
+            percentile = normalize_score(float(e[2]))
+            item_score = float(e[3]) if e[3] is not None else None
+            remember_character_score(by_character, enc_key, name, realm, percentile, item_score)
 
     characters = []
     for (realm, name), char in sorted(by_character.items()):
@@ -546,13 +513,13 @@ def fetch_chunk(
     realm: dict[str, str],
     zone_id: int,
     start_page: int,
-) -> tuple[dict[str, list[tuple[str, str, str, float, float | None]]], bool]:
+) -> tuple[dict[str, list[tuple[str, str, float, float | None]]], bool]:
     """Fetch one chunk of pages for a single realm+zone. Returns (encounter_raw, exhausted)."""
     realm_name = realm["name"]
     region = realm.get("region") or default_region
     realm_slug = realm.get("slug") or realm_name.lower().replace(" ", "")
-    # Entries: (name, realm, spec, amount, item_score)
-    encounter_raw: dict[str, list[tuple[str, str, str, float, float | None]]] = {}
+    # Entries: (name, realm, percentile, item_score)
+    encounter_raw: dict[str, list[tuple[str, str, float, float | None]]] = {}
     zone_name = "unknown"
     exhausted = False
 
@@ -570,6 +537,7 @@ def fetch_chunk(
             "serverRegion": region,
             "serverSlug": realm_slug,
             "page": page,
+            "pageSize": args.page_size,
             "metric": args.metric,
             "partition": args.partition,
         }
@@ -586,7 +554,9 @@ def fetch_chunk(
         first_payload_shape = "no encounters"
         first_ranking_shape = "no rankings"
         page_rankings = 0
+        usable_rankings = 0
         missing_name = 0
+        missing_percentile = 0
 
         for encounter in encounters:
             if not isinstance(encounter, dict):
@@ -603,23 +573,22 @@ def fetch_chunk(
                     f"{zone_name}, realm {realm_name}, encounter {encounter_id}: {rankings_error}"
                 )
             any_more = any_more or payload_has_more(rankings_payload)
+            total_rankings = payload_count(rankings_payload)
             entries = ranking_entries(rankings_payload)
             raw_list = encounter_raw.setdefault(encounter_key, [])
             for ranking in entries:
                 page_rankings += 1
                 if first_ranking_shape == "no rankings":
                     first_ranking_shape = payload_shape(ranking)
-                name = name_from_ranking(ranking)
-                if not name:
+                if not name_from_ranking(ranking):
                     missing_name += 1
                     continue
-                amount = amount_from_ranking(ranking)
-                if amount is None:
+                score_entry = make_score_entry(ranking, realm_name, total_rankings)
+                if not score_entry:
+                    missing_percentile += 1
                     continue
-                resolved_realm = realm_from_ranking(ranking, realm_name)
-                spec = spec_from_ranking(ranking)
-                item_score = item_score_from_ranking(ranking)
-                raw_list.append((name, resolved_realm, spec, amount, item_score))
+                usable_rankings += 1
+                raw_list.append(score_entry)
                 any_entries = True
 
         rate_limit = data.get("rateLimitData") or {}
@@ -628,7 +597,8 @@ def fetch_chunk(
         print(
             f"zone {zone_id} {zone_name} {region}/{realm_name} page {page}: "
             f"{len(encounter_raw)} encounters, {page_rankings} rankings, "
-            f"missing name {missing_name}, "
+            f"{usable_rankings} usable, missing name {missing_name}, "
+            f"missing percentile {missing_percentile}, "
             f"payload {first_payload_shape}, first ranking {first_ranking_shape}, rate {spent}/{limit}"
         )
 
@@ -649,12 +619,17 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
     """Fetch next chunk for all realm+zone combos. Returns True when the full cycle is complete."""
     state = load_state(args.state_file)
 
+    if state.get("scorePolicyVersion") != SCORE_POLICY_VERSION:
+        print("Fetch state score policy changed — resetting accumulated WCL state.")
+        state = new_state(int(state.get("cycle", 1) or 1))
+
     if state.get("complete"):
         print("Cycle complete — resetting state for new cycle.")
-        state = {"cycle": state.get("cycle", 1) + 1, "complete": False, "progress": {}, "encounterEntries": {}}
+        state = new_state(int(state.get("cycle", 1) or 1) + 1)
 
     progress: dict[str, Any] = state.setdefault("progress", {})
-    # encounterEntries: enc_key -> list of [name, realm, spec, amount, itemScore|null]
+    state["scorePolicyVersion"] = SCORE_POLICY_VERSION
+    # encounterEntries: enc_key -> list of [name, realm, percentile, itemScore|null]
     enc_entries: dict[str, list[list[Any]]] = state.setdefault("encounterEntries", {})
 
     all_done = True
@@ -676,11 +651,18 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
             for enc_key, raw_list in encounter_raw.items():
                 stored = enc_entries.setdefault(enc_key, [])
                 # Index existing entries by (realm, name) to avoid duplicates across chunks.
-                existing_keys: set[tuple[str, str]] = {(e[1], e[0]) for e in stored}
-                for name, resolved_realm, spec, amount, item_score in raw_list:
-                    if (resolved_realm, name) not in existing_keys:
-                        stored.append([name, resolved_realm, spec, amount, item_score])
-                        existing_keys.add((resolved_realm, name))
+                existing: dict[tuple[str, str], list[Any]] = {(e[1], e[0]): e for e in stored if len(e) >= 4}
+                for name, resolved_realm, percentile, item_score in raw_list:
+                    existing_entry = existing.get((resolved_realm, name))
+                    if existing_entry:
+                        existing_entry[2] = max(float(existing_entry[2]), percentile)
+                        if item_score and item_score > 0:
+                            old_item_score = float(existing_entry[3]) if existing_entry[3] is not None else 0.0
+                            existing_entry[3] = max(old_item_score, item_score)
+                    else:
+                        new_entry = [name, resolved_realm, percentile, item_score]
+                        stored.append(new_entry)
+                        existing[(resolved_realm, name)] = new_entry
 
             combo["nextPage"] = start_page + args.pages_per_chunk
             if exhausted:
@@ -711,6 +693,8 @@ def main() -> int:
     parser.add_argument("--metric", default=env_str("WCL_METRIC", "dps"))
     parser.add_argument("--partition", default=env_int("WCL_PARTITION"), type=int)
     parser.add_argument("--max-pages", default=env_int("WCL_MAX_PAGES") or 200, type=int)
+    parser.add_argument("--page-size", default=env_int("WCL_PAGE_SIZE") or DEFAULT_PAGE_SIZE, type=int,
+                        help="Ranking entries to request per WCL page. Larger pages reduce truncation under the 20-page API limit.")
     parser.add_argument("--sleep-seconds", default=env_float("WCL_SLEEP_SECONDS", 1.0), type=float)
     parser.add_argument("--token-url", default=env_str("WCL_TOKEN_URL", TOKEN_URL))
     parser.add_argument("--graphql-url", default=env_str("WCL_GRAPHQL_URL", GRAPHQL_URL))
@@ -720,6 +704,10 @@ def main() -> int:
     if args.max_pages > API_MAX_PAGE:
         print(f"clamping --max-pages from {args.max_pages} to Warcraft Logs API max page {API_MAX_PAGE}")
         args.max_pages = API_MAX_PAGE
+    try:
+        args.page_size = clamp_page_size(args.page_size)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
 
     try:
         zone_ids = parse_zone_ids(args.zone_ids)
@@ -753,9 +741,11 @@ def main() -> int:
         document: dict[str, Any] = {
             "generatedAt": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
             "source": "warcraftlogs-api-v2",
-            "scorePolicy": "Mean of each character's best encounter rank percentiles across the configured zone IDs.",
+            "scorePolicy": SCORE_POLICY,
+            "scorePolicyVersion": SCORE_POLICY_VERSION,
             "zoneIDs": zone_ids,
             "metric": args.metric,
+            "pageSize": args.page_size,
             "characters": characters,
         }
         if len(zone_ids) == 1:
@@ -802,9 +792,11 @@ def main() -> int:
     document = {
         "generatedAt": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "source": "warcraftlogs-api-v2",
-        "scorePolicy": "Mean of each character's best encounter rank percentiles across the configured zone IDs.",
+        "scorePolicy": SCORE_POLICY,
+        "scorePolicyVersion": SCORE_POLICY_VERSION,
         "zoneIDs": zone_ids,
         "metric": args.metric,
+        "pageSize": args.page_size,
         "characters": characters,
     }
     if len(zone_ids) == 1:

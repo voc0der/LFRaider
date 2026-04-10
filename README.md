@@ -26,6 +26,8 @@ The Warcraft Logs collector is present but guarded. Do not enable scheduled data
 
 The collector supports one or more Warcraft Logs ranking zones. In GitHub Actions, prefer the repository variable `WCL_ZONE_IDS` with a comma-separated value such as `1047,1048`. The older single-zone `WCL_ZONE_ID` variable still works.
 
+The collector requests larger Warcraft Logs ranking pages with `WCL_PAGE_SIZE`, defaulting to `1000`, while still respecting the API's 20-page cap. This keeps lower-ranked but still useful characters from being dropped just because they were beyond the first small default pages.
+
 ## Why The Guard Exists
 
 Warcraft Logs Classic Fresh uses OAuth 2.0 and supports public API access through the client credentials flow. The official docs say to create a client, exchange `client_id` and `client_secret` for an access token, then call the public GraphQL endpoint at `https://www.warcraftlogs.com/api/v2/client`.

@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
+import importlib.util
+import io
+import tempfile
+import unittest
+from contextlib import redirect_stdout
+from pathlib import Path
+from types import SimpleNamespace
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+MODULE_PATH = REPO_ROOT / "tools" / "fetch_wcl_scores.py"
+
+spec = importlib.util.spec_from_file_location("fetch_wcl_scores", MODULE_PATH)
+fetch_wcl_scores = importlib.util.module_from_spec(spec)
+assert spec and spec.loader
+spec.loader.exec_module(fetch_wcl_scores)
+
+
+class FetchWclScoresTests(unittest.TestCase):
+    def test_make_score_entry_prefers_wcl_percentile(self) -> None:
+        entry = fetch_wcl_scores.make_score_entry(
+            {
+                "name": "Voidless",
+                "serverName": "Dreamscythe",
+                "rankPercent": 94.8,
+                "amount": 1234.5,
+                "itemLevel": 126,
+            },
+            "Dreamscythe",
+            None,
+        )
+
+        self.assertEqual(entry, ("Voidless", "Dreamscythe", 94.8, 126.0))
+
+    def test_scores_from_state_averages_stored_percentiles_and_keeps_best_duplicate(self) -> None:
+        state = fetch_wcl_scores.new_state()
+        state["encounterEntries"] = {
+            "1047:649": [
+                ["Voidless", "Dreamscythe", 95.0, 126.0],
+                ["Voidless", "Dreamscythe", 93.0, 125.0],
+            ],
+            "1047:650": [
+                ["Voidless", "Dreamscythe", 94.0, 127.0],
+            ],
+        }
+
+        characters = fetch_wcl_scores.scores_from_state(state, [1047], "dps")
+
+        self.assertEqual(
+            characters,
+            [
+                {
+                    "name": "Voidless",
+                    "realm": "Dreamscythe",
+                    "score": 94.5,
+                    "encounters": 2,
+                    "itemScore": 127.0,
+                }
+            ],
+        )
+
+    def test_collect_realm_scores_passes_page_size_and_uses_api_percentile(self) -> None:
+        calls: list[dict[str, object]] = []
+        original_graphql = fetch_wcl_scores.graphql
+
+        def fake_graphql(_url: str, _token: str, _query: str, variables: dict[str, object]) -> dict[str, object]:
+            calls.append(variables)
+            return {
+                "worldData": {
+                    "zone": {
+                        "name": "The Burning Crusade",
+                        "encounters": [
+                            {
+                                "id": 649,
+                                "name": "High King Maulgar",
+                                "characterRankings": {
+                                    "hasMorePages": False,
+                                    "rankings": [
+                                        {
+                                            "name": "Voidless",
+                                            "serverName": "Dreamscythe",
+                                            "rankPercent": 95.0,
+                                            "amount": 1888.7,
+                                        }
+                                    ],
+                                },
+                            }
+                        ],
+                    }
+                },
+                "rateLimitData": {"limitPerHour": 10000, "pointsSpentThisHour": 1},
+            }
+
+        fetch_wcl_scores.graphql = fake_graphql
+        try:
+            args = SimpleNamespace(
+                graphql_url="https://example.invalid/graphql",
+                max_pages=20,
+                page_size=1000,
+                metric="dps",
+                partition=None,
+                sleep_seconds=0,
+            )
+            with redirect_stdout(io.StringIO()):
+                scores = fetch_wcl_scores.collect_realm_scores(
+                    args,
+                    "token",
+                    "us",
+                    {"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"},
+                    1047,
+                )
+        finally:
+            fetch_wcl_scores.graphql = original_graphql
+
+        self.assertEqual(calls[0]["pageSize"], 1000)
+        self.assertEqual(scores[("Dreamscythe", "Voidless")]["encounters"]["1047:649"], 95.0)
+
+    def test_incremental_state_resets_when_score_policy_changes(self) -> None:
+        original_fetch_chunk = fetch_wcl_scores.fetch_chunk
+
+        def fake_fetch_chunk(_args, _token, _region, _realm, _zone_id, _start_page):
+            return {"1047:649": [("Vocoder", "Dreamscythe", 74.7, 126.0)]}, True
+
+        fetch_wcl_scores.fetch_chunk = fake_fetch_chunk
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                state_file = Path(tmpdir) / "state.json"
+                state_file.write_text(
+                    '{"complete": false, "cycle": 1, "progress": {}, '
+                    '"encounterEntries": {"old": [["Bad", "Dreamscythe", "Rogue", 1, null]]}}\n',
+                    encoding="utf-8",
+                )
+                args = SimpleNamespace(state_file=state_file, max_pages=20, pages_per_chunk=20)
+
+                with redirect_stdout(io.StringIO()):
+                    complete = fetch_wcl_scores.run_incremental(
+                        args,
+                        [1047],
+                        "us",
+                        [{"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"}],
+                        "token",
+                    )
+
+                state = fetch_wcl_scores.load_state(state_file)
+        finally:
+            fetch_wcl_scores.fetch_chunk = original_fetch_chunk
+
+        self.assertTrue(complete)
+        self.assertEqual(state["scorePolicyVersion"], fetch_wcl_scores.SCORE_POLICY_VERSION)
+        self.assertNotIn("old", state["encounterEntries"])
+        self.assertEqual(state["encounterEntries"]["1047:649"][0], ["Vocoder", "Dreamscythe", 74.7, 126.0])
+
+
+if __name__ == "__main__":
+    unittest.main()
