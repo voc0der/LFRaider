@@ -94,31 +94,10 @@ LFRaiderData = {
 
 Warcraft Logs scores are stored as tenths, so `747` displays as `74.7`. Item score is stored as a whole number by default.
 
-## Local Development
+## Contributing
 
-Regenerate the runtime data from JSON:
-
-```bash
-python3 tools/generate_data.py data/scores.json LFRaider_Data.lua
-```
-
-Run tests:
-
-```bash
-lua tests/run.lua
-```
-
-Run a syntax check:
-
-```bash
-luac -p LFRaider.lua LFRaider_Data.lua tests/run.lua
-```
-
-Verify the runtime-only package:
-
-```bash
-./.github/scripts/verify-release-package.sh
-```
+Development and contribution notes are in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+Release workflow notes are in [`RELEASING.md`](RELEASING.md).
 
 ## Scope
 
