@@ -396,6 +396,36 @@ class FetchWclScoresTests(unittest.TestCase):
             ],
         )
 
+    def test_fetch_realm_character_chunk_does_not_exhaust_when_rate_limited_before_any_progress(self) -> None:
+        original_fetch_server_characters_page = fetch_wcl_scores.fetch_server_characters_page
+        calls: list[int] = []
+
+        def fake_fetch_server_characters_page(_args, _token, _realm_region, _realm_slug, _realm_name, _zone_ids, page):
+            calls.append(page)
+            raise fetch_wcl_scores.RateLimitExceededError("quota exceeded")
+
+        fetch_wcl_scores.fetch_server_characters_page = fake_fetch_server_characters_page
+        try:
+            args = SimpleNamespace(max_pages=20, pages_per_chunk=20, sleep_seconds=0)
+
+            with redirect_stdout(io.StringIO()):
+                result = fetch_wcl_scores.fetch_realm_character_chunk(
+                    args,
+                    "token",
+                    "us",
+                    {"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"},
+                    [1047],
+                    1,
+                )
+        finally:
+            fetch_wcl_scores.fetch_server_characters_page = original_fetch_server_characters_page
+
+        self.assertEqual(calls, [1])
+        self.assertTrue(result.rate_limited)
+        self.assertFalse(result.exhausted)
+        self.assertEqual(result.next_page, 1)
+        self.assertEqual(result.encounter_raw, {})
+
     def test_incremental_saves_partial_progress_when_rate_limited(self) -> None:
         original_fetch_realm_character_chunk = fetch_wcl_scores.fetch_realm_character_chunk
 
@@ -430,6 +460,36 @@ class FetchWclScoresTests(unittest.TestCase):
         self.assertEqual(state["progress"]["us/dreamscythe"]["nextPage"], 5)
         self.assertFalse(state["progress"]["us/dreamscythe"]["done"])
         self.assertEqual(state["encounterEntries"]["1047:649"][0], ["Vocoder", "Dreamscythe", 74.7, 126.0])
+
+    def test_incremental_keeps_realm_pending_when_rate_limited_before_any_progress(self) -> None:
+        original_fetch_realm_character_chunk = fetch_wcl_scores.fetch_realm_character_chunk
+
+        def fake_fetch_realm_character_chunk(_args, _token, _region, _realm, _zone_ids, _start_page):
+            return fetch_wcl_scores.RealmChunkResult({}, False, 1, True)
+
+        fetch_wcl_scores.fetch_realm_character_chunk = fake_fetch_realm_character_chunk
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                state_file = Path(tmpdir) / "state.json"
+                args = SimpleNamespace(state_file=state_file, max_pages=20, pages_per_chunk=20)
+
+                with redirect_stdout(io.StringIO()):
+                    complete = fetch_wcl_scores.run_incremental(
+                        args,
+                        [1047],
+                        "us",
+                        [{"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"}],
+                        "token",
+                    )
+
+                state = fetch_wcl_scores.load_state(state_file)
+        finally:
+            fetch_wcl_scores.fetch_realm_character_chunk = original_fetch_realm_character_chunk
+
+        self.assertFalse(complete)
+        self.assertEqual(state["progress"]["us/dreamscythe"]["nextPage"], 1)
+        self.assertFalse(state["progress"]["us/dreamscythe"]["done"])
+        self.assertEqual(state["encounterEntries"], {})
 
 
 if __name__ == "__main__":
