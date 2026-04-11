@@ -2,8 +2,8 @@ name: Refresh Score Data
 
 on:
   schedule:
-    # Chunk fetch: every 2 hours.
-    - cron: "7 */2 * * *"
+    # Chunk fetch: every 5 minutes, offset from the top of the hour to reduce schedule delays.
+    - cron: "2/5 * * * *"
     # Weekly cycle reset (clears state, starts a fresh chunked cycle) — Tuesday 10:17 UTC
     - cron: "17 10 * * 2"
   workflow_dispatch:
@@ -33,10 +33,11 @@ jobs:
       WCL_PARTITION: ${{ vars.WCL_PARTITION }}
       WCL_GRAPHQL_URL: ${{ vars.WCL_GRAPHQL_URL || 'https://www.warcraftlogs.com/api/v2/client' }}
       WCL_PAGES_PER_CHUNK: ${{ vars.WCL_PAGES_PER_CHUNK || '20' }}
+      WCL_REALM_CHUNKS_PER_RUN: ${{ vars.WCL_REALM_CHUNKS_PER_RUN || '0' }}
       WCL_RESUME_OVERLAP_PAGES: ${{ vars.WCL_RESUME_OVERLAP_PAGES || '2' }}
       WCL_MAX_PAGES: ${{ vars.WCL_MAX_PAGES || '20' }}
       WCL_PAGE_SIZE: ${{ vars.WCL_PAGE_SIZE || '1000' }}
-      WCL_SLEEP_SECONDS: ${{ vars.WCL_SLEEP_SECONDS || '1.0' }}
+      WCL_SLEEP_SECONDS: ${{ vars.WCL_SLEEP_SECONDS || '0' }}
       LFR_WCL_DISTRIBUTION_APPROVED: ${{ vars.LFR_WCL_DISTRIBUTION_APPROVED }}
 
     steps:
@@ -66,14 +67,6 @@ jobs:
           [[ -n "${WCL_CLIENT_ID}" ]] || { echo "WCL_CLIENT_ID secret is required" >&2; exit 1; }
           [[ -n "${WCL_CLIENT_SECRET}" ]] || { echo "WCL_CLIENT_SECRET secret is required" >&2; exit 1; }
           [[ -n "${WCL_ZONE_IDS}" || -n "${WCL_ZONE_ID}" ]] || { echo "WCL_ZONE_IDS or WCL_ZONE_ID repository variable is required" >&2; exit 1; }
-
-      - name: Install Lua
-        if: steps.gate.outputs.run == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y lua5.4
 
       - name: Determine run mode
         if: steps.gate.outputs.run == 'true'
@@ -108,6 +101,7 @@ jobs:
             --output data/scores.json \
             --state-file data/fetch_state.json \
             --pages-per-chunk "${WCL_PAGES_PER_CHUNK}" \
+            --realm-chunks-per-run "${WCL_REALM_CHUNKS_PER_RUN}" \
             --max-pages "${WCL_MAX_PAGES}" \
             --page-size "${WCL_PAGE_SIZE}" \
             --zone-ids "${WCL_ZONE_IDS:-${WCL_ZONE_ID}}" \
@@ -148,6 +142,17 @@ jobs:
           git add data/scores.json data/fetch_state.json LFRaider_Data.lua
           git commit -m "chore(data): refresh score dataset"
           git push
+
+      - name: Install Lua
+        if: |
+          steps.gate.outputs.run == 'true' &&
+          steps.changed.outputs.changed == 'true' &&
+          steps.chunk.outputs.cycle_complete == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y lua5.4
 
       - name: Bump addon version and release (cycle complete)
         if: |

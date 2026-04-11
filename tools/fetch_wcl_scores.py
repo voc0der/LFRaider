@@ -30,6 +30,7 @@ API_MAX_PAGE = 20
 DEFAULT_PAGE_SIZE = 1000
 DEFAULT_CHARACTER_QUERY_BATCH_SIZE = 25
 DEFAULT_RESUME_OVERLAP_PAGES = 2
+DEFAULT_REALM_CHUNKS_PER_RUN = 0
 SERVER_CHARACTERS_MAX_LIMIT = 100
 PAGE_SIZE_FALLBACKS: tuple[int | None, ...] = (500, 200, 100, None)
 REQUEST_TIMEOUT_SECONDS = 60
@@ -142,6 +143,13 @@ def server_characters_page_limit(args: argparse.Namespace) -> int:
 
 def resume_overlap_pages(args: argparse.Namespace) -> int:
     return max(0, int(getattr(args, "resume_overlap_pages", DEFAULT_RESUME_OVERLAP_PAGES)))
+
+
+def realm_chunks_per_run_limit(args: argparse.Namespace) -> int | None:
+    value = int(getattr(args, "realm_chunks_per_run", DEFAULT_REALM_CHUNKS_PER_RUN) or 0)
+    if value <= 0:
+        return None
+    return value
 
 
 def build_server_characters_query(metric: str | None, include_partition: bool, zone_ids: list[int]) -> str:
@@ -1267,7 +1275,7 @@ def fetch_chunk(
 
 
 def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, realms: list[dict[str, str]], token: str) -> bool:
-    """Fetch next chunk for all realms. Returns True when the full cycle is complete."""
+    """Fetch incremental chunks for pending realms. Returns True when the full cycle is complete."""
     state = load_state(args.state_file)
 
     if state.get("scorePolicyVersion") != SCORE_POLICY_VERSION:
@@ -1281,6 +1289,7 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
     progress: dict[str, Any] = state.setdefault("progress", {})
     state["scorePolicyVersion"] = SCORE_POLICY_VERSION
     overlap_pages = resume_overlap_pages(args)
+    realm_chunk_limit = realm_chunks_per_run_limit(args)
     # encounterEntries: enc_key -> list of [name, realm, percentile, itemScore|null]
     enc_entries: dict[str, list[list[Any]]] = state.setdefault("encounterEntries", {})
     realm_progress: list[tuple[dict[str, str], str, dict[str, Any]]] = []
@@ -1293,12 +1302,17 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
         realm_progress.append((realm, combo_key, combo))
 
     all_done = True
-    processed_combo = False
+    made_progress = False
+    processed_realm_chunks = 0
     for realm, combo_key, combo in realm_progress:
         if combo["done"]:
             continue
 
         all_done = False
+        if realm_chunk_limit is not None and processed_realm_chunks >= realm_chunk_limit:
+            break
+
+        processed_realm_chunks += 1
         frontier_page = int(combo["nextPage"])
         start_page = max(1, frontier_page - overlap_pages)
         if start_page < frontier_page:
@@ -1312,11 +1326,11 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
 
         if chunk.next_page > frontier_page:
             combo["nextPage"] = chunk.next_page
-            processed_combo = True
+            made_progress = True
         if chunk.exhausted:
             combo["done"] = True
             print(f"combo {combo_key} exhausted")
-            processed_combo = True
+            made_progress = True
         if chunk_interrupted and chunk.next_page > start_page:
             pages_fetched = chunk.next_page - start_page
             pages_advanced = max(0, chunk.next_page - frontier_page)
@@ -1332,12 +1346,17 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
                 f"{pages_fetched} page(s){overlap_note}, "
                 f"resume from page {combo['nextPage']} next run"
             )
-        break
+        if chunk_interrupted:
+            break
+
+        if chunk.next_page <= frontier_page and not chunk.exhausted:
+            print(f"No progress for {combo_key}; stopping incremental run early.")
+            break
 
     all_combos_done = all(combo.get("done", False) for _, _, combo in realm_progress) and bool(realm_progress)
     if all_done and not all_combos_done:
         all_combos_done = True
-    if not processed_combo and not all_done:
+    if not made_progress and not all_done:
         print("No progress this run; keeping fetch state as-is.")
     state["complete"] = all_combos_done
 
@@ -1363,6 +1382,14 @@ def main() -> int:
         type=int,
         help="Pages to rewind and re-fetch before the saved frontier in chunked mode.",
     )
+    parser.add_argument(
+        "--realm-chunks-per-run",
+        default=env_int("WCL_REALM_CHUNKS_PER_RUN")
+        if env_int("WCL_REALM_CHUNKS_PER_RUN") is not None
+        else DEFAULT_REALM_CHUNKS_PER_RUN,
+        type=int,
+        help="Realm chunks to process per incremental run. Use 0 to keep going until all pending realms are done or the run is interrupted.",
+    )
     parser.add_argument("--zone-id", default=env_int("WCL_ZONE_ID"), type=int)
     parser.add_argument("--zone-ids", default=env_str("WCL_ZONE_IDS"), help="Comma-separated Warcraft Logs zone IDs. Overrides --zone-id when set.")
     parser.add_argument("--metric", default=env_str("WCL_METRIC", "dps"))
@@ -1385,6 +1412,8 @@ def main() -> int:
         raise SystemExit("--pages-per-chunk must be a positive integer")
     if args.resume_overlap_pages < 0:
         raise SystemExit("--resume-overlap-pages must be zero or greater")
+    if args.realm_chunks_per_run < 0:
+        raise SystemExit("--realm-chunks-per-run must be zero or greater")
     try:
         args.page_size = clamp_page_size(args.page_size)
     except ValueError as exc:
