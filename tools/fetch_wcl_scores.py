@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import socket
 import statistics
 import time
 import urllib.error
@@ -30,12 +31,19 @@ DEFAULT_PAGE_SIZE = 1000
 DEFAULT_CHARACTER_QUERY_BATCH_SIZE = 25
 SERVER_CHARACTERS_MAX_LIMIT = 100
 PAGE_SIZE_FALLBACKS: tuple[int | None, ...] = (500, 200, 100, None)
+REQUEST_TIMEOUT_SECONDS = 60
+REQUEST_MAX_ATTEMPTS = 4
+RETRYABLE_HTTP_STATUS_CODES: frozenset[int] = frozenset({408, 500, 502, 503, 504})
 SCORE_POLICY_VERSION = 3
 SCORE_POLICY = "Mean of WCL per-encounter rank percentiles across the configured zone IDs."
 
 
 class RateLimitExceededError(RuntimeError):
     """Raised when Warcraft Logs rejects a request for quota reasons."""
+
+
+class TransientRequestError(RuntimeError):
+    """Raised when a retryable upstream request keeps failing after retries."""
 
 
 class RealmChunkResult(NamedTuple):
@@ -45,6 +53,7 @@ class RealmChunkResult(NamedTuple):
     exhausted: bool
     next_page: int
     rate_limited: bool = False
+    interrupted: bool = False
 
 
 RANKINGS_QUERY = """
@@ -228,29 +237,101 @@ def parse_zone_ids(value: str | None) -> list[int]:
     return zone_ids
 
 
+def request_retry_delay_seconds(attempt: int) -> float:
+    return float(2 ** (attempt - 1))
+
+
+def retryable_request_text(text: str) -> bool:
+    lowered = text.lower()
+    return any(
+        marker in lowered
+        for marker in (
+            "timed out",
+            "timeout",
+            "temporary failure",
+            "temporarily unavailable",
+            "connection reset",
+            "connection aborted",
+            "connection refused",
+            "remote end closed connection",
+        )
+    )
+
+
+def is_retryable_request_exception(exc: BaseException) -> bool:
+    if isinstance(exc, urllib.error.HTTPError):
+        return exc.code in RETRYABLE_HTTP_STATUS_CODES
+
+    if isinstance(exc, urllib.error.URLError):
+        reason = exc.reason
+        if isinstance(reason, BaseException):
+            return is_retryable_request_exception(reason)
+        return retryable_request_text(str(reason))
+
+    if isinstance(exc, (TimeoutError, socket.timeout, ConnectionError)):
+        return True
+
+    return retryable_request_text(str(exc))
+
+
+def log_request_retry(url: str, summary: str, attempt: int) -> None:
+    wait_seconds = request_retry_delay_seconds(attempt)
+    print(
+        f"request to {url} failed ({summary}); "
+        f"retrying in {wait_seconds:.1f}s "
+        f"(attempt {attempt + 1}/{REQUEST_MAX_ATTEMPTS})"
+    )
+    time.sleep(wait_seconds)
+
+
 def request_json(url: str, body: dict[str, Any] | bytes, headers: dict[str, str], auth: tuple[str, str] | None = None) -> dict[str, Any]:
     if isinstance(body, dict):
         data = json.dumps(body).encode("utf-8")
     else:
         data = body
 
-    request = urllib.request.Request(url, data=data, headers=headers, method="POST")
-    if auth:
-        import base64
+    for attempt in range(1, REQUEST_MAX_ATTEMPTS + 1):
+        request = urllib.request.Request(url, data=data, headers=headers, method="POST")
+        if auth:
+            import base64
 
-        token = base64.b64encode(f"{auth[0]}:{auth[1]}".encode("utf-8")).decode("ascii")
-        request.add_header("Authorization", f"Basic {token}")
+            token = base64.b64encode(f"{auth[0]}:{auth[1]}".encode("utf-8")).decode("ascii")
+            request.add_header("Authorization", f"Basic {token}")
 
-    try:
-        with urllib.request.urlopen(request, timeout=60) as response:
-            return json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")
-        if exc.code == 429:
-            raise RateLimitExceededError(detail) from exc
-        raise RuntimeError(f"{url} returned HTTP {exc.code}: {detail}") from exc
-    except urllib.error.URLError as exc:
-        raise RuntimeError(f"{url} request failed: {exc.reason}") from exc
+        try:
+            with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            try:
+                detail = exc.read().decode("utf-8", errors="replace")
+            finally:
+                exc.close()
+            if exc.code == 429:
+                raise RateLimitExceededError(detail) from exc
+
+            message = f"{url} returned HTTP {exc.code}: {detail}"
+            if exc.code in RETRYABLE_HTTP_STATUS_CODES:
+                if attempt < REQUEST_MAX_ATTEMPTS:
+                    log_request_retry(url, f"HTTP {exc.code}", attempt)
+                    continue
+                raise TransientRequestError(message) from exc
+            raise RuntimeError(message) from exc
+        except urllib.error.URLError as exc:
+            message = f"{url} request failed: {exc.reason}"
+            if is_retryable_request_exception(exc):
+                if attempt < REQUEST_MAX_ATTEMPTS:
+                    log_request_retry(url, str(exc.reason), attempt)
+                    continue
+                raise TransientRequestError(message) from exc
+            raise RuntimeError(message) from exc
+        except (TimeoutError, socket.timeout, ConnectionError) as exc:
+            message = f"{url} request failed: {exc}"
+            if attempt < REQUEST_MAX_ATTEMPTS:
+                log_request_retry(url, str(exc), attempt)
+                continue
+            raise TransientRequestError(message) from exc
+
+    raise AssertionError("request_json exhausted retry loop without returning or raising")
 
 
 def get_access_token(client_id: str, client_secret: str, token_url: str) -> str:
@@ -734,6 +815,7 @@ def fetch_realm_character_chunk(
     exhausted = False
     next_page = start_page
     rate_limited = False
+    interrupted = False
 
     if start_page > args.max_pages:
         print(
@@ -766,6 +848,11 @@ def fetch_realm_character_chunk(
         except RateLimitExceededError as exc:
             print(f"rate limited while fetching {combo_key}: {exc}")
             rate_limited = True
+            interrupted = True
+            break
+        except TransientRequestError as exc:
+            print(f"transient upstream failure while fetching {combo_key}: {exc}")
+            interrupted = True
             break
         ranked_characters = len({(realm_name, name) for rows in page_entries.values() for name, _, _, _ in rows})
         merge_encounter_raw(encounter_raw, page_entries)
@@ -784,10 +871,10 @@ def fetch_realm_character_chunk(
             exhausted = True
             break
 
-    if not exhausted and not rate_limited and next_page > start_page and end_page >= args.max_pages:
+    if not exhausted and not interrupted and next_page > start_page and end_page >= args.max_pages:
         exhausted = True
 
-    return RealmChunkResult(encounter_raw, exhausted, next_page, rate_limited)
+    return RealmChunkResult(encounter_raw, exhausted, next_page, rate_limited, interrupted)
 
 
 def build_rankings_variables(
@@ -1208,6 +1295,7 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
         all_done = False
         start_page = combo["nextPage"]
         chunk = fetch_realm_character_chunk(args, token, region, realm, zone_ids, start_page)
+        chunk_interrupted = chunk.rate_limited or chunk.interrupted
         merge_state_entries(enc_entries, chunk.encounter_raw)
 
         if chunk.next_page > start_page:
@@ -1217,7 +1305,7 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
             combo["done"] = True
             print(f"combo {combo_key} exhausted")
             processed_combo = True
-        if chunk.rate_limited and chunk.next_page > start_page:
+        if chunk_interrupted and chunk.next_page > start_page:
             pages_fetched = chunk.next_page - start_page
             print(
                 f"saved partial progress for {combo_key}: "
@@ -1291,7 +1379,14 @@ def main() -> int:
         raise SystemExit("WCL_CLIENT_ID and WCL_CLIENT_SECRET are required")
 
     region, realms = load_realms(args.realms)
-    token = get_access_token(client_id, client_secret, args.token_url)
+    try:
+        token = get_access_token(client_id, client_secret, args.token_url)
+    except TransientRequestError as exc:
+        if args.state_file:
+            print(f"Transient upstream failure while requesting OAuth token: {exc}")
+            print("Cycle incomplete — leaving existing scores.json unchanged.")
+            return 0
+        raise SystemExit(str(exc)) from exc
 
     # ── Incremental / chunked mode ────────────────────────────────────────────
     if args.state_file:
@@ -1333,18 +1428,20 @@ def main() -> int:
         start_page = 1
         while start_page <= args.max_pages:
             chunk = fetch_realm_character_chunk(args, token, region, realm, zone_ids, start_page)
+            chunk_interrupted = chunk.rate_limited or chunk.interrupted
             merge_state_entries(enc_entries, chunk.encounter_raw)
-            if chunk.rate_limited:
+            if chunk_interrupted:
                 realm_name = realm["name"]
                 realm_region = realm.get("region") or region
                 realm_slug = realm.get("slug") or realm_name.lower().replace(" ", "")
+                failure_label = "Rate limited" if chunk.rate_limited else "Transient upstream failure"
                 if chunk.next_page <= start_page:
                     raise SystemExit(
-                        f"Rate limited before any pages could be fetched for {realm_region}/{realm_slug}. "
+                        f"{failure_label} before any pages could be fetched for {realm_region}/{realm_slug}. "
                         "Retry later or use --state-file chunked mode."
                     )
                 raise SystemExit(
-                    f"Rate limited after fetching through page {chunk.next_page - 1} for {realm_region}/{realm_slug}. "
+                    f"{failure_label} after fetching through page {chunk.next_page - 1} for {realm_region}/{realm_slug}. "
                     "Retry later or use --state-file chunked mode."
                 )
             if chunk.exhausted:
