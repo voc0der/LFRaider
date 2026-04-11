@@ -784,7 +784,7 @@ def fetch_realm_character_chunk(
             exhausted = True
             break
 
-    if not exhausted and end_page >= args.max_pages:
+    if not exhausted and not rate_limited and next_page > start_page and end_page >= args.max_pages:
         exhausted = True
 
     return RealmChunkResult(encounter_raw, exhausted, next_page, rate_limited)
