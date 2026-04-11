@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+### Fixed
+- Rewind a small overlap window when chunked Warcraft Logs refreshes resume so live pagination drift is less likely to skip characters between runs
+
 ## [0.1.4] - 2026-04-10
 
 ### Changed

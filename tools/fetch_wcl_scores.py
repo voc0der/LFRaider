@@ -29,6 +29,7 @@ TERMS_URL = "https://www.archon.gg/wow/articles/help/rpg-logs-api-terms-of-servi
 API_MAX_PAGE = 20
 DEFAULT_PAGE_SIZE = 1000
 DEFAULT_CHARACTER_QUERY_BATCH_SIZE = 25
+DEFAULT_RESUME_OVERLAP_PAGES = 2
 SERVER_CHARACTERS_MAX_LIMIT = 100
 PAGE_SIZE_FALLBACKS: tuple[int | None, ...] = (500, 200, 100, None)
 REQUEST_TIMEOUT_SECONDS = 60
@@ -137,6 +138,10 @@ def format_page_size(value: int | None) -> str:
 def server_characters_page_limit(args: argparse.Namespace) -> int:
     requested_size = active_page_size(args) or DEFAULT_PAGE_SIZE
     return min(requested_size, SERVER_CHARACTERS_MAX_LIMIT)
+
+
+def resume_overlap_pages(args: argparse.Namespace) -> int:
+    return max(0, int(getattr(args, "resume_overlap_pages", DEFAULT_RESUME_OVERLAP_PAGES)))
 
 
 def build_server_characters_query(metric: str | None, include_partition: bool, zone_ids: list[int]) -> str:
@@ -1275,6 +1280,7 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
 
     progress: dict[str, Any] = state.setdefault("progress", {})
     state["scorePolicyVersion"] = SCORE_POLICY_VERSION
+    overlap_pages = resume_overlap_pages(args)
     # encounterEntries: enc_key -> list of [name, realm, percentile, itemScore|null]
     enc_entries: dict[str, list[list[Any]]] = state.setdefault("encounterEntries", {})
     realm_progress: list[tuple[dict[str, str], str, dict[str, Any]]] = []
@@ -1293,12 +1299,18 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
             continue
 
         all_done = False
-        start_page = combo["nextPage"]
+        frontier_page = int(combo["nextPage"])
+        start_page = max(1, frontier_page - overlap_pages)
+        if start_page < frontier_page:
+            print(
+                f"rewinding {combo_key} from page {frontier_page} to {start_page} "
+                "to recheck live pagination drift"
+            )
         chunk = fetch_realm_character_chunk(args, token, region, realm, zone_ids, start_page)
         chunk_interrupted = chunk.rate_limited or chunk.interrupted
         merge_state_entries(enc_entries, chunk.encounter_raw)
 
-        if chunk.next_page > start_page:
+        if chunk.next_page > frontier_page:
             combo["nextPage"] = chunk.next_page
             processed_combo = True
         if chunk.exhausted:
@@ -1307,9 +1319,18 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
             processed_combo = True
         if chunk_interrupted and chunk.next_page > start_page:
             pages_fetched = chunk.next_page - start_page
+            pages_advanced = max(0, chunk.next_page - frontier_page)
+            overlap_note = ""
+            if start_page < frontier_page:
+                overlap_note = (
+                    f", rechecked {frontier_page - start_page} overlap page(s)"
+                    if pages_advanced > 0
+                    else f", rechecked overlap pages up to {frontier_page - 1}"
+                )
             print(
                 f"saved partial progress for {combo_key}: "
-                f"{pages_fetched} page(s), resume from page {chunk.next_page} next run"
+                f"{pages_fetched} page(s){overlap_note}, "
+                f"resume from page {combo['nextPage']} next run"
             )
         break
 
@@ -1334,6 +1355,14 @@ def main() -> int:
                         help="Path to incremental fetch state file. When set, runs in chunked mode.")
     parser.add_argument("--pages-per-chunk", default=env_int("WCL_PAGES_PER_CHUNK") or 20, type=int,
                         help="Pages to fetch for one realm per run in chunked mode.")
+    parser.add_argument(
+        "--resume-overlap-pages",
+        default=env_int("WCL_RESUME_OVERLAP_PAGES")
+        if env_int("WCL_RESUME_OVERLAP_PAGES") is not None
+        else DEFAULT_RESUME_OVERLAP_PAGES,
+        type=int,
+        help="Pages to rewind and re-fetch before the saved frontier in chunked mode.",
+    )
     parser.add_argument("--zone-id", default=env_int("WCL_ZONE_ID"), type=int)
     parser.add_argument("--zone-ids", default=env_str("WCL_ZONE_IDS"), help="Comma-separated Warcraft Logs zone IDs. Overrides --zone-id when set.")
     parser.add_argument("--metric", default=env_str("WCL_METRIC", "dps"))
@@ -1352,6 +1381,10 @@ def main() -> int:
     if args.max_pages > API_MAX_PAGE:
         print(f"clamping --max-pages from {args.max_pages} to Warcraft Logs API max page {API_MAX_PAGE}")
         args.max_pages = API_MAX_PAGE
+    if args.pages_per_chunk <= 0:
+        raise SystemExit("--pages-per-chunk must be a positive integer")
+    if args.resume_overlap_pages < 0:
+        raise SystemExit("--resume-overlap-pages must be zero or greater")
     try:
         args.page_size = clamp_page_size(args.page_size)
     except ValueError as exc:
