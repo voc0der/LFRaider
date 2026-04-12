@@ -1056,13 +1056,6 @@ def run_hybrid_incremental(
                     existing.add(name)
 
             if all_exhausted:
-                # Inject any realm-level known characters not found via encounter rankings.
-                existing = set(combo["discoveredNames"])
-                for name in realm.get("knownCharacters") or []:
-                    if name not in existing:
-                        combo["discoveredNames"].append(name)
-                        existing.add(name)
-                        print(f"{combo_key}: injecting known character {name!r} not found in encounter rankings")
                 combo["phase"] = "scoring"
                 print(
                     f"{combo_key}: discovery complete — "
@@ -1074,14 +1067,6 @@ def run_hybrid_incremental(
                 return False
 
         if combo.get("phase") == "scoring":
-            # Ensure any known characters that weren't discovered are still scored.
-            existing = set(combo["discoveredNames"])
-            for name in realm.get("knownCharacters") or []:
-                if name not in existing:
-                    combo["discoveredNames"].append(name)
-                    existing.add(name)
-                    print(f"{combo_key}: injecting known character {name!r} for scoring")
-
             all_chars = combo["discoveredNames"]
             offset = combo.get("scoringOffset", 0)
             char_dicts = [
