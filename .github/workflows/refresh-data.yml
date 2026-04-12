@@ -1,6 +1,11 @@
 name: Refresh Score Data
 
 on:
+  schedule:
+    # Chunk fetch: every 5 minutes, offset from the top of the hour to reduce schedule delays.
+    - cron: "2/5 * * * *"
+    # Weekly cycle reset (clears state, starts a fresh chunked cycle) — Tuesday 10:17 UTC
+    - cron: "17 10 * * 2"
   workflow_dispatch:
     inputs:
       mode:
