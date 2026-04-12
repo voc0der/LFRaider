@@ -7,6 +7,10 @@ on:
         description: "'chunk' (default) or 'full' (reset incremental state and restart the cycle)"
         required: false
         default: chunk
+      hybrid:
+        description: "Use hybrid encounter-discovery fetch. true/false"
+        required: false
+        default: "true"
 
 permissions:
   contents: write
@@ -27,7 +31,7 @@ jobs:
       WCL_METRIC: ${{ vars.WCL_METRIC || 'dps' }}
       WCL_PARTITION: ${{ vars.WCL_PARTITION }}
       WCL_GRAPHQL_URL: ${{ vars.WCL_GRAPHQL_URL || 'https://www.warcraftlogs.com/api/v2/client' }}
-      WCL_PAGES_PER_CHUNK: ${{ vars.WCL_PAGES_PER_CHUNK || '20' }}
+      WCL_PAGES_PER_CHUNK: ${{ vars.WCL_PAGES_PER_CHUNK || '200' }}
       WCL_REALM_CHUNKS_PER_RUN: ${{ vars.WCL_REALM_CHUNKS_PER_RUN || '0' }}
       WCL_RESUME_OVERLAP_PAGES: ${{ vars.WCL_RESUME_OVERLAP_PAGES || '2' }}
       WCL_MAX_PAGES: ${{ vars.WCL_MAX_PAGES || '10000' }}
@@ -91,6 +95,10 @@ jobs:
         run: |
           set -euo pipefail
           tmpfile=$(mktemp)
+          HYBRID_FLAG=""
+          if [[ "${{ github.event.inputs.hybrid }}" != "false" ]]; then
+            HYBRID_FLAG="--hybrid"
+          fi
           python3 tools/fetch_wcl_scores.py \
             --realms data/realms.json \
             --output data/scores.json \
@@ -100,7 +108,8 @@ jobs:
             --max-pages "${WCL_MAX_PAGES}" \
             --page-size "${WCL_PAGE_SIZE}" \
             --zone-ids "${WCL_ZONE_IDS:-${WCL_ZONE_ID}}" \
-            --metric "${WCL_METRIC}" 2>&1 | tee "$tmpfile"
+            --metric "${WCL_METRIC}" \
+            ${HYBRID_FLAG} 2>&1 | tee "$tmpfile"
           if grep -q "^CYCLE_COMPLETE$" "$tmpfile"; then
             echo "cycle_complete=true" >> "$GITHUB_OUTPUT"
           else
