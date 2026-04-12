@@ -3630,7 +3630,7 @@
       [
         "Ahlya",
         "Dreamscythe",
-        48.69666815424068,
+        48.6967,
         108.0
       ],
       [
@@ -3678,19 +3678,19 @@
       [
         "Ahndi",
         "Dreamscythe",
-        3.3646353028457026,
+        3.36464,
         106.0
       ],
       [
         "Ahnold",
         "Dreamscythe",
-        90.72176367076005,
+        90.7218,
         115.0
       ],
       [
         "Aholeyguy",
         "Dreamscythe",
-        89.61568574585596,
+        89.6157,
         113.0
       ],
       [
@@ -3732,7 +3732,7 @@
       [
         "Ahriakazaya",
         "Dreamscythe",
-        50.45918774056012,
+        50.4592,
         105.0
       ],
       [
@@ -3750,7 +3750,7 @@
       [
         "Ahshakahmi",
         "Dreamscythe",
-        8.67442523184768,
+        8.67443,
         114.0
       ],
       [
@@ -3786,7 +3786,7 @@
       [
         "Ahsokatano",
         "Dreamscythe",
-        22.119770770213787,
+        22.1198,
         113.0
       ],
       [
@@ -3798,7 +3798,7 @@
       [
         "Ahtin",
         "Dreamscythe",
-        75.23366629962456,
+        75.2337,
         114.0
       ],
       [
@@ -3816,7 +3816,7 @@
       [
         "Ahuntersry",
         "Dreamscythe",
-        56.53198403400392,
+        56.532,
         112.0
       ],
       [
@@ -3846,7 +3846,7 @@
       [
         "Aidiermoda",
         "Dreamscythe",
-        52.754076217055314,
+        52.7541,
         116.0
       ],
       [
@@ -3858,7 +3858,7 @@
       [
         "Aidono",
         "Dreamscythe",
-        38.91829739477633,
+        38.9183,
         113.0
       ],
       [
@@ -3930,7 +3930,7 @@
       [
         "Aijax",
         "Dreamscythe",
-        0.26755391359704167,
+        0.267554,
         108.0
       ],
       [
@@ -3942,13 +3942,13 @@
       [
         "Aikohime",
         "Dreamscythe",
-        68.88185197703436,
+        68.8819,
         115.0
       ],
       [
         "Aikun",
         "Dreamscythe",
-        34.30508737381004,
+        34.3051,
         116.0
       ],
       [
@@ -3967,7 +3967,7 @@
         "Ailirra",
         "Dreamscythe",
         80.0,
-        104.0
+        113.0
       ],
       [
         "Ailissa",
@@ -4074,8 +4074,506 @@
       [
         "Ainax",
         "Dreamscythe",
-        56.82917182257936,
+        56.8292,
         115.0
+      ],
+      [
+        "Ainnah",
+        "Dreamscythe",
+        86.5227,
+        114.0
+      ],
+      [
+        "Ainosora",
+        "Dreamscythe",
+        28.638,
+        109.0
+      ],
+      [
+        "Ainsworth",
+        "Dreamscythe",
+        69.89450395537762,
+        114.0
+      ],
+      [
+        "Ainzyah",
+        "Dreamscythe",
+        47.519982945302615,
+        115.0
+      ],
+      [
+        "Aioh",
+        "Dreamscythe",
+        39.2671,
+        111.0
+      ],
+      [
+        "Aioras",
+        "Dreamscythe",
+        69.2659,
+        111.0
+      ],
+      [
+        "Aipionir",
+        "Dreamscythe",
+        69.08855922425826,
+        111.0
+      ],
+      [
+        "Airathle",
+        "Dreamscythe",
+        82.54520046831922,
+        112.0
+      ],
+      [
+        "Airbagit",
+        "Dreamscythe",
+        60.7661,
+        115.0
+      ],
+      [
+        "Airblaster",
+        "Dreamscythe",
+        77.9232,
+        109.0
+      ],
+      [
+        "Airdii",
+        "Dreamscythe",
+        98.0077,
+        116.0
+      ],
+      [
+        "Airdiix",
+        "Dreamscythe",
+        30.0444,
+        110.0
+      ],
+      [
+        "Airell",
+        "Dreamscythe",
+        33.451,
+        107.0
+      ],
+      [
+        "Airenos",
+        "Dreamscythe",
+        10.454,
+        112.0
+      ],
+      [
+        "Airetam",
+        "Dreamscythe",
+        80.9926,
+        107.0
+      ],
+      [
+        "Airezjr",
+        "Dreamscythe",
+        93.3488,
+        113.0
+      ],
+      [
+        "Airgolem",
+        "Dreamscythe",
+        41.8688,
+        110.0
+      ],
+      [
+        "Airhole",
+        "Dreamscythe",
+        64.17739676736576,
+        113.0
+      ],
+      [
+        "Airi",
+        "Dreamscythe",
+        89.0846,
+        112.0
+      ],
+      [
+        "Airikwar",
+        "Dreamscythe",
+        97.1549,
+        106.0
+      ],
+      [
+        "Airiy",
+        "Dreamscythe",
+        53.3273,
+        113.0
+      ],
+      [
+        "Airmedhylda",
+        "Dreamscythe",
+        3.7447184538119185,
+        102.0
+      ],
+      [
+        "Airnick",
+        "Dreamscythe",
+        50.0,
+        112.0
+      ],
+      [
+        "Airok",
+        "Dreamscythe",
+        31.2281,
+        103.0
+      ],
+      [
+        "Aironar",
+        "Dreamscythe",
+        74.07047739259238,
+        115.0
+      ],
+      [
+        "Airone",
+        "Dreamscythe",
+        33.8954,
+        107.0
+      ],
+      [
+        "Aironk",
+        "Dreamscythe",
+        27.801724153362713,
+        109.0
+      ],
+      [
+        "Airowarlock",
+        "Dreamscythe",
+        24.088602771871784,
+        113.0
+      ],
+      [
+        "Airplaneears",
+        "Dreamscythe",
+        97.64104516044341,
+        110.0
+      ],
+      [
+        "Airportal",
+        "Dreamscythe",
+        42.62386343597651,
+        115.0
+      ],
+      [
+        "Airra",
+        "Dreamscythe",
+        95.16216342749644,
+        111.0
+      ],
+      [
+        "Airrashylie",
+        "Dreamscythe",
+        56.43961139834308,
+        115.0
+      ],
+      [
+        "Airrey",
+        "Dreamscythe",
+        89.18348275238336,
+        116.0
+      ],
+      [
+        "Airtaco",
+        "Dreamscythe",
+        77.6182,
+        113.0
+      ],
+      [
+        "Airtaxi",
+        "Dreamscythe",
+        45.774,
+        113.0
+      ],
+      [
+        "Airtyte",
+        "Dreamscythe",
+        91.1398,
+        113.0
+      ],
+      [
+        "Airvaster",
+        "Dreamscythe",
+        67.4942,
+        110.0
+      ],
+      [
+        "Airymoo",
+        "Dreamscythe",
+        50.0,
+        112.0
+      ],
+      [
+        "Aisen",
+        "Dreamscythe",
+        87.9164,
+        112.0
+      ],
+      [
+        "Aislehealzju",
+        "Dreamscythe",
+        30.0,
+        108.0
+      ],
+      [
+        "Aitabulas",
+        "Dreamscythe",
+        74.27279427182826,
+        115.0
+      ],
+      [
+        "Aithur",
+        "Dreamscythe",
+        66.99362076353788,
+        111.0
+      ],
+      [
+        "Aithyr",
+        "Dreamscythe",
+        63.83954552793687,
+        110.0
+      ],
+      [
+        "Aiunii",
+        "Dreamscythe",
+        13.569083434603481,
+        112.0
+      ],
+      [
+        "Aivana",
+        "Dreamscythe",
+        98.8581,
+        112.0
+      ],
+      [
+        "Aivenn",
+        "Dreamscythe",
+        88.89751171454073,
+        113.0
+      ],
+      [
+        "Aizlyn",
+        "Dreamscythe",
+        8.26094,
+        109.0
+      ],
+      [
+        "Aizuthegrand",
+        "Dreamscythe",
+        11.0305,
+        113.0
+      ],
+      [
+        "Ajabalaj",
+        "Dreamscythe",
+        83.98922942239747,
+        115.0
+      ],
+      [
+        "Ajabaralani",
+        "Dreamscythe",
+        11.862,
+        110.0
+      ],
+      [
+        "Ajack",
+        "Dreamscythe",
+        73.9628,
+        108.0
+      ],
+      [
+        "Ajackz",
+        "Dreamscythe",
+        88.4209,
+        115.0
+      ],
+      [
+        "Ajamian",
+        "Dreamscythe",
+        66.35339174713019,
+        114.0
+      ],
+      [
+        "Ajanis",
+        "Dreamscythe",
+        88.0813,
+        107.0
+      ],
+      [
+        "Ajaxx",
+        "Dreamscythe",
+        95.0634,
+        111.0
+      ],
+      [
+        "Ajontis",
+        "Dreamscythe",
+        66.9704,
+        112.0
+      ],
+      [
+        "Ajuladin",
+        "Dreamscythe",
+        60.08099563209996,
+        117.0
+      ],
+      [
+        "Ajumpstart",
+        "Dreamscythe",
+        44.7254,
+        107.0
+      ],
+      [
+        "Aj\u00e3pplegate",
+        "Dreamscythe",
+        77.88002367078009,
+        111.0
+      ],
+      [
+        "Aka",
+        "Dreamscythe",
+        94.6738,
+        111.0
+      ],
+      [
+        "Akaattila",
+        "Dreamscythe",
+        97.4383,
+        115.0
+      ],
+      [
+        "Akabackwards",
+        "Dreamscythe",
+        37.56953773190889,
+        107.0
+      ],
+      [
+        "Akabo",
+        "Dreamscythe",
+        67.2688,
+        111.0
+      ],
+      [
+        "Akadan",
+        "Dreamscythe",
+        5.08376,
+        110.0
+      ],
+      [
+        "Akadiaqt",
+        "Dreamscythe",
+        58.4102,
+        111.0
+      ],
+      [
+        "Akaeden",
+        "Dreamscythe",
+        5.62009,
+        115.0
+      ],
+      [
+        "Akaeldama",
+        "Dreamscythe",
+        3.00327,
+        111.0
+      ],
+      [
+        "Akafoxslayer",
+        "Dreamscythe",
+        64.1722,
+        115.0
+      ],
+      [
+        "Akahime",
+        "Dreamscythe",
+        40.2633,
+        114.0
+      ],
+      [
+        "Akahmah",
+        "Dreamscythe",
+        97.8283,
+        111.0
+      ],
+      [
+        "Akaholywater",
+        "Dreamscythe",
+        81.4819,
+        115.0
+      ],
+      [
+        "Akaim",
+        "Dreamscythe",
+        7.48843,
+        112.0
+      ],
+      [
+        "Akala",
+        "Dreamscythe",
+        57.4237,
+        112.0
+      ],
+      [
+        "Akal\u00eea",
+        "Dreamscythe",
+        10.851532439485846,
+        114.0
+      ],
+      [
+        "Akamaitara",
+        "Dreamscythe",
+        39.75816898671712,
+        111.0
+      ],
+      [
+        "Akamanis",
+        "Dreamscythe",
+        40.505073397130815,
+        109.0
+      ],
+      [
+        "Akamaz",
+        "Dreamscythe",
+        92.7687,
+        114.0
+      ],
+      [
+        "Akamina",
+        "Dreamscythe",
+        75.0,
+        86.0
+      ],
+      [
+        "Akanah",
+        "Dreamscythe",
+        10.0,
+        115.0
+      ],
+      [
+        "Akano",
+        "Dreamscythe",
+        58.40464295395708,
+        114.0
+      ],
+      [
+        "Akan\u00f6s",
+        "Dreamscythe",
+        95.7601,
+        110.0
+      ],
+      [
+        "Akaraka",
+        "Dreamscythe",
+        22.5862,
+        106.0
+      ],
+      [
+        "Akasuki",
+        "Dreamscythe",
+        58.8661,
+        100.0
       ]
     ],
     "1047:50653": [
@@ -7862,7 +8360,7 @@
       [
         "Aholeyguy",
         "Dreamscythe",
-        85.37577787020858,
+        85.3758,
         114.0
       ],
       [
@@ -7922,7 +8420,7 @@
       [
         "Ahshakahmi",
         "Dreamscythe",
-        4.48533625511106,
+        4.48534,
         114.0
       ],
       [
@@ -7940,7 +8438,7 @@
       [
         "Ahsie",
         "Dreamscythe",
-        90.37545730143219,
+        90.3755,
         112.0
       ],
       [
@@ -7958,7 +8456,7 @@
       [
         "Ahsokatano",
         "Dreamscythe",
-        56.69719278523475,
+        56.6972,
         113.0
       ],
       [
@@ -7988,7 +8486,7 @@
       [
         "Ahuntersry",
         "Dreamscythe",
-        51.60646867669097,
+        51.6065,
         112.0
       ],
       [
@@ -8036,7 +8534,7 @@
       [
         "Aidsdyk",
         "Dreamscythe",
-        33.428474665225075,
+        33.4285,
         113.0
       ],
       [
@@ -8096,13 +8594,13 @@
       [
         "Aiishii",
         "Dreamscythe",
-        19.635856628122706,
+        19.6359,
         112.0
       ],
       [
         "Aijax",
         "Dreamscythe",
-        4.432589056029983,
+        4.43259,
         105.0
       ],
       [
@@ -8126,7 +8624,7 @@
       [
         "Aikunn",
         "Dreamscythe",
-        8.357116453026016,
+        8.35712,
         114.0
       ],
       [
@@ -8139,7 +8637,7 @@
         "Ailirra",
         "Dreamscythe",
         90.0,
-        98.0
+        108.0
       ],
       [
         "Ailissa",
@@ -8150,7 +8648,7 @@
       [
         "Ailow",
         "Dreamscythe",
-        26.530462507467934,
+        26.5305,
         111.0
       ],
       [
@@ -8162,7 +8660,7 @@
       [
         "Ailwynn",
         "Dreamscythe",
-        53.37298623449552,
+        53.373,
         116.0
       ],
       [
@@ -8192,7 +8690,7 @@
       [
         "Aimersmay",
         "Dreamscythe",
-        13.609970569047931,
+        13.61,
         110.0
       ],
       [
@@ -8246,8 +8744,506 @@
       [
         "Ainax",
         "Dreamscythe",
-        85.20506346848545,
+        85.2051,
         115.0
+      ],
+      [
+        "Ainnah",
+        "Dreamscythe",
+        70.3615,
+        114.0
+      ],
+      [
+        "Ainosora",
+        "Dreamscythe",
+        8.52932,
+        111.0
+      ],
+      [
+        "Ainsworth",
+        "Dreamscythe",
+        80.236267416293,
+        115.0
+      ],
+      [
+        "Ainzyah",
+        "Dreamscythe",
+        20.95665052063234,
+        114.0
+      ],
+      [
+        "Aioh",
+        "Dreamscythe",
+        44.7831,
+        111.0
+      ],
+      [
+        "Aioras",
+        "Dreamscythe",
+        74.9316,
+        111.0
+      ],
+      [
+        "Aipionir",
+        "Dreamscythe",
+        42.32412916726315,
+        111.0
+      ],
+      [
+        "Airathle",
+        "Dreamscythe",
+        87.7071114223123,
+        112.0
+      ],
+      [
+        "Airbagit",
+        "Dreamscythe",
+        78.1562,
+        116.0
+      ],
+      [
+        "Airblaster",
+        "Dreamscythe",
+        59.9524,
+        114.0
+      ],
+      [
+        "Airdii",
+        "Dreamscythe",
+        95.6684,
+        115.0
+      ],
+      [
+        "Airdiix",
+        "Dreamscythe",
+        46.4259,
+        115.0
+      ],
+      [
+        "Airell",
+        "Dreamscythe",
+        47.2912,
+        100.0
+      ],
+      [
+        "Airenos",
+        "Dreamscythe",
+        13.0954,
+        112.0
+      ],
+      [
+        "Airetam",
+        "Dreamscythe",
+        63.8763,
+        107.0
+      ],
+      [
+        "Airezjr",
+        "Dreamscythe",
+        99.5639,
+        112.0
+      ],
+      [
+        "Airgolem",
+        "Dreamscythe",
+        27.7139,
+        109.0
+      ],
+      [
+        "Airhole",
+        "Dreamscythe",
+        76.16066168970612,
+        112.0
+      ],
+      [
+        "Airi",
+        "Dreamscythe",
+        91.7354,
+        112.0
+      ],
+      [
+        "Airikwar",
+        "Dreamscythe",
+        93.3816,
+        106.0
+      ],
+      [
+        "Airiy",
+        "Dreamscythe",
+        71.9282,
+        114.0
+      ],
+      [
+        "Airmedhylda",
+        "Dreamscythe",
+        3.1498971914238134,
+        102.0
+      ],
+      [
+        "Airnick",
+        "Dreamscythe",
+        50.0,
+        114.0
+      ],
+      [
+        "Airok",
+        "Dreamscythe",
+        31.9138,
+        100.0
+      ],
+      [
+        "Aironar",
+        "Dreamscythe",
+        87.5549186875638,
+        115.0
+      ],
+      [
+        "Airone",
+        "Dreamscythe",
+        74.07432767977738,
+        107.0
+      ],
+      [
+        "Aironk",
+        "Dreamscythe",
+        42.05727250198532,
+        112.0
+      ],
+      [
+        "Airowarlock",
+        "Dreamscythe",
+        41.86200910002507,
+        113.0
+      ],
+      [
+        "Airplaneears",
+        "Dreamscythe",
+        95.16526485950735,
+        110.0
+      ],
+      [
+        "Airportal",
+        "Dreamscythe",
+        68.77630442441296,
+        115.0
+      ],
+      [
+        "Airra",
+        "Dreamscythe",
+        80.0,
+        112.0
+      ],
+      [
+        "Airrashylie",
+        "Dreamscythe",
+        90.82828136248368,
+        116.0
+      ],
+      [
+        "Airrey",
+        "Dreamscythe",
+        67.6337093466602,
+        112.0
+      ],
+      [
+        "Airtaco",
+        "Dreamscythe",
+        62.168,
+        113.0
+      ],
+      [
+        "Airtaxi",
+        "Dreamscythe",
+        53.6374,
+        113.0
+      ],
+      [
+        "Airtyte",
+        "Dreamscythe",
+        79.8316,
+        113.0
+      ],
+      [
+        "Airvaster",
+        "Dreamscythe",
+        69.2328,
+        113.0
+      ],
+      [
+        "Airymoo",
+        "Dreamscythe",
+        51.352688405996695,
+        115.0
+      ],
+      [
+        "Aisen",
+        "Dreamscythe",
+        64.7484,
+        112.0
+      ],
+      [
+        "Aislehealzju",
+        "Dreamscythe",
+        40.0,
+        111.0
+      ],
+      [
+        "Aitabulas",
+        "Dreamscythe",
+        26.353464123584736,
+        111.0
+      ],
+      [
+        "Aithur",
+        "Dreamscythe",
+        36.72115633971457,
+        112.0
+      ],
+      [
+        "Aithyr",
+        "Dreamscythe",
+        4.1284864108795425,
+        110.0
+      ],
+      [
+        "Aiunii",
+        "Dreamscythe",
+        17.991963931579757,
+        112.0
+      ],
+      [
+        "Aivana",
+        "Dreamscythe",
+        95.712,
+        110.0
+      ],
+      [
+        "Aivenn",
+        "Dreamscythe",
+        61.89504792711024,
+        113.0
+      ],
+      [
+        "Aizlyn",
+        "Dreamscythe",
+        17.7116,
+        109.0
+      ],
+      [
+        "Aizuthegrand",
+        "Dreamscythe",
+        7.16438,
+        113.0
+      ],
+      [
+        "Ajabalaj",
+        "Dreamscythe",
+        30.0,
+        114.0
+      ],
+      [
+        "Ajabaralani",
+        "Dreamscythe",
+        7.94993,
+        110.0
+      ],
+      [
+        "Ajack",
+        "Dreamscythe",
+        76.6372,
+        110.0
+      ],
+      [
+        "Ajackz",
+        "Dreamscythe",
+        80.7963,
+        112.0
+      ],
+      [
+        "Ajamian",
+        "Dreamscythe",
+        44.55208809479777,
+        112.0
+      ],
+      [
+        "Ajanis",
+        "Dreamscythe",
+        89.6797,
+        112.0
+      ],
+      [
+        "Ajaxx",
+        "Dreamscythe",
+        90.3933,
+        113.0
+      ],
+      [
+        "Ajontis",
+        "Dreamscythe",
+        68.6647,
+        113.0
+      ],
+      [
+        "Ajuladin",
+        "Dreamscythe",
+        60.92864799116275,
+        117.0
+      ],
+      [
+        "Ajumpstart",
+        "Dreamscythe",
+        47.2364,
+        107.0
+      ],
+      [
+        "Aj\u00e3pplegate",
+        "Dreamscythe",
+        87.40777851258353,
+        111.0
+      ],
+      [
+        "Aka",
+        "Dreamscythe",
+        94.7502,
+        111.0
+      ],
+      [
+        "Akaattila",
+        "Dreamscythe",
+        58.5695,
+        114.0
+      ],
+      [
+        "Akabackwards",
+        "Dreamscythe",
+        65.21426294670589,
+        111.0
+      ],
+      [
+        "Akabo",
+        "Dreamscythe",
+        87.9107,
+        111.0
+      ],
+      [
+        "Akadan",
+        "Dreamscythe",
+        0.928995,
+        110.0
+      ],
+      [
+        "Akadiaqt",
+        "Dreamscythe",
+        71.7854,
+        111.0
+      ],
+      [
+        "Akaeden",
+        "Dreamscythe",
+        24.0295,
+        115.0
+      ],
+      [
+        "Akaeldama",
+        "Dreamscythe",
+        2.98417,
+        111.0
+      ],
+      [
+        "Akafoxslayer",
+        "Dreamscythe",
+        44.9592,
+        115.0
+      ],
+      [
+        "Akahime",
+        "Dreamscythe",
+        70.7598,
+        114.0
+      ],
+      [
+        "Akahmah",
+        "Dreamscythe",
+        20.4881,
+        115.0
+      ],
+      [
+        "Akaholywater",
+        "Dreamscythe",
+        65.5511,
+        113.0
+      ],
+      [
+        "Akaim",
+        "Dreamscythe",
+        64.43605880965721,
+        112.0
+      ],
+      [
+        "Akala",
+        "Dreamscythe",
+        97.5592,
+        112.0
+      ],
+      [
+        "Akal\u00eea",
+        "Dreamscythe",
+        11.537364413688012,
+        114.0
+      ],
+      [
+        "Akamaitara",
+        "Dreamscythe",
+        48.37023477144277,
+        108.0
+      ],
+      [
+        "Akamanis",
+        "Dreamscythe",
+        17.80026180033583,
+        110.0
+      ],
+      [
+        "Akamaz",
+        "Dreamscythe",
+        91.2258,
+        114.0
+      ],
+      [
+        "Akamina",
+        "Dreamscythe",
+        80.0,
+        104.0
+      ],
+      [
+        "Akanah",
+        "Dreamscythe",
+        44.82995227605518,
+        110.0
+      ],
+      [
+        "Akano",
+        "Dreamscythe",
+        77.9479009167236,
+        113.0
+      ],
+      [
+        "Akan\u00f6s",
+        "Dreamscythe",
+        99.4995,
+        110.0
+      ],
+      [
+        "Akaraka",
+        "Dreamscythe",
+        9.98507,
+        106.0
+      ],
+      [
+        "Akasuki",
+        "Dreamscythe",
+        66.5977,
+        102.0
       ]
     ],
     "1047:50654": [
@@ -11951,7 +12947,7 @@
         "Ahkris",
         "Dreamscythe",
         97.0,
-        112.0
+        115.0
       ],
       [
         "Ahlaadon",
@@ -11980,7 +12976,7 @@
       [
         "Ahlya",
         "Dreamscythe",
-        32.127174131044434,
+        32.1272,
         108.0
       ],
       [
@@ -12052,7 +13048,7 @@
       [
         "Ahonawkawan",
         "Dreamscythe",
-        17.12878778263789,
+        17.1288,
         107.0
       ],
       [
@@ -12106,7 +13102,7 @@
       [
         "Ahshakahmi",
         "Dreamscythe",
-        12.142392410032294,
+        12.1424,
         114.0
       ],
       [
@@ -12148,19 +13144,19 @@
       [
         "Ahtin",
         "Dreamscythe",
-        77.91645287788369,
+        77.9165,
         114.0
       ],
       [
         "Ahumm",
         "Dreamscythe",
         97.0,
-        113.0
+        117.0
       ],
       [
         "Ahumun",
         "Dreamscythe",
-        50.403851379741354,
+        50.4039,
         115.0
       ],
       [
@@ -12196,7 +13192,7 @@
       [
         "Aidiermoda",
         "Dreamscythe",
-        81.22794999761126,
+        81.228,
         116.0
       ],
       [
@@ -12208,13 +13204,13 @@
       [
         "Aidono",
         "Dreamscythe",
-        39.72436053675838,
+        39.7244,
         111.0
       ],
       [
         "Aidsdyk",
         "Dreamscythe",
-        29.297070961644216,
+        29.2971,
         112.0
       ],
       [
@@ -12232,7 +13228,7 @@
       [
         "Aienzen",
         "Dreamscythe",
-        38.875188165490485,
+        38.8752,
         113.0
       ],
       [
@@ -12256,7 +13252,7 @@
       [
         "Aiidie",
         "Dreamscythe",
-        52.06669228791712,
+        52.0667,
         106.0
       ],
       [
@@ -12317,7 +13313,7 @@
         "Ailirra",
         "Dreamscythe",
         97.0,
-        98.0
+        111.0
       ],
       [
         "Ailissa",
@@ -12328,7 +13324,7 @@
       [
         "Ailow",
         "Dreamscythe",
-        22.01094976609435,
+        22.011,
         110.0
       ],
       [
@@ -12424,8 +13420,512 @@
       [
         "Ainax",
         "Dreamscythe",
-        39.533452472420954,
+        39.5335,
         115.0
+      ],
+      [
+        "Ainnah",
+        "Dreamscythe",
+        86.2637,
+        114.0
+      ],
+      [
+        "Ainosora",
+        "Dreamscythe",
+        14.193,
+        109.0
+      ],
+      [
+        "Ainsworth",
+        "Dreamscythe",
+        84.59702610458375,
+        115.0
+      ],
+      [
+        "Ainzyah",
+        "Dreamscythe",
+        67.398577521876,
+        114.0
+      ],
+      [
+        "Aioh",
+        "Dreamscythe",
+        3.16165,
+        111.0
+      ],
+      [
+        "Aioras",
+        "Dreamscythe",
+        90.0237,
+        111.0
+      ],
+      [
+        "Aipionir",
+        "Dreamscythe",
+        54.35458591737491,
+        112.0
+      ],
+      [
+        "Airathle",
+        "Dreamscythe",
+        88.50454516455534,
+        113.0
+      ],
+      [
+        "Airbagit",
+        "Dreamscythe",
+        19.5617,
+        116.0
+      ],
+      [
+        "Airblaster",
+        "Dreamscythe",
+        59.1566,
+        109.0
+      ],
+      [
+        "Airdii",
+        "Dreamscythe",
+        90.9696,
+        116.0
+      ],
+      [
+        "Airdiix",
+        "Dreamscythe",
+        36.4505,
+        115.0
+      ],
+      [
+        "Airekka",
+        "Dreamscythe",
+        43.891185504170394,
+        111.0
+      ],
+      [
+        "Airell",
+        "Dreamscythe",
+        44.5081,
+        107.0
+      ],
+      [
+        "Airenos",
+        "Dreamscythe",
+        23.7166,
+        112.0
+      ],
+      [
+        "Airetam",
+        "Dreamscythe",
+        70.0548,
+        98.0
+      ],
+      [
+        "Airezjr",
+        "Dreamscythe",
+        96.9959,
+        113.0
+      ],
+      [
+        "Airgolem",
+        "Dreamscythe",
+        57.1642,
+        110.0
+      ],
+      [
+        "Airhole",
+        "Dreamscythe",
+        89.70898177163005,
+        111.0
+      ],
+      [
+        "Airi",
+        "Dreamscythe",
+        87.302,
+        107.0
+      ],
+      [
+        "Airikwar",
+        "Dreamscythe",
+        100.0,
+        106.0
+      ],
+      [
+        "Airiy",
+        "Dreamscythe",
+        66.1053,
+        113.0
+      ],
+      [
+        "Airmedhylda",
+        "Dreamscythe",
+        2.539734984120007,
+        102.0
+      ],
+      [
+        "Airnick",
+        "Dreamscythe",
+        80.0,
+        114.0
+      ],
+      [
+        "Airok",
+        "Dreamscythe",
+        61.5543,
+        100.0
+      ],
+      [
+        "Aironar",
+        "Dreamscythe",
+        82.81149705005002,
+        114.0
+      ],
+      [
+        "Airone",
+        "Dreamscythe",
+        80.23994190957727,
+        107.0
+      ],
+      [
+        "Aironk",
+        "Dreamscythe",
+        53.2343455700254,
+        109.0
+      ],
+      [
+        "Airowarlock",
+        "Dreamscythe",
+        45.27461718150784,
+        113.0
+      ],
+      [
+        "Airplaneears",
+        "Dreamscythe",
+        97.74098872283777,
+        110.0
+      ],
+      [
+        "Airportal",
+        "Dreamscythe",
+        57.54046391735685,
+        115.0
+      ],
+      [
+        "Airra",
+        "Dreamscythe",
+        95.0,
+        112.0
+      ],
+      [
+        "Airrashylie",
+        "Dreamscythe",
+        79.26833430375653,
+        115.0
+      ],
+      [
+        "Airrey",
+        "Dreamscythe",
+        60.0,
+        116.0
+      ],
+      [
+        "Airtaco",
+        "Dreamscythe",
+        53.2802,
+        111.0
+      ],
+      [
+        "Airtaxi",
+        "Dreamscythe",
+        79.7133,
+        113.0
+      ],
+      [
+        "Airtyte",
+        "Dreamscythe",
+        61.4065,
+        117.0
+      ],
+      [
+        "Airvaster",
+        "Dreamscythe",
+        49.5711,
+        113.0
+      ],
+      [
+        "Airymoo",
+        "Dreamscythe",
+        75.0,
+        115.0
+      ],
+      [
+        "Aisen",
+        "Dreamscythe",
+        50.951,
+        112.0
+      ],
+      [
+        "Aislehealzju",
+        "Dreamscythe",
+        75.0,
+        111.0
+      ],
+      [
+        "Aitabulas",
+        "Dreamscythe",
+        52.23740225510426,
+        111.0
+      ],
+      [
+        "Aithur",
+        "Dreamscythe",
+        39.10393061027513,
+        111.0
+      ],
+      [
+        "Aithyr",
+        "Dreamscythe",
+        47.85638663064331,
+        110.0
+      ],
+      [
+        "Aiunii",
+        "Dreamscythe",
+        32.25574415355444,
+        112.0
+      ],
+      [
+        "Aivana",
+        "Dreamscythe",
+        98.2526,
+        111.0
+      ],
+      [
+        "Aivenn",
+        "Dreamscythe",
+        46.691592493865734,
+        114.0
+      ],
+      [
+        "Aizlyn",
+        "Dreamscythe",
+        14.835,
+        109.0
+      ],
+      [
+        "Aizuthegrand",
+        "Dreamscythe",
+        12.7771,
+        112.0
+      ],
+      [
+        "Ajabalaj",
+        "Dreamscythe",
+        60.0,
+        115.0
+      ],
+      [
+        "Ajabaralani",
+        "Dreamscythe",
+        12.8807,
+        110.0
+      ],
+      [
+        "Ajack",
+        "Dreamscythe",
+        93.416,
+        113.0
+      ],
+      [
+        "Ajackz",
+        "Dreamscythe",
+        82.6672,
+        112.0
+      ],
+      [
+        "Ajamian",
+        "Dreamscythe",
+        63.68751573457383,
+        112.0
+      ],
+      [
+        "Ajanis",
+        "Dreamscythe",
+        81.0762,
+        112.0
+      ],
+      [
+        "Ajaxx",
+        "Dreamscythe",
+        99.6969,
+        111.0
+      ],
+      [
+        "Ajontis",
+        "Dreamscythe",
+        83.0611,
+        113.0
+      ],
+      [
+        "Ajuladin",
+        "Dreamscythe",
+        80.0,
+        117.0
+      ],
+      [
+        "Ajumpstart",
+        "Dreamscythe",
+        48.6659,
+        110.0
+      ],
+      [
+        "Aj\u00e3pplegate",
+        "Dreamscythe",
+        3.798089539912609,
+        111.0
+      ],
+      [
+        "Aka",
+        "Dreamscythe",
+        91.2051,
+        109.0
+      ],
+      [
+        "Akaattila",
+        "Dreamscythe",
+        91.3758,
+        115.0
+      ],
+      [
+        "Akabackwards",
+        "Dreamscythe",
+        46.438149848973985,
+        111.0
+      ],
+      [
+        "Akabo",
+        "Dreamscythe",
+        81.5308,
+        111.0
+      ],
+      [
+        "Akadan",
+        "Dreamscythe",
+        6.46599,
+        110.0
+      ],
+      [
+        "Akadiaqt",
+        "Dreamscythe",
+        15.8596,
+        111.0
+      ],
+      [
+        "Akaeden",
+        "Dreamscythe",
+        6.6668,
+        115.0
+      ],
+      [
+        "Akaeldama",
+        "Dreamscythe",
+        30.0961,
+        111.0
+      ],
+      [
+        "Akafoxslayer",
+        "Dreamscythe",
+        69.0789,
+        115.0
+      ],
+      [
+        "Akahime",
+        "Dreamscythe",
+        40.5196,
+        114.0
+      ],
+      [
+        "Akahmah",
+        "Dreamscythe",
+        90.7898,
+        111.0
+      ],
+      [
+        "Akaholywater",
+        "Dreamscythe",
+        83.2755,
+        113.0
+      ],
+      [
+        "Akaim",
+        "Dreamscythe",
+        32.47648236136503,
+        112.0
+      ],
+      [
+        "Akala",
+        "Dreamscythe",
+        83.9761,
+        110.0
+      ],
+      [
+        "Akal\u00eea",
+        "Dreamscythe",
+        18.809969346677914,
+        114.0
+      ],
+      [
+        "Akamaitara",
+        "Dreamscythe",
+        34.619184344190074,
+        110.0
+      ],
+      [
+        "Akamanis",
+        "Dreamscythe",
+        17.426946560738727,
+        109.0
+      ],
+      [
+        "Akamaz",
+        "Dreamscythe",
+        94.8796,
+        114.0
+      ],
+      [
+        "Akamina",
+        "Dreamscythe",
+        95.0,
+        104.0
+      ],
+      [
+        "Akanah",
+        "Dreamscythe",
+        42.91705431714324,
+        115.0
+      ],
+      [
+        "Akano",
+        "Dreamscythe",
+        81.63273050627629,
+        114.0
+      ],
+      [
+        "Akan\u00f6s",
+        "Dreamscythe",
+        95.5101,
+        110.0
+      ],
+      [
+        "Akaraka",
+        "Dreamscythe",
+        11.4459,
+        106.0
+      ],
+      [
+        "Akasuki",
+        "Dreamscythe",
+        87.4067,
+        100.0
       ]
     ],
     "1047:50655": [
@@ -16141,7 +17641,7 @@
         "Ahkris",
         "Dreamscythe",
         80.0,
-        114.0
+        115.0
       ],
       [
         "Ahlaadon",
@@ -16218,19 +17718,19 @@
       [
         "Ahndi",
         "Dreamscythe",
-        4.199309449987328,
+        4.19931,
         106.0
       ],
       [
         "Ahnold",
         "Dreamscythe",
-        97.0181937424677,
+        97.0182,
         111.0
       ],
       [
         "Aholeyguy",
         "Dreamscythe",
-        66.10149623182208,
+        66.1015,
         113.0
       ],
       [
@@ -16308,7 +17808,7 @@
       [
         "Ahsi",
         "Dreamscythe",
-        97.16038706077464,
+        97.1604,
         109.0
       ],
       [
@@ -16338,7 +17838,7 @@
       [
         "Ahtin",
         "Dreamscythe",
-        90.7561556794167,
+        90.7562,
         110.0
       ],
       [
@@ -16350,7 +17850,7 @@
       [
         "Ahumun",
         "Dreamscythe",
-        45.895253636341685,
+        45.8953,
         115.0
       ],
       [
@@ -16422,7 +17922,7 @@
       [
         "Aienzen",
         "Dreamscythe",
-        9.713887257734967,
+        9.71389,
         113.0
       ],
       [
@@ -16446,7 +17946,7 @@
       [
         "Aiidie",
         "Dreamscythe",
-        64.36936512671936,
+        64.3694,
         106.0
       ],
       [
@@ -16488,13 +17988,13 @@
       [
         "Aikun",
         "Dreamscythe",
-        43.874877053576114,
+        43.8749,
         117.0
       ],
       [
         "Aikunn",
         "Dreamscythe",
-        29.336687199544432,
+        29.3367,
         114.0
       ],
       [
@@ -16507,7 +18007,7 @@
         "Ailirra",
         "Dreamscythe",
         90.0,
-        98.0
+        113.0
       ],
       [
         "Ailissa",
@@ -16518,7 +18018,7 @@
       [
         "Ailow",
         "Dreamscythe",
-        63.93608862238109,
+        63.9361,
         110.0
       ],
       [
@@ -16554,13 +18054,13 @@
       [
         "Aimee",
         "Dreamscythe",
-        81.329057320552,
+        81.3291,
         114.0
       ],
       [
         "Aimersmay",
         "Dreamscythe",
-        19.94228158894118,
+        19.9423,
         110.0
       ],
       [
@@ -16602,7 +18102,7 @@
       [
         "Aimsformagic",
         "Dreamscythe",
-        43.069689882172675,
+        43.0697,
         112.0
       ],
       [
@@ -16614,8 +18114,512 @@
       [
         "Ainax",
         "Dreamscythe",
-        34.43185972464096,
+        34.4319,
         112.0
+      ],
+      [
+        "Ainnah",
+        "Dreamscythe",
+        85.769,
+        115.0
+      ],
+      [
+        "Ainosora",
+        "Dreamscythe",
+        17.6181,
+        109.0
+      ],
+      [
+        "Ainsworth",
+        "Dreamscythe",
+        84.91881212075938,
+        113.0
+      ],
+      [
+        "Ainzyah",
+        "Dreamscythe",
+        38.53345166971484,
+        115.0
+      ],
+      [
+        "Aioh",
+        "Dreamscythe",
+        64.1654,
+        111.0
+      ],
+      [
+        "Aioras",
+        "Dreamscythe",
+        72.7401,
+        111.0
+      ],
+      [
+        "Aipionir",
+        "Dreamscythe",
+        33.98392784826138,
+        112.0
+      ],
+      [
+        "Airathle",
+        "Dreamscythe",
+        93.16044436590309,
+        111.0
+      ],
+      [
+        "Airbagit",
+        "Dreamscythe",
+        52.0805,
+        116.0
+      ],
+      [
+        "Airblaster",
+        "Dreamscythe",
+        63.7938,
+        114.0
+      ],
+      [
+        "Airdii",
+        "Dreamscythe",
+        94.7598,
+        111.0
+      ],
+      [
+        "Airdiix",
+        "Dreamscythe",
+        80.7792,
+        115.0
+      ],
+      [
+        "Airekka",
+        "Dreamscythe",
+        26.700826087330867,
+        111.0
+      ],
+      [
+        "Airell",
+        "Dreamscythe",
+        49.6668,
+        94.0
+      ],
+      [
+        "Airenos",
+        "Dreamscythe",
+        27.3298,
+        112.0
+      ],
+      [
+        "Airetam",
+        "Dreamscythe",
+        95.7677,
+        102.0
+      ],
+      [
+        "Airezjr",
+        "Dreamscythe",
+        78.4931,
+        113.0
+      ],
+      [
+        "Airgolem",
+        "Dreamscythe",
+        41.2921,
+        109.0
+      ],
+      [
+        "Airhole",
+        "Dreamscythe",
+        78.07510772916324,
+        109.0
+      ],
+      [
+        "Airi",
+        "Dreamscythe",
+        95.5056,
+        113.0
+      ],
+      [
+        "Airikwar",
+        "Dreamscythe",
+        98.1525,
+        106.0
+      ],
+      [
+        "Airiy",
+        "Dreamscythe",
+        76.0193,
+        112.0
+      ],
+      [
+        "Airmedhylda",
+        "Dreamscythe",
+        0.0,
+        102.0
+      ],
+      [
+        "Airnick",
+        "Dreamscythe",
+        51.00883817066528,
+        112.0
+      ],
+      [
+        "Airok",
+        "Dreamscythe",
+        29.3827,
+        100.0
+      ],
+      [
+        "Aironar",
+        "Dreamscythe",
+        87.18690179678421,
+        114.0
+      ],
+      [
+        "Airone",
+        "Dreamscythe",
+        28.2193052296713,
+        108.0
+      ],
+      [
+        "Aironk",
+        "Dreamscythe",
+        61.93957437680411,
+        109.0
+      ],
+      [
+        "Airowarlock",
+        "Dreamscythe",
+        7.866770898788857,
+        113.0
+      ],
+      [
+        "Airplaneears",
+        "Dreamscythe",
+        92.06195019735242,
+        110.0
+      ],
+      [
+        "Airportal",
+        "Dreamscythe",
+        43.7776903023462,
+        115.0
+      ],
+      [
+        "Airra",
+        "Dreamscythe",
+        80.0,
+        112.0
+      ],
+      [
+        "Airrashylie",
+        "Dreamscythe",
+        96.9406838491074,
+        115.0
+      ],
+      [
+        "Airrey",
+        "Dreamscythe",
+        20.0,
+        116.0
+      ],
+      [
+        "Airtaco",
+        "Dreamscythe",
+        74.5516,
+        111.0
+      ],
+      [
+        "Airtaxi",
+        "Dreamscythe",
+        85.5289,
+        113.0
+      ],
+      [
+        "Airtyte",
+        "Dreamscythe",
+        59.7191,
+        113.0
+      ],
+      [
+        "Airvaster",
+        "Dreamscythe",
+        67.5865,
+        114.0
+      ],
+      [
+        "Airymoo",
+        "Dreamscythe",
+        68.468305426585,
+        114.0
+      ],
+      [
+        "Aisen",
+        "Dreamscythe",
+        73.18241554363959,
+        115.0
+      ],
+      [
+        "Aislehealzju",
+        "Dreamscythe",
+        59.75072410792416,
+        111.0
+      ],
+      [
+        "Aitabulas",
+        "Dreamscythe",
+        35.552567985674024,
+        114.0
+      ],
+      [
+        "Aithur",
+        "Dreamscythe",
+        32.65701612188752,
+        113.0
+      ],
+      [
+        "Aithyr",
+        "Dreamscythe",
+        24.947579435659616,
+        110.0
+      ],
+      [
+        "Aiunii",
+        "Dreamscythe",
+        20.60955925666207,
+        112.0
+      ],
+      [
+        "Aivana",
+        "Dreamscythe",
+        86.1202,
+        110.0
+      ],
+      [
+        "Aivenn",
+        "Dreamscythe",
+        68.84645932216878,
+        113.0
+      ],
+      [
+        "Aizlyn",
+        "Dreamscythe",
+        19.7567,
+        109.0
+      ],
+      [
+        "Aizuthegrand",
+        "Dreamscythe",
+        6.44979,
+        112.0
+      ],
+      [
+        "Ajabalaj",
+        "Dreamscythe",
+        84.48843186051229,
+        115.0
+      ],
+      [
+        "Ajabaralani",
+        "Dreamscythe",
+        5.57672,
+        110.0
+      ],
+      [
+        "Ajack",
+        "Dreamscythe",
+        55.0806,
+        113.0
+      ],
+      [
+        "Ajackz",
+        "Dreamscythe",
+        79.7153,
+        112.0
+      ],
+      [
+        "Ajamian",
+        "Dreamscythe",
+        61.609923062894666,
+        114.0
+      ],
+      [
+        "Ajanis",
+        "Dreamscythe",
+        98.0105,
+        107.0
+      ],
+      [
+        "Ajaxx",
+        "Dreamscythe",
+        98.0255,
+        111.0
+      ],
+      [
+        "Ajontis",
+        "Dreamscythe",
+        89.0597,
+        113.0
+      ],
+      [
+        "Ajuladin",
+        "Dreamscythe",
+        71.2909750551458,
+        117.0
+      ],
+      [
+        "Ajumpstart",
+        "Dreamscythe",
+        78.5817,
+        107.0
+      ],
+      [
+        "Aj\u00e3pplegate",
+        "Dreamscythe",
+        87.5060409211034,
+        111.0
+      ],
+      [
+        "Aka",
+        "Dreamscythe",
+        77.9771,
+        111.0
+      ],
+      [
+        "Akaattila",
+        "Dreamscythe",
+        78.9781,
+        115.0
+      ],
+      [
+        "Akabackwards",
+        "Dreamscythe",
+        56.954741644152044,
+        111.0
+      ],
+      [
+        "Akabo",
+        "Dreamscythe",
+        92.9321,
+        111.0
+      ],
+      [
+        "Akadan",
+        "Dreamscythe",
+        3.91203,
+        110.0
+      ],
+      [
+        "Akadiaqt",
+        "Dreamscythe",
+        79.3823,
+        111.0
+      ],
+      [
+        "Akaeden",
+        "Dreamscythe",
+        8.71239,
+        115.0
+      ],
+      [
+        "Akaeldama",
+        "Dreamscythe",
+        31.731,
+        111.0
+      ],
+      [
+        "Akafoxslayer",
+        "Dreamscythe",
+        64.7363,
+        115.0
+      ],
+      [
+        "Akahime",
+        "Dreamscythe",
+        83.8589,
+        114.0
+      ],
+      [
+        "Akahmah",
+        "Dreamscythe",
+        89.4754,
+        111.0
+      ],
+      [
+        "Akaholywater",
+        "Dreamscythe",
+        89.2468,
+        113.0
+      ],
+      [
+        "Akaim",
+        "Dreamscythe",
+        29.78827278893227,
+        112.0
+      ],
+      [
+        "Akala",
+        "Dreamscythe",
+        44.183,
+        110.0
+      ],
+      [
+        "Akal\u00eea",
+        "Dreamscythe",
+        0.8528922645898096,
+        114.0
+      ],
+      [
+        "Akamaitara",
+        "Dreamscythe",
+        30.635498535096225,
+        109.0
+      ],
+      [
+        "Akamanis",
+        "Dreamscythe",
+        44.75462745042829,
+        110.0
+      ],
+      [
+        "Akamaz",
+        "Dreamscythe",
+        96.459,
+        113.0
+      ],
+      [
+        "Akamina",
+        "Dreamscythe",
+        90.76343004217274,
+        104.0
+      ],
+      [
+        "Akanah",
+        "Dreamscythe",
+        44.357603304544085,
+        110.0
+      ],
+      [
+        "Akano",
+        "Dreamscythe",
+        72.19811366467353,
+        109.0
+      ],
+      [
+        "Akan\u00f6s",
+        "Dreamscythe",
+        90.4968,
+        111.0
+      ],
+      [
+        "Akaraka",
+        "Dreamscythe",
+        19.2931,
+        106.0
+      ],
+      [
+        "Akasuki",
+        "Dreamscythe",
+        40.2106,
+        100.0
       ]
     ],
     "1047:50656": [
@@ -20337,7 +22341,7 @@
         "Ahkris",
         "Dreamscythe",
         80.0,
-        114.0
+        115.0
       ],
       [
         "Ahlaadon",
@@ -20366,7 +22370,7 @@
       [
         "Ahlya",
         "Dreamscythe",
-        39.76047923702934,
+        39.7605,
         108.0
       ],
       [
@@ -20438,7 +22442,7 @@
       [
         "Ahonawkawan",
         "Dreamscythe",
-        29.435591981909162,
+        29.4356,
         107.0
       ],
       [
@@ -20504,13 +22508,13 @@
       [
         "Ahsi",
         "Dreamscythe",
-        81.64718870147215,
+        81.6472,
         102.0
       ],
       [
         "Ahsie",
         "Dreamscythe",
-        47.79695317645412,
+        47.797,
         112.0
       ],
       [
@@ -20528,7 +22532,7 @@
       [
         "Ahsokatano",
         "Dreamscythe",
-        22.41917286936218,
+        22.4192,
         113.0
       ],
       [
@@ -20552,7 +22556,7 @@
       [
         "Ahuntersry",
         "Dreamscythe",
-        75.16046761433718,
+        75.1605,
         110.0
       ],
       [
@@ -20600,7 +22604,7 @@
       [
         "Aidsdyk",
         "Dreamscythe",
-        35.41339192670689,
+        35.4134,
         111.0
       ],
       [
@@ -20618,7 +22622,7 @@
       [
         "Aienzen",
         "Dreamscythe",
-        15.376566352193667,
+        15.3766,
         113.0
       ],
       [
@@ -20642,7 +22646,7 @@
       [
         "Aiidie",
         "Dreamscythe",
-        66.88285224906767,
+        66.8829,
         107.0
       ],
       [
@@ -20660,7 +22664,7 @@
       [
         "Aiishii",
         "Dreamscythe",
-        7.650145318873337,
+        7.65015,
         112.0
       ],
       [
@@ -20678,19 +22682,19 @@
       [
         "Aikohime",
         "Dreamscythe",
-        83.24655485705574,
+        83.2466,
         115.0
       ],
       [
         "Aikun",
         "Dreamscythe",
-        36.06976430814053,
+        36.0698,
         117.0
       ],
       [
         "Aikunn",
         "Dreamscythe",
-        13.880397898654092,
+        13.8804,
         114.0
       ],
       [
@@ -20703,7 +22707,7 @@
         "Ailirra",
         "Dreamscythe",
         80.0,
-        104.0
+        113.0
       ],
       [
         "Ailissa",
@@ -20714,7 +22718,7 @@
       [
         "Ailow",
         "Dreamscythe",
-        50.437163201315535,
+        50.4372,
         110.0
       ],
       [
@@ -20726,7 +22730,7 @@
       [
         "Ailwynn",
         "Dreamscythe",
-        53.74439850040177,
+        53.7444,
         116.0
       ],
       [
@@ -20750,13 +22754,13 @@
       [
         "Aimee",
         "Dreamscythe",
-        86.3873745688304,
+        86.3874,
         114.0
       ],
       [
         "Aimersmay",
         "Dreamscythe",
-        34.95259275936206,
+        34.9526,
         111.0
       ],
       [
@@ -20812,6 +22816,510 @@
         "Dreamscythe",
         49.71803137864138,
         112.0
+      ],
+      [
+        "Ainnah",
+        "Dreamscythe",
+        61.0201,
+        116.0
+      ],
+      [
+        "Ainosora",
+        "Dreamscythe",
+        12.8147,
+        111.0
+      ],
+      [
+        "Ainsworth",
+        "Dreamscythe",
+        81.29116569500601,
+        113.0
+      ],
+      [
+        "Ainzyah",
+        "Dreamscythe",
+        56.0382713143822,
+        115.0
+      ],
+      [
+        "Aioh",
+        "Dreamscythe",
+        72.9752,
+        111.0
+      ],
+      [
+        "Aioras",
+        "Dreamscythe",
+        82.2397,
+        111.0
+      ],
+      [
+        "Aipionir",
+        "Dreamscythe",
+        68.49057138399101,
+        112.0
+      ],
+      [
+        "Airathle",
+        "Dreamscythe",
+        84.50438091133397,
+        112.0
+      ],
+      [
+        "Airbagit",
+        "Dreamscythe",
+        60.2905,
+        115.0
+      ],
+      [
+        "Airblaster",
+        "Dreamscythe",
+        62.6454,
+        109.0
+      ],
+      [
+        "Airdii",
+        "Dreamscythe",
+        96.6463,
+        116.0
+      ],
+      [
+        "Airdiix",
+        "Dreamscythe",
+        10.502,
+        115.0
+      ],
+      [
+        "Airekka",
+        "Dreamscythe",
+        40.212854298666066,
+        112.0
+      ],
+      [
+        "Airell",
+        "Dreamscythe",
+        31.6163,
+        107.0
+      ],
+      [
+        "Airenos",
+        "Dreamscythe",
+        18.7387,
+        112.0
+      ],
+      [
+        "Airetam",
+        "Dreamscythe",
+        91.7692,
+        111.0
+      ],
+      [
+        "Airezjr",
+        "Dreamscythe",
+        98.0516,
+        113.0
+      ],
+      [
+        "Airgolem",
+        "Dreamscythe",
+        17.3469,
+        109.0
+      ],
+      [
+        "Airhole",
+        "Dreamscythe",
+        76.03155486142388,
+        111.0
+      ],
+      [
+        "Airi",
+        "Dreamscythe",
+        80.3691,
+        113.0
+      ],
+      [
+        "Airikwar",
+        "Dreamscythe",
+        86.4026,
+        106.0
+      ],
+      [
+        "Airiy",
+        "Dreamscythe",
+        50.5983,
+        112.0
+      ],
+      [
+        "Airmedhylda",
+        "Dreamscythe",
+        0.9623906689621305,
+        102.0
+      ],
+      [
+        "Airnick",
+        "Dreamscythe",
+        50.0,
+        112.0
+      ],
+      [
+        "Airok",
+        "Dreamscythe",
+        89.8983,
+        100.0
+      ],
+      [
+        "Aironar",
+        "Dreamscythe",
+        92.40615045550217,
+        114.0
+      ],
+      [
+        "Airone",
+        "Dreamscythe",
+        62.79515930904441,
+        108.0
+      ],
+      [
+        "Aironk",
+        "Dreamscythe",
+        62.37844377879098,
+        109.0
+      ],
+      [
+        "Airowarlock",
+        "Dreamscythe",
+        15.452795755527251,
+        113.0
+      ],
+      [
+        "Airplaneears",
+        "Dreamscythe",
+        91.80246661823068,
+        110.0
+      ],
+      [
+        "Airportal",
+        "Dreamscythe",
+        81.37103088218375,
+        115.0
+      ],
+      [
+        "Airra",
+        "Dreamscythe",
+        80.0,
+        112.0
+      ],
+      [
+        "Airrashylie",
+        "Dreamscythe",
+        87.64995995418828,
+        115.0
+      ],
+      [
+        "Airrey",
+        "Dreamscythe",
+        89.74562962087975,
+        116.0
+      ],
+      [
+        "Airtaco",
+        "Dreamscythe",
+        37.1574,
+        113.0
+      ],
+      [
+        "Airtaxi",
+        "Dreamscythe",
+        31.9585,
+        113.0
+      ],
+      [
+        "Airtyte",
+        "Dreamscythe",
+        92.1006,
+        114.0
+      ],
+      [
+        "Airvaster",
+        "Dreamscythe",
+        64.646,
+        113.0
+      ],
+      [
+        "Airymoo",
+        "Dreamscythe",
+        70.83409010429959,
+        112.0
+      ],
+      [
+        "Aisen",
+        "Dreamscythe",
+        83.6999,
+        112.0
+      ],
+      [
+        "Aislehealzju",
+        "Dreamscythe",
+        69.95644795164647,
+        108.0
+      ],
+      [
+        "Aitabulas",
+        "Dreamscythe",
+        41.73349387946686,
+        114.0
+      ],
+      [
+        "Aithur",
+        "Dreamscythe",
+        69.24998421975108,
+        111.0
+      ],
+      [
+        "Aithyr",
+        "Dreamscythe",
+        47.13825543951974,
+        110.0
+      ],
+      [
+        "Aiunii",
+        "Dreamscythe",
+        21.79742015617004,
+        112.0
+      ],
+      [
+        "Aivana",
+        "Dreamscythe",
+        99.3082,
+        111.0
+      ],
+      [
+        "Aivenn",
+        "Dreamscythe",
+        37.92912134284591,
+        114.0
+      ],
+      [
+        "Aizlyn",
+        "Dreamscythe",
+        5.54779,
+        109.0
+      ],
+      [
+        "Aizuthegrand",
+        "Dreamscythe",
+        22.3836,
+        113.0
+      ],
+      [
+        "Ajabalaj",
+        "Dreamscythe",
+        63.53593765705614,
+        114.0
+      ],
+      [
+        "Ajabaralani",
+        "Dreamscythe",
+        42.1282,
+        111.0
+      ],
+      [
+        "Ajack",
+        "Dreamscythe",
+        90.1117,
+        113.0
+      ],
+      [
+        "Ajackz",
+        "Dreamscythe",
+        92.9211,
+        112.0
+      ],
+      [
+        "Ajamian",
+        "Dreamscythe",
+        64.05509541745188,
+        111.0
+      ],
+      [
+        "Ajanis",
+        "Dreamscythe",
+        95.8015,
+        107.0
+      ],
+      [
+        "Ajaxx",
+        "Dreamscythe",
+        95.1494,
+        113.0
+      ],
+      [
+        "Ajontis",
+        "Dreamscythe",
+        87.7724,
+        113.0
+      ],
+      [
+        "Ajuladin",
+        "Dreamscythe",
+        75.60650083051779,
+        117.0
+      ],
+      [
+        "Ajumpstart",
+        "Dreamscythe",
+        73.5076,
+        107.0
+      ],
+      [
+        "Aj\u00e3pplegate",
+        "Dreamscythe",
+        54.77402452803002,
+        111.0
+      ],
+      [
+        "Aka",
+        "Dreamscythe",
+        89.6529,
+        110.0
+      ],
+      [
+        "Akaattila",
+        "Dreamscythe",
+        70.8305,
+        115.0
+      ],
+      [
+        "Akabackwards",
+        "Dreamscythe",
+        68.48489203857365,
+        107.0
+      ],
+      [
+        "Akabo",
+        "Dreamscythe",
+        14.9699,
+        111.0
+      ],
+      [
+        "Akadan",
+        "Dreamscythe",
+        2.80263,
+        110.0
+      ],
+      [
+        "Akadiaqt",
+        "Dreamscythe",
+        28.2015,
+        111.0
+      ],
+      [
+        "Akaeden",
+        "Dreamscythe",
+        25.2985,
+        115.0
+      ],
+      [
+        "Akaeldama",
+        "Dreamscythe",
+        15.4834,
+        111.0
+      ],
+      [
+        "Akafoxslayer",
+        "Dreamscythe",
+        54.4616,
+        115.0
+      ],
+      [
+        "Akahime",
+        "Dreamscythe",
+        71.9751,
+        110.0
+      ],
+      [
+        "Akahmah",
+        "Dreamscythe",
+        34.7875,
+        115.0
+      ],
+      [
+        "Akaholywater",
+        "Dreamscythe",
+        67.1257,
+        113.0
+      ],
+      [
+        "Akaim",
+        "Dreamscythe",
+        58.99528712861832,
+        112.0
+      ],
+      [
+        "Akala",
+        "Dreamscythe",
+        70.9704,
+        110.0
+      ],
+      [
+        "Akal\u00eea",
+        "Dreamscythe",
+        8.868266564629018,
+        114.0
+      ],
+      [
+        "Akamaitara",
+        "Dreamscythe",
+        35.408025887903875,
+        110.0
+      ],
+      [
+        "Akamanis",
+        "Dreamscythe",
+        12.347156141736551,
+        110.0
+      ],
+      [
+        "Akamaz",
+        "Dreamscythe",
+        83.5868,
+        110.0
+      ],
+      [
+        "Akamina",
+        "Dreamscythe",
+        99.13452753725618,
+        96.0
+      ],
+      [
+        "Akanah",
+        "Dreamscythe",
+        41.50837344287106,
+        110.0
+      ],
+      [
+        "Akano",
+        "Dreamscythe",
+        53.469928190393325,
+        109.0
+      ],
+      [
+        "Akan\u00f6s",
+        "Dreamscythe",
+        87.4261,
+        110.0
+      ],
+      [
+        "Akaraka",
+        "Dreamscythe",
+        13.781,
+        106.0
+      ],
+      [
+        "Akasuki",
+        "Dreamscythe",
+        17.7344,
+        110.0
       ]
     ],
     "1047:50657": [
@@ -24622,7 +27130,7 @@
       [
         "Ahndi",
         "Dreamscythe",
-        0.999234795934251,
+        0.999235,
         106.0
       ],
       [
@@ -24646,7 +27154,7 @@
       [
         "Ahonawkawan",
         "Dreamscythe",
-        37.462693506890794,
+        37.4627,
         107.0
       ],
       [
@@ -24688,7 +27196,7 @@
       [
         "Ahriakazaya",
         "Dreamscythe",
-        58.349267283091805,
+        58.3493,
         104.0
       ],
       [
@@ -24712,7 +27220,7 @@
       [
         "Ahshoot",
         "Dreamscythe",
-        22.25787603471575,
+        22.2579,
         112.0
       ],
       [
@@ -24724,7 +27232,7 @@
       [
         "Ahsie",
         "Dreamscythe",
-        77.19116466241093,
+        77.1912,
         112.0
       ],
       [
@@ -24760,13 +27268,13 @@
       [
         "Ahumun",
         "Dreamscythe",
-        72.26505997234328,
+        72.2651,
         116.0
       ],
       [
         "Ahuntersry",
         "Dreamscythe",
-        31.74105024999382,
+        31.7411,
         112.0
       ],
       [
@@ -24802,13 +27310,13 @@
       [
         "Aidivvh",
         "Dreamscythe",
-        80.2143,
-        114.0
+        80.21430678539399,
+        116.0
       ],
       [
         "Aidono",
         "Dreamscythe",
-        35.67147351823897,
+        35.6715,
         113.0
       ],
       [
@@ -24856,7 +27364,7 @@
       [
         "Aiidie",
         "Dreamscythe",
-        60.1853757881027,
+        60.1854,
         106.0
       ],
       [
@@ -24886,7 +27394,7 @@
       [
         "Aikohime",
         "Dreamscythe",
-        73.79627343062278,
+        73.7963,
         115.0
       ],
       [
@@ -24898,7 +27406,7 @@
       [
         "Aikunn",
         "Dreamscythe",
-        35.10689517336221,
+        35.1069,
         114.0
       ],
       [
@@ -24911,7 +27419,7 @@
         "Ailirra",
         "Dreamscythe",
         90.0,
-        98.0
+        108.0
       ],
       [
         "Ailissa",
@@ -24922,7 +27430,7 @@
       [
         "Ailow",
         "Dreamscythe",
-        63.75475744447369,
+        63.7548,
         110.0
       ],
       [
@@ -24958,7 +27466,7 @@
       [
         "Aimee",
         "Dreamscythe",
-        71.89396966174444,
+        71.894,
         114.0
       ],
       [
@@ -25006,7 +27514,7 @@
       [
         "Aimsformagic",
         "Dreamscythe",
-        60.717074582116254,
+        60.7171,
         111.0
       ],
       [
@@ -25018,8 +27526,512 @@
       [
         "Ainax",
         "Dreamscythe",
-        38.80075122690745,
+        38.8008,
         115.0
+      ],
+      [
+        "Ainnah",
+        "Dreamscythe",
+        83.7738,
+        116.0
+      ],
+      [
+        "Ainosora",
+        "Dreamscythe",
+        9.57884,
+        109.0
+      ],
+      [
+        "Ainsworth",
+        "Dreamscythe",
+        71.35721857135121,
+        114.0
+      ],
+      [
+        "Ainzyah",
+        "Dreamscythe",
+        62.47533752673811,
+        115.0
+      ],
+      [
+        "Aioh",
+        "Dreamscythe",
+        27.656,
+        112.0
+      ],
+      [
+        "Aioras",
+        "Dreamscythe",
+        63.8839,
+        111.0
+      ],
+      [
+        "Aipionir",
+        "Dreamscythe",
+        27.029932126811527,
+        112.0
+      ],
+      [
+        "Airathle",
+        "Dreamscythe",
+        76.77113941846984,
+        113.0
+      ],
+      [
+        "Airbagit",
+        "Dreamscythe",
+        41.5379,
+        116.0
+      ],
+      [
+        "Airblaster",
+        "Dreamscythe",
+        73.7803,
+        109.0
+      ],
+      [
+        "Airdii",
+        "Dreamscythe",
+        87.345,
+        115.0
+      ],
+      [
+        "Airdiix",
+        "Dreamscythe",
+        50.4768,
+        110.0
+      ],
+      [
+        "Airekka",
+        "Dreamscythe",
+        25.15222140857312,
+        112.0
+      ],
+      [
+        "Airell",
+        "Dreamscythe",
+        68.2426,
+        107.0
+      ],
+      [
+        "Airenos",
+        "Dreamscythe",
+        0.96121,
+        112.0
+      ],
+      [
+        "Airetam",
+        "Dreamscythe",
+        80.8347,
+        111.0
+      ],
+      [
+        "Airezjr",
+        "Dreamscythe",
+        98.6186,
+        113.0
+      ],
+      [
+        "Airgolem",
+        "Dreamscythe",
+        44.9495,
+        109.0
+      ],
+      [
+        "Airhole",
+        "Dreamscythe",
+        78.3736079066095,
+        111.0
+      ],
+      [
+        "Airi",
+        "Dreamscythe",
+        93.8717,
+        112.0
+      ],
+      [
+        "Airikwar",
+        "Dreamscythe",
+        98.9074,
+        106.0
+      ],
+      [
+        "Airiy",
+        "Dreamscythe",
+        62.8295,
+        112.0
+      ],
+      [
+        "Airmedhylda",
+        "Dreamscythe",
+        3.852612673039788,
+        102.0
+      ],
+      [
+        "Airnick",
+        "Dreamscythe",
+        30.0,
+        114.0
+      ],
+      [
+        "Airok",
+        "Dreamscythe",
+        39.0221,
+        101.0
+      ],
+      [
+        "Aironar",
+        "Dreamscythe",
+        89.96567436271393,
+        114.0
+      ],
+      [
+        "Airone",
+        "Dreamscythe",
+        56.173870335115375,
+        107.0
+      ],
+      [
+        "Aironk",
+        "Dreamscythe",
+        47.765508515147715,
+        112.0
+      ],
+      [
+        "Airowarlock",
+        "Dreamscythe",
+        29.748202353527937,
+        113.0
+      ],
+      [
+        "Airplaneears",
+        "Dreamscythe",
+        92.68506079196939,
+        110.0
+      ],
+      [
+        "Airportal",
+        "Dreamscythe",
+        71.00085331897975,
+        115.0
+      ],
+      [
+        "Airra",
+        "Dreamscythe",
+        80.38590825226872,
+        112.0
+      ],
+      [
+        "Airrashylie",
+        "Dreamscythe",
+        66.85302345862462,
+        115.0
+      ],
+      [
+        "Airrey",
+        "Dreamscythe",
+        59.43975798781716,
+        112.0
+      ],
+      [
+        "Airtaco",
+        "Dreamscythe",
+        26.3846,
+        113.0
+      ],
+      [
+        "Airtaxi",
+        "Dreamscythe",
+        38.613,
+        113.0
+      ],
+      [
+        "Airtyte",
+        "Dreamscythe",
+        95.2656,
+        110.0
+      ],
+      [
+        "Airvaster",
+        "Dreamscythe",
+        84.3541,
+        114.0
+      ],
+      [
+        "Airymoo",
+        "Dreamscythe",
+        80.55531153866079,
+        115.0
+      ],
+      [
+        "Aisen",
+        "Dreamscythe",
+        70.82685768728889,
+        114.0
+      ],
+      [
+        "Aislehealzju",
+        "Dreamscythe",
+        71.47362106354909,
+        111.0
+      ],
+      [
+        "Aitabulas",
+        "Dreamscythe",
+        25.011837950327,
+        114.0
+      ],
+      [
+        "Aithur",
+        "Dreamscythe",
+        25.288093022929775,
+        111.0
+      ],
+      [
+        "Aithyr",
+        "Dreamscythe",
+        90.17038533679097,
+        110.0
+      ],
+      [
+        "Aiunii",
+        "Dreamscythe",
+        18.473442402735373,
+        112.0
+      ],
+      [
+        "Aivana",
+        "Dreamscythe",
+        88.918,
+        110.0
+      ],
+      [
+        "Aivenn",
+        "Dreamscythe",
+        65.2510896389408,
+        114.0
+      ],
+      [
+        "Aizlyn",
+        "Dreamscythe",
+        27.5409,
+        109.0
+      ],
+      [
+        "Aizuthegrand",
+        "Dreamscythe",
+        9.08145,
+        114.0
+      ],
+      [
+        "Ajabalaj",
+        "Dreamscythe",
+        60.571766028858924,
+        115.0
+      ],
+      [
+        "Ajabaralani",
+        "Dreamscythe",
+        3.59654,
+        111.0
+      ],
+      [
+        "Ajack",
+        "Dreamscythe",
+        89.2092,
+        112.0
+      ],
+      [
+        "Ajackz",
+        "Dreamscythe",
+        91.4044,
+        115.0
+      ],
+      [
+        "Ajamian",
+        "Dreamscythe",
+        42.258313309826875,
+        112.0
+      ],
+      [
+        "Ajanis",
+        "Dreamscythe",
+        88.343,
+        112.0
+      ],
+      [
+        "Ajaxx",
+        "Dreamscythe",
+        90.0495,
+        111.0
+      ],
+      [
+        "Ajontis",
+        "Dreamscythe",
+        81.0053,
+        109.0
+      ],
+      [
+        "Ajuladin",
+        "Dreamscythe",
+        60.0,
+        116.0
+      ],
+      [
+        "Ajumpstart",
+        "Dreamscythe",
+        48.1274,
+        107.0
+      ],
+      [
+        "Aj\u00e3pplegate",
+        "Dreamscythe",
+        80.08591885570172,
+        111.0
+      ],
+      [
+        "Aka",
+        "Dreamscythe",
+        86.703,
+        111.0
+      ],
+      [
+        "Akaattila",
+        "Dreamscythe",
+        65.0973,
+        115.0
+      ],
+      [
+        "Akabackwards",
+        "Dreamscythe",
+        67.95625871471437,
+        111.0
+      ],
+      [
+        "Akabo",
+        "Dreamscythe",
+        96.1144,
+        111.0
+      ],
+      [
+        "Akadan",
+        "Dreamscythe",
+        2.8489,
+        110.0
+      ],
+      [
+        "Akadiaqt",
+        "Dreamscythe",
+        61.8685,
+        111.0
+      ],
+      [
+        "Akaeden",
+        "Dreamscythe",
+        7.87192,
+        115.0
+      ],
+      [
+        "Akaeldama",
+        "Dreamscythe",
+        2.4095,
+        111.0
+      ],
+      [
+        "Akafoxslayer",
+        "Dreamscythe",
+        56.5644,
+        113.0
+      ],
+      [
+        "Akahime",
+        "Dreamscythe",
+        83.2879,
+        114.0
+      ],
+      [
+        "Akahmah",
+        "Dreamscythe",
+        95.7714,
+        111.0
+      ],
+      [
+        "Akaholywater",
+        "Dreamscythe",
+        70.2314,
+        113.0
+      ],
+      [
+        "Akaim",
+        "Dreamscythe",
+        13.809623047419786,
+        113.0
+      ],
+      [
+        "Akala",
+        "Dreamscythe",
+        79.1594,
+        112.0
+      ],
+      [
+        "Akal\u00eea",
+        "Dreamscythe",
+        27.28074651280632,
+        114.0
+      ],
+      [
+        "Akamaitara",
+        "Dreamscythe",
+        31.676703348167397,
+        110.0
+      ],
+      [
+        "Akamanis",
+        "Dreamscythe",
+        36.55909363579215,
+        110.0
+      ],
+      [
+        "Akamaz",
+        "Dreamscythe",
+        89.2502,
+        113.0
+      ],
+      [
+        "Akamina",
+        "Dreamscythe",
+        80.0,
+        104.0
+      ],
+      [
+        "Akanah",
+        "Dreamscythe",
+        63.45421424204863,
+        115.0
+      ],
+      [
+        "Akano",
+        "Dreamscythe",
+        69.88140585858491,
+        114.0
+      ],
+      [
+        "Akan\u00f6s",
+        "Dreamscythe",
+        90.8363,
+        110.0
+      ],
+      [
+        "Akaraka",
+        "Dreamscythe",
+        2.70095,
+        106.0
+      ],
+      [
+        "Akasuki",
+        "Dreamscythe",
+        72.7549,
+        112.0
       ]
     ],
     "1047:50658": [
@@ -28741,7 +31753,7 @@
         "Ahkris",
         "Dreamscythe",
         80.0,
-        114.0
+        115.0
       ],
       [
         "Ahlaadon",
@@ -28770,7 +31782,7 @@
       [
         "Ahlya",
         "Dreamscythe",
-        62.68856710031172,
+        62.6886,
         108.0
       ],
       [
@@ -28824,7 +31836,7 @@
       [
         "Ahnold",
         "Dreamscythe",
-        97.83895013553784,
+        97.839,
         113.0
       ],
       [
@@ -28902,7 +31914,7 @@
       [
         "Ahshakahmi",
         "Dreamscythe",
-        27.594494186822875,
+        27.5945,
         114.0
       ],
       [
@@ -28914,13 +31926,13 @@
       [
         "Ahsi",
         "Dreamscythe",
-        96.29379105331978,
+        96.2938,
         109.0
       ],
       [
         "Ahsie",
         "Dreamscythe",
-        35.62658661839269,
+        35.6266,
         114.0
       ],
       [
@@ -28938,13 +31950,13 @@
       [
         "Ahsokatano",
         "Dreamscythe",
-        13.653584801900466,
+        13.6536,
         113.0
       ],
       [
         "Ahtin",
         "Dreamscythe",
-        75.87509196646285,
+        75.8751,
         114.0
       ],
       [
@@ -28956,13 +31968,13 @@
       [
         "Ahumun",
         "Dreamscythe",
-        74.02455711137733,
+        74.0246,
         115.0
       ],
       [
         "Ahuntersry",
         "Dreamscythe",
-        53.116491760728856,
+        53.1165,
         112.0
       ],
       [
@@ -28998,19 +32010,19 @@
       [
         "Aidivvh",
         "Dreamscythe",
-        76.5081,
+        76.50814392978108,
         114.0
       ],
       [
         "Aidono",
         "Dreamscythe",
-        50.651190184253885,
+        50.6512,
         113.0
       ],
       [
         "Aidsdyk",
         "Dreamscythe",
-        18.467195903630355,
+        18.4672,
         113.0
       ],
       [
@@ -29028,7 +32040,7 @@
       [
         "Aienzen",
         "Dreamscythe",
-        27.39429585354679,
+        27.3943,
         113.0
       ],
       [
@@ -29052,7 +32064,7 @@
       [
         "Aiidie",
         "Dreamscythe",
-        55.8298929874217,
+        55.8299,
         106.0
       ],
       [
@@ -29070,7 +32082,7 @@
       [
         "Aiishii",
         "Dreamscythe",
-        25.748491220787397,
+        25.7485,
         112.0
       ],
       [
@@ -29088,13 +32100,13 @@
       [
         "Aikun",
         "Dreamscythe",
-        50.360467357101115,
+        50.3605,
         117.0
       ],
       [
         "Aikunn",
         "Dreamscythe",
-        42.22035912238429,
+        42.2204,
         114.0
       ],
       [
@@ -29107,7 +32119,7 @@
         "Ailirra",
         "Dreamscythe",
         90.0,
-        98.0
+        108.0
       ],
       [
         "Ailissa",
@@ -29118,7 +32130,7 @@
       [
         "Ailow",
         "Dreamscythe",
-        39.93097547978158,
+        39.931,
         110.0
       ],
       [
@@ -29216,6 +32228,504 @@
         "Dreamscythe",
         36.5245,
         114.0
+      ],
+      [
+        "Ainnah",
+        "Dreamscythe",
+        96.7131,
+        116.0
+      ],
+      [
+        "Ainosora",
+        "Dreamscythe",
+        38.1559,
+        111.0
+      ],
+      [
+        "Ainsworth",
+        "Dreamscythe",
+        87.8332921149828,
+        113.0
+      ],
+      [
+        "Ainzyah",
+        "Dreamscythe",
+        42.42273844007395,
+        115.0
+      ],
+      [
+        "Aioh",
+        "Dreamscythe",
+        72.7646,
+        112.0
+      ],
+      [
+        "Aioras",
+        "Dreamscythe",
+        74.5739,
+        111.0
+      ],
+      [
+        "Aipionir",
+        "Dreamscythe",
+        20.552623366800276,
+        112.0
+      ],
+      [
+        "Airathle",
+        "Dreamscythe",
+        63.346660589554105,
+        112.0
+      ],
+      [
+        "Airbagit",
+        "Dreamscythe",
+        41.6882,
+        115.0
+      ],
+      [
+        "Airblaster",
+        "Dreamscythe",
+        59.3225,
+        113.0
+      ],
+      [
+        "Airdii",
+        "Dreamscythe",
+        93.9617,
+        111.0
+      ],
+      [
+        "Airdiix",
+        "Dreamscythe",
+        34.0079,
+        115.0
+      ],
+      [
+        "Airekka",
+        "Dreamscythe",
+        12.668013458407934,
+        109.0
+      ],
+      [
+        "Airell",
+        "Dreamscythe",
+        43.2028,
+        101.0
+      ],
+      [
+        "Airenos",
+        "Dreamscythe",
+        3.89019,
+        112.0
+      ],
+      [
+        "Airetam",
+        "Dreamscythe",
+        87.4903,
+        111.0
+      ],
+      [
+        "Airezjr",
+        "Dreamscythe",
+        85.0983,
+        112.0
+      ],
+      [
+        "Airgolem",
+        "Dreamscythe",
+        67.7628,
+        109.0
+      ],
+      [
+        "Airhole",
+        "Dreamscythe",
+        79.24516855353184,
+        111.0
+      ],
+      [
+        "Airi",
+        "Dreamscythe",
+        92.0612,
+        113.0
+      ],
+      [
+        "Airikwar",
+        "Dreamscythe",
+        97.8665,
+        106.0
+      ],
+      [
+        "Airiy",
+        "Dreamscythe",
+        37.7482,
+        112.0
+      ],
+      [
+        "Airmedhylda",
+        "Dreamscythe",
+        0.6159027865433747,
+        102.0
+      ],
+      [
+        "Airnick",
+        "Dreamscythe",
+        52.50912924677779,
+        112.0
+      ],
+      [
+        "Airok",
+        "Dreamscythe",
+        36.6483,
+        103.0
+      ],
+      [
+        "Aironar",
+        "Dreamscythe",
+        89.86965229427622,
+        115.0
+      ],
+      [
+        "Airone",
+        "Dreamscythe",
+        28.078403547692023,
+        108.0
+      ],
+      [
+        "Aironk",
+        "Dreamscythe",
+        10.947616198054702,
+        102.0
+      ],
+      [
+        "Airowarlock",
+        "Dreamscythe",
+        20.152320004050512,
+        113.0
+      ],
+      [
+        "Airplaneears",
+        "Dreamscythe",
+        80.0,
+        110.0
+      ],
+      [
+        "Airportal",
+        "Dreamscythe",
+        53.676514188833195,
+        115.0
+      ],
+      [
+        "Airra",
+        "Dreamscythe",
+        80.0,
+        112.0
+      ],
+      [
+        "Airrashylie",
+        "Dreamscythe",
+        90.16944469914802,
+        113.0
+      ],
+      [
+        "Airrey",
+        "Dreamscythe",
+        33.78459740874423,
+        114.0
+      ],
+      [
+        "Airtaco",
+        "Dreamscythe",
+        69.6725,
+        113.0
+      ],
+      [
+        "Airtaxi",
+        "Dreamscythe",
+        39.4012,
+        113.0
+      ],
+      [
+        "Airtyte",
+        "Dreamscythe",
+        89.5344,
+        110.0
+      ],
+      [
+        "Airvaster",
+        "Dreamscythe",
+        80.3927,
+        113.0
+      ],
+      [
+        "Airymoo",
+        "Dreamscythe",
+        49.048089409839605,
+        115.0
+      ],
+      [
+        "Aisen",
+        "Dreamscythe",
+        12.8995,
+        112.0
+      ],
+      [
+        "Aislehealzju",
+        "Dreamscythe",
+        40.0,
+        111.0
+      ],
+      [
+        "Aitabulas",
+        "Dreamscythe",
+        29.49686023977039,
+        112.0
+      ],
+      [
+        "Aithur",
+        "Dreamscythe",
+        57.24995951690944,
+        113.0
+      ],
+      [
+        "Aithyr",
+        "Dreamscythe",
+        78.28429541329069,
+        110.0
+      ],
+      [
+        "Aiunii",
+        "Dreamscythe",
+        18.992561286359656,
+        112.0
+      ],
+      [
+        "Aivana",
+        "Dreamscythe",
+        96.1845,
+        110.0
+      ],
+      [
+        "Aivenn",
+        "Dreamscythe",
+        80.8809741150858,
+        111.0
+      ],
+      [
+        "Aizlyn",
+        "Dreamscythe",
+        13.8555,
+        111.0
+      ],
+      [
+        "Aizuthegrand",
+        "Dreamscythe",
+        5.17842,
+        112.0
+      ],
+      [
+        "Ajabalaj",
+        "Dreamscythe",
+        20.0,
+        115.0
+      ],
+      [
+        "Ajabaralani",
+        "Dreamscythe",
+        10.6703,
+        111.0
+      ],
+      [
+        "Ajack",
+        "Dreamscythe",
+        84.7851,
+        113.0
+      ],
+      [
+        "Ajackz",
+        "Dreamscythe",
+        88.0297,
+        115.0
+      ],
+      [
+        "Ajamian",
+        "Dreamscythe",
+        58.890820434466804,
+        114.0
+      ],
+      [
+        "Ajanis",
+        "Dreamscythe",
+        92.2842,
+        108.0
+      ],
+      [
+        "Ajaxx",
+        "Dreamscythe",
+        83.1465,
+        113.0
+      ],
+      [
+        "Ajontis",
+        "Dreamscythe",
+        65.3786,
+        112.0
+      ],
+      [
+        "Ajuladin",
+        "Dreamscythe",
+        67.28149124396857,
+        117.0
+      ],
+      [
+        "Ajumpstart",
+        "Dreamscythe",
+        57.7175,
+        112.0
+      ],
+      [
+        "Aj\u00e3pplegate",
+        "Dreamscythe",
+        19.842910207365577,
+        111.0
+      ],
+      [
+        "Aka",
+        "Dreamscythe",
+        95.7652,
+        111.0
+      ],
+      [
+        "Akaattila",
+        "Dreamscythe",
+        78.5524,
+        115.0
+      ],
+      [
+        "Akabackwards",
+        "Dreamscythe",
+        48.44119018837656,
+        111.0
+      ],
+      [
+        "Akabo",
+        "Dreamscythe",
+        89.6502,
+        111.0
+      ],
+      [
+        "Akadan",
+        "Dreamscythe",
+        4.82165,
+        110.0
+      ],
+      [
+        "Akadiaqt",
+        "Dreamscythe",
+        69.8175,
+        111.0
+      ],
+      [
+        "Akaeden",
+        "Dreamscythe",
+        9.48553,
+        115.0
+      ],
+      [
+        "Akafoxslayer",
+        "Dreamscythe",
+        55.4417,
+        115.0
+      ],
+      [
+        "Akahime",
+        "Dreamscythe",
+        60.9086,
+        114.0
+      ],
+      [
+        "Akahmah",
+        "Dreamscythe",
+        96.8383,
+        111.0
+      ],
+      [
+        "Akaholywater",
+        "Dreamscythe",
+        64.0477,
+        113.0
+      ],
+      [
+        "Akaim",
+        "Dreamscythe",
+        18.832908583755533,
+        113.0
+      ],
+      [
+        "Akala",
+        "Dreamscythe",
+        76.1661,
+        112.0
+      ],
+      [
+        "Akal\u00eea",
+        "Dreamscythe",
+        46.27723427281801,
+        114.0
+      ],
+      [
+        "Akamaitara",
+        "Dreamscythe",
+        64.31072383873591,
+        110.0
+      ],
+      [
+        "Akamanis",
+        "Dreamscythe",
+        43.78201595569596,
+        110.0
+      ],
+      [
+        "Akamaz",
+        "Dreamscythe",
+        93.9194,
+        113.0
+      ],
+      [
+        "Akamina",
+        "Dreamscythe",
+        96.84360095784353,
+        106.0
+      ],
+      [
+        "Akanah",
+        "Dreamscythe",
+        50.15783645279118,
+        110.0
+      ],
+      [
+        "Akano",
+        "Dreamscythe",
+        77.35950238152819,
+        114.0
+      ],
+      [
+        "Akan\u00f6s",
+        "Dreamscythe",
+        91.3177,
+        111.0
+      ],
+      [
+        "Akaraka",
+        "Dreamscythe",
+        23.172,
+        106.0
+      ],
+      [
+        "Akasuki",
+        "Dreamscythe",
+        32.1905,
+        112.0
       ]
     ],
     "1047:50659": [
@@ -32888,7 +36398,7 @@
       [
         "Ahlya",
         "Dreamscythe",
-        57.09988654213909,
+        57.0999,
         109.0
       ],
       [
@@ -32942,7 +36452,7 @@
       [
         "Ahnold",
         "Dreamscythe",
-        89.06928630542876,
+        89.0693,
         116.0
       ],
       [
@@ -32996,7 +36506,7 @@
       [
         "Ahriakazaya",
         "Dreamscythe",
-        31.781387281635034,
+        31.7814,
         106.0
       ],
       [
@@ -33026,13 +36536,13 @@
       [
         "Ahsi",
         "Dreamscythe",
-        85.43468497063026,
+        85.4347,
         107.0
       ],
       [
         "Ahsie",
         "Dreamscythe",
-        86.8286664378931,
+        86.8287,
         114.0
       ],
       [
@@ -33050,7 +36560,7 @@
       [
         "Ahsokatano",
         "Dreamscythe",
-        25.942392064057127,
+        25.9424,
         113.0
       ],
       [
@@ -33068,13 +36578,13 @@
       [
         "Ahumun",
         "Dreamscythe",
-        56.199373104460804,
+        56.1994,
         115.0
       ],
       [
         "Ahuntersry",
         "Dreamscythe",
-        68.33196523885168,
+        68.332,
         112.0
       ],
       [
@@ -33104,13 +36614,13 @@
       [
         "Aidiermoda",
         "Dreamscythe",
-        64.99939389137148,
+        64.9994,
         116.0
       ],
       [
         "Aidivvh",
         "Dreamscythe",
-        61.4124,
+        61.412450620273155,
         116.0
       ],
       [
@@ -33182,7 +36692,7 @@
       [
         "Aiishii",
         "Dreamscythe",
-        18.740884307959487,
+        18.7409,
         112.0
       ],
       [
@@ -33194,13 +36704,13 @@
       [
         "Aikohime",
         "Dreamscythe",
-        70.03227086275183,
+        70.0323,
         115.0
       ],
       [
         "Aikun",
         "Dreamscythe",
-        24.233954546643467,
+        24.234,
         117.0
       ],
       [
@@ -33328,6 +36838,498 @@
         "Dreamscythe",
         37.7892,
         113.0
+      ],
+      [
+        "Ainnah",
+        "Dreamscythe",
+        78.0363,
+        116.0
+      ],
+      [
+        "Ainosora",
+        "Dreamscythe",
+        5.36551,
+        110.0
+      ],
+      [
+        "Ainsworth",
+        "Dreamscythe",
+        87.15878551553591,
+        114.0
+      ],
+      [
+        "Ainzyah",
+        "Dreamscythe",
+        41.78510092964409,
+        115.0
+      ],
+      [
+        "Aioras",
+        "Dreamscythe",
+        60.1816,
+        113.0
+      ],
+      [
+        "Aipionir",
+        "Dreamscythe",
+        70.63015297426783,
+        112.0
+      ],
+      [
+        "Airathle",
+        "Dreamscythe",
+        68.59201869991571,
+        112.0
+      ],
+      [
+        "Airbagit",
+        "Dreamscythe",
+        19.2945,
+        116.0
+      ],
+      [
+        "Airblaster",
+        "Dreamscythe",
+        41.3903,
+        109.0
+      ],
+      [
+        "Airdii",
+        "Dreamscythe",
+        91.8775,
+        116.0
+      ],
+      [
+        "Airdiix",
+        "Dreamscythe",
+        37.742,
+        115.0
+      ],
+      [
+        "Airekka",
+        "Dreamscythe",
+        21.72172526900756,
+        112.0
+      ],
+      [
+        "Airell",
+        "Dreamscythe",
+        73.8773,
+        107.0
+      ],
+      [
+        "Airenos",
+        "Dreamscythe",
+        55.431,
+        112.0
+      ],
+      [
+        "Airetam",
+        "Dreamscythe",
+        69.2833,
+        111.0
+      ],
+      [
+        "Airezjr",
+        "Dreamscythe",
+        77.3505,
+        112.0
+      ],
+      [
+        "Airgolem",
+        "Dreamscythe",
+        49.0341,
+        109.0
+      ],
+      [
+        "Airhole",
+        "Dreamscythe",
+        83.37447383527726,
+        112.0
+      ],
+      [
+        "Airi",
+        "Dreamscythe",
+        97.6899,
+        109.0
+      ],
+      [
+        "Airikwar",
+        "Dreamscythe",
+        98.1566,
+        106.0
+      ],
+      [
+        "Airiy",
+        "Dreamscythe",
+        48.9421,
+        114.0
+      ],
+      [
+        "Airmedhylda",
+        "Dreamscythe",
+        1.484182544692643,
+        102.0
+      ],
+      [
+        "Airnick",
+        "Dreamscythe",
+        50.0,
+        114.0
+      ],
+      [
+        "Airok",
+        "Dreamscythe",
+        30.5143,
+        103.0
+      ],
+      [
+        "Aironar",
+        "Dreamscythe",
+        90.87478290703538,
+        114.0
+      ],
+      [
+        "Airone",
+        "Dreamscythe",
+        37.35916916646701,
+        108.0
+      ],
+      [
+        "Aironk",
+        "Dreamscythe",
+        43.949148053210244,
+        112.0
+      ],
+      [
+        "Airowarlock",
+        "Dreamscythe",
+        29.61111604406195,
+        113.0
+      ],
+      [
+        "Airplaneears",
+        "Dreamscythe",
+        86.48237780368945,
+        113.0
+      ],
+      [
+        "Airportal",
+        "Dreamscythe",
+        64.0846009840762,
+        115.0
+      ],
+      [
+        "Airra",
+        "Dreamscythe",
+        75.0,
+        112.0
+      ],
+      [
+        "Airrashylie",
+        "Dreamscythe",
+        64.07154382554131,
+        116.0
+      ],
+      [
+        "Airrey",
+        "Dreamscythe",
+        40.0,
+        116.0
+      ],
+      [
+        "Airtaco",
+        "Dreamscythe",
+        61.2691,
+        113.0
+      ],
+      [
+        "Airtaxi",
+        "Dreamscythe",
+        62.8587,
+        113.0
+      ],
+      [
+        "Airtyte",
+        "Dreamscythe",
+        55.6591,
+        117.0
+      ],
+      [
+        "Airvaster",
+        "Dreamscythe",
+        53.5209,
+        114.0
+      ],
+      [
+        "Airymoo",
+        "Dreamscythe",
+        50.0,
+        114.0
+      ],
+      [
+        "Aisen",
+        "Dreamscythe",
+        79.73770407658864,
+        114.0
+      ],
+      [
+        "Aislehealzju",
+        "Dreamscythe",
+        70.57551082013735,
+        110.0
+      ],
+      [
+        "Aitabulas",
+        "Dreamscythe",
+        43.3216,
+        113.0
+      ],
+      [
+        "Aithur",
+        "Dreamscythe",
+        38.35997334364135,
+        113.0
+      ],
+      [
+        "Aithyr",
+        "Dreamscythe",
+        99.48618999916756,
+        111.0
+      ],
+      [
+        "Aiunii",
+        "Dreamscythe",
+        29.316637718152634,
+        112.0
+      ],
+      [
+        "Aivana",
+        "Dreamscythe",
+        87.6123,
+        113.0
+      ],
+      [
+        "Aivenn",
+        "Dreamscythe",
+        96.03540569884508,
+        114.0
+      ],
+      [
+        "Aizlyn",
+        "Dreamscythe",
+        8.03154,
+        111.0
+      ],
+      [
+        "Aizuthegrand",
+        "Dreamscythe",
+        5.77118,
+        114.0
+      ],
+      [
+        "Ajabalaj",
+        "Dreamscythe",
+        40.0,
+        115.0
+      ],
+      [
+        "Ajabaralani",
+        "Dreamscythe",
+        16.9186,
+        111.0
+      ],
+      [
+        "Ajack",
+        "Dreamscythe",
+        71.4423,
+        113.0
+      ],
+      [
+        "Ajackz",
+        "Dreamscythe",
+        88.0892,
+        115.0
+      ],
+      [
+        "Ajamian",
+        "Dreamscythe",
+        47.3686892557082,
+        114.0
+      ],
+      [
+        "Ajanis",
+        "Dreamscythe",
+        91.3536,
+        107.0
+      ],
+      [
+        "Ajaxx",
+        "Dreamscythe",
+        98.0224,
+        111.0
+      ],
+      [
+        "Ajontis",
+        "Dreamscythe",
+        74.1987,
+        113.0
+      ],
+      [
+        "Ajuladin",
+        "Dreamscythe",
+        91.21820817758741,
+        118.0
+      ],
+      [
+        "Ajumpstart",
+        "Dreamscythe",
+        73.37124822250759,
+        112.0
+      ],
+      [
+        "Aj\u00e3pplegate",
+        "Dreamscythe",
+        81.52124268016951,
+        111.0
+      ],
+      [
+        "Aka",
+        "Dreamscythe",
+        94.9832,
+        111.0
+      ],
+      [
+        "Akaattila",
+        "Dreamscythe",
+        94.1443,
+        115.0
+      ],
+      [
+        "Akabackwards",
+        "Dreamscythe",
+        69.22724461685176,
+        111.0
+      ],
+      [
+        "Akabo",
+        "Dreamscythe",
+        84.5478,
+        111.0
+      ],
+      [
+        "Akadan",
+        "Dreamscythe",
+        2.63493,
+        111.0
+      ],
+      [
+        "Akadiaqt",
+        "Dreamscythe",
+        39.0156,
+        111.0
+      ],
+      [
+        "Akaeden",
+        "Dreamscythe",
+        3.20624,
+        115.0
+      ],
+      [
+        "Akafoxslayer",
+        "Dreamscythe",
+        65.6356,
+        115.0
+      ],
+      [
+        "Akahime",
+        "Dreamscythe",
+        97.1444,
+        114.0
+      ],
+      [
+        "Akahmah",
+        "Dreamscythe",
+        90.1922,
+        111.0
+      ],
+      [
+        "Akaholywater",
+        "Dreamscythe",
+        65.0106,
+        115.0
+      ],
+      [
+        "Akaim",
+        "Dreamscythe",
+        26.255320117522125,
+        113.0
+      ],
+      [
+        "Akala",
+        "Dreamscythe",
+        85.1366,
+        110.0
+      ],
+      [
+        "Akal\u00eea",
+        "Dreamscythe",
+        53.839216176387986,
+        114.0
+      ],
+      [
+        "Akamaitara",
+        "Dreamscythe",
+        41.815769397178876,
+        110.0
+      ],
+      [
+        "Akamanis",
+        "Dreamscythe",
+        35.548068370741184,
+        109.0
+      ],
+      [
+        "Akamaz",
+        "Dreamscythe",
+        87.0443,
+        113.0
+      ],
+      [
+        "Akamina",
+        "Dreamscythe",
+        96.46302272250753,
+        111.0
+      ],
+      [
+        "Akanah",
+        "Dreamscythe",
+        62.76901726763443,
+        110.0
+      ],
+      [
+        "Akano",
+        "Dreamscythe",
+        49.78278718925879,
+        114.0
+      ],
+      [
+        "Akan\u00f6s",
+        "Dreamscythe",
+        47.7965,
+        111.0
+      ],
+      [
+        "Akaraka",
+        "Dreamscythe",
+        8.21307,
+        106.0
+      ],
+      [
+        "Akasuki",
+        "Dreamscythe",
+        41.1121,
+        112.0
       ]
     ],
     "1047:50661": [
@@ -37054,7 +41056,7 @@
       [
         "Ahndi",
         "Dreamscythe",
-        5.982665762997744,
+        5.98267,
         106.0
       ],
       [
@@ -37066,19 +41068,19 @@
       [
         "Aholeyguy",
         "Dreamscythe",
-        91.06316652187179,
+        91.0632,
         113.0
       ],
       [
         "Ahonatoko",
         "Dreamscythe",
-        65.1248,
-        93.0
+        68.09631449130725,
+        112.0
       ],
       [
         "Ahonawkawan",
         "Dreamscythe",
-        19.866688754328244,
+        19.8667,
         107.0
       ],
       [
@@ -37174,7 +41176,7 @@
       [
         "Ahsokatano",
         "Dreamscythe",
-        14.035564085440857,
+        14.0356,
         113.0
       ],
       [
@@ -37187,7 +41189,7 @@
         "Ahumm",
         "Dreamscythe",
         95.0,
-        112.0
+        117.0
       ],
       [
         "Ahumun",
@@ -37228,14 +41230,14 @@
       [
         "Aidiermoda",
         "Dreamscythe",
-        45.08738297737665,
+        45.0874,
         100.0
       ],
       [
         "Aidivvh",
         "Dreamscythe",
         68.7399,
-        114.0
+        116.0
       ],
       [
         "Aidono",
@@ -37264,7 +41266,7 @@
       [
         "Aienzen",
         "Dreamscythe",
-        38.50646378117401,
+        38.5065,
         110.0
       ],
       [
@@ -37288,7 +41290,7 @@
       [
         "Aiidie",
         "Dreamscythe",
-        52.4251980240375,
+        52.4252,
         106.0
       ],
       [
@@ -37306,7 +41308,7 @@
       [
         "Aiishii",
         "Dreamscythe",
-        4.99139858698291,
+        4.9914,
         112.0
       ],
       [
@@ -37324,7 +41326,7 @@
       [
         "Aikun",
         "Dreamscythe",
-        56.554880497443804,
+        56.5549,
         117.0
       ],
       [
@@ -37337,7 +41339,7 @@
         "Ailirra",
         "Dreamscythe",
         95.0,
-        98.0
+        113.0
       ],
       [
         "Ailissa",
@@ -37438,7 +41440,7 @@
       [
         "Aimsformagic",
         "Dreamscythe",
-        34.48368445600799,
+        34.4837,
         112.0
       ],
       [
@@ -37450,8 +41452,494 @@
       [
         "Ainax",
         "Dreamscythe",
-        46.785485734709184,
+        46.7855,
         115.0
+      ],
+      [
+        "Ainnah",
+        "Dreamscythe",
+        71.4849,
+        114.0
+      ],
+      [
+        "Ainosora",
+        "Dreamscythe",
+        9.5007,
+        111.0
+      ],
+      [
+        "Ainsworth",
+        "Dreamscythe",
+        83.63190668073172,
+        113.0
+      ],
+      [
+        "Ainzyah",
+        "Dreamscythe",
+        64.12056706370723,
+        115.0
+      ],
+      [
+        "Aioh",
+        "Dreamscythe",
+        6.92662,
+        111.0
+      ],
+      [
+        "Aioras",
+        "Dreamscythe",
+        54.0198,
+        113.0
+      ],
+      [
+        "Aipionir",
+        "Dreamscythe",
+        37.34017481587929,
+        112.0
+      ],
+      [
+        "Airathle",
+        "Dreamscythe",
+        93.98892310382101,
+        112.0
+      ],
+      [
+        "Airbagit",
+        "Dreamscythe",
+        37.8365,
+        116.0
+      ],
+      [
+        "Airblaster",
+        "Dreamscythe",
+        34.1413,
+        109.0
+      ],
+      [
+        "Airdii",
+        "Dreamscythe",
+        90.5191,
+        113.0
+      ],
+      [
+        "Airdiix",
+        "Dreamscythe",
+        35.2669,
+        115.0
+      ],
+      [
+        "Airell",
+        "Dreamscythe",
+        41.3362,
+        97.0
+      ],
+      [
+        "Airenos",
+        "Dreamscythe",
+        15.5964,
+        111.0
+      ],
+      [
+        "Airetam",
+        "Dreamscythe",
+        83.5611,
+        111.0
+      ],
+      [
+        "Airezjr",
+        "Dreamscythe",
+        90.9249,
+        112.0
+      ],
+      [
+        "Airgolem",
+        "Dreamscythe",
+        57.1841,
+        109.0
+      ],
+      [
+        "Airhole",
+        "Dreamscythe",
+        87.42942347040685,
+        112.0
+      ],
+      [
+        "Airi",
+        "Dreamscythe",
+        93.0062,
+        112.0
+      ],
+      [
+        "Airikwar",
+        "Dreamscythe",
+        43.006,
+        106.0
+      ],
+      [
+        "Airiy",
+        "Dreamscythe",
+        60.5149,
+        112.0
+      ],
+      [
+        "Airmedhylda",
+        "Dreamscythe",
+        0.6459911943918988,
+        103.0
+      ],
+      [
+        "Airnick",
+        "Dreamscythe",
+        80.49948349892534,
+        114.0
+      ],
+      [
+        "Airok",
+        "Dreamscythe",
+        27.1902,
+        101.0
+      ],
+      [
+        "Aironar",
+        "Dreamscythe",
+        90.5772619540186,
+        115.0
+      ],
+      [
+        "Airone",
+        "Dreamscythe",
+        59.05663022784999,
+        108.0
+      ],
+      [
+        "Aironk",
+        "Dreamscythe",
+        9.930142413971977,
+        105.0
+      ],
+      [
+        "Airowarlock",
+        "Dreamscythe",
+        18.588133797782383,
+        113.0
+      ],
+      [
+        "Airplaneears",
+        "Dreamscythe",
+        92.84355703908076,
+        113.0
+      ],
+      [
+        "Airportal",
+        "Dreamscythe",
+        64.9239885206658,
+        115.0
+      ],
+      [
+        "Airra",
+        "Dreamscythe",
+        95.76997721616782,
+        111.0
+      ],
+      [
+        "Airrashylie",
+        "Dreamscythe",
+        75.0,
+        116.0
+      ],
+      [
+        "Airrey",
+        "Dreamscythe",
+        7.405778411073559,
+        115.0
+      ],
+      [
+        "Airtaco",
+        "Dreamscythe",
+        57.1718,
+        102.0
+      ],
+      [
+        "Airtaxi",
+        "Dreamscythe",
+        59.078,
+        113.0
+      ],
+      [
+        "Airtyte",
+        "Dreamscythe",
+        98.5747,
+        113.0
+      ],
+      [
+        "Airvaster",
+        "Dreamscythe",
+        81.596,
+        113.0
+      ],
+      [
+        "Airymoo",
+        "Dreamscythe",
+        80.0,
+        113.0
+      ],
+      [
+        "Aisen",
+        "Dreamscythe",
+        70.0,
+        114.0
+      ],
+      [
+        "Aislehealzju",
+        "Dreamscythe",
+        80.0,
+        113.0
+      ],
+      [
+        "Aitabulas",
+        "Dreamscythe",
+        26.915052105086183,
+        115.0
+      ],
+      [
+        "Aithur",
+        "Dreamscythe",
+        9.163169715164333,
+        112.0
+      ],
+      [
+        "Aithyr",
+        "Dreamscythe",
+        52.64820365451703,
+        110.0
+      ],
+      [
+        "Aiunii",
+        "Dreamscythe",
+        93.6337147818799,
+        114.0
+      ],
+      [
+        "Aivana",
+        "Dreamscythe",
+        96.5947,
+        113.0
+      ],
+      [
+        "Aivenn",
+        "Dreamscythe",
+        83.70933684557038,
+        111.0
+      ],
+      [
+        "Aizuthegrand",
+        "Dreamscythe",
+        17.2837,
+        114.0
+      ],
+      [
+        "Ajabalaj",
+        "Dreamscythe",
+        60.63783378452827,
+        114.0
+      ],
+      [
+        "Ajabaralani",
+        "Dreamscythe",
+        9.86541,
+        111.0
+      ],
+      [
+        "Ajack",
+        "Dreamscythe",
+        75.7515,
+        114.0
+      ],
+      [
+        "Ajackz",
+        "Dreamscythe",
+        95.9387,
+        115.0
+      ],
+      [
+        "Ajamian",
+        "Dreamscythe",
+        45.654778590893734,
+        112.0
+      ],
+      [
+        "Ajanis",
+        "Dreamscythe",
+        85.3573,
+        113.0
+      ],
+      [
+        "Ajaxx",
+        "Dreamscythe",
+        95.0786,
+        113.0
+      ],
+      [
+        "Ajontis",
+        "Dreamscythe",
+        80.6663,
+        112.0
+      ],
+      [
+        "Ajuladin",
+        "Dreamscythe",
+        80.0,
+        112.0
+      ],
+      [
+        "Ajumpstart",
+        "Dreamscythe",
+        64.0648,
+        110.0
+      ],
+      [
+        "Aj\u00e3pplegate",
+        "Dreamscythe",
+        48.906667963635854,
+        111.0
+      ],
+      [
+        "Aka",
+        "Dreamscythe",
+        84.6839,
+        111.0
+      ],
+      [
+        "Akaattila",
+        "Dreamscythe",
+        87.8732,
+        115.0
+      ],
+      [
+        "Akabackwards",
+        "Dreamscythe",
+        38.516011264157,
+        111.0
+      ],
+      [
+        "Akabo",
+        "Dreamscythe",
+        95.7651,
+        111.0
+      ],
+      [
+        "Akadan",
+        "Dreamscythe",
+        5.32016,
+        111.0
+      ],
+      [
+        "Akadiaqt",
+        "Dreamscythe",
+        38.4315,
+        111.0
+      ],
+      [
+        "Akaeden",
+        "Dreamscythe",
+        3.21709,
+        115.0
+      ],
+      [
+        "Akafoxslayer",
+        "Dreamscythe",
+        66.1531,
+        115.0
+      ],
+      [
+        "Akahime",
+        "Dreamscythe",
+        69.0928,
+        114.0
+      ],
+      [
+        "Akahmah",
+        "Dreamscythe",
+        98.6024,
+        111.0
+      ],
+      [
+        "Akaholywater",
+        "Dreamscythe",
+        80.0033,
+        114.0
+      ],
+      [
+        "Akaim",
+        "Dreamscythe",
+        10.62947742403523,
+        113.0
+      ],
+      [
+        "Akala",
+        "Dreamscythe",
+        73.2213,
+        110.0
+      ],
+      [
+        "Akal\u00eea",
+        "Dreamscythe",
+        40.51461592720733,
+        114.0
+      ],
+      [
+        "Akamaitara",
+        "Dreamscythe",
+        32.43163212731727,
+        110.0
+      ],
+      [
+        "Akamanis",
+        "Dreamscythe",
+        20.277021674086456,
+        109.0
+      ],
+      [
+        "Akamaz",
+        "Dreamscythe",
+        81.2547,
+        113.0
+      ],
+      [
+        "Akamina",
+        "Dreamscythe",
+        90.0,
+        91.0
+      ],
+      [
+        "Akanah",
+        "Dreamscythe",
+        46.51889794977749,
+        110.0
+      ],
+      [
+        "Akano",
+        "Dreamscythe",
+        66.36658745057768,
+        113.0
+      ],
+      [
+        "Akan\u00f6s",
+        "Dreamscythe",
+        97.7317,
+        110.0
+      ],
+      [
+        "Akaraka",
+        "Dreamscythe",
+        16.5464,
+        106.0
+      ],
+      [
+        "Akasuki",
+        "Dreamscythe",
+        23.7548,
+        110.0
       ]
     ],
     "1047:50662": [
@@ -40926,19 +45414,19 @@
       [
         "Ahndi",
         "Dreamscythe",
-        2.3511063786737507,
+        2.35111,
         106.0
       ],
       [
         "Ahnold",
         "Dreamscythe",
-        85.12789650547754,
+        85.1279,
         116.0
       ],
       [
         "Aholeyguy",
         "Dreamscythe",
-        91.2079805051882,
+        91.208,
         113.0
       ],
       [
@@ -40950,7 +45438,7 @@
       [
         "Ahonawkawan",
         "Dreamscythe",
-        16.011679787199615,
+        16.0117,
         107.0
       ],
       [
@@ -40998,7 +45486,7 @@
       [
         "Ahshoot",
         "Dreamscythe",
-        34.84419400032899,
+        34.8442,
         112.0
       ],
       [
@@ -41022,13 +45510,13 @@
       [
         "Ahsokatano",
         "Dreamscythe",
-        26.85347772788953,
+        26.8535,
         113.0
       ],
       [
         "Ahtin",
         "Dreamscythe",
-        92.40339915553591,
+        92.4034,
         114.0
       ],
       [
@@ -41046,7 +45534,7 @@
       [
         "Ahuntersry",
         "Dreamscythe",
-        32.11236453919068,
+        32.1124,
         112.0
       ],
       [
@@ -41148,13 +45636,13 @@
       [
         "Aikohime",
         "Dreamscythe",
-        75.55296733691947,
+        75.553,
         115.0
       ],
       [
         "Aikun",
         "Dreamscythe",
-        48.73917110275687,
+        48.7392,
         117.0
       ],
       [
@@ -41167,7 +45655,7 @@
         "Ailirra",
         "Dreamscythe",
         80.0,
-        108.0
+        113.0
       ],
       [
         "Ailissa",
@@ -41190,7 +45678,7 @@
       [
         "Ailwynn",
         "Dreamscythe",
-        45.583068047251864,
+        45.5831,
         116.0
       ],
       [
@@ -41220,7 +45708,7 @@
       [
         "Aimersmay",
         "Dreamscythe",
-        15.187280844079378,
+        15.1873,
         115.0
       ],
       [
@@ -41256,7 +45744,7 @@
       [
         "Aimsformagic",
         "Dreamscythe",
-        50.91069378999597,
+        50.9107,
         112.0
       ],
       [
@@ -41268,8 +45756,458 @@
       [
         "Ainax",
         "Dreamscythe",
-        45.660583973471255,
+        45.6606,
         115.0
+      ],
+      [
+        "Ainnah",
+        "Dreamscythe",
+        74.5514,
+        116.0
+      ],
+      [
+        "Ainosora",
+        "Dreamscythe",
+        14.0259,
+        111.0
+      ],
+      [
+        "Ainsworth",
+        "Dreamscythe",
+        72.0386748789936,
+        115.0
+      ],
+      [
+        "Ainzyah",
+        "Dreamscythe",
+        38.94022906989924,
+        115.0
+      ],
+      [
+        "Aioras",
+        "Dreamscythe",
+        95.2428,
+        111.0
+      ],
+      [
+        "Aipionir",
+        "Dreamscythe",
+        47.859188614913045,
+        111.0
+      ],
+      [
+        "Airathle",
+        "Dreamscythe",
+        79.00468543460671,
+        113.0
+      ],
+      [
+        "Airbagit",
+        "Dreamscythe",
+        47.2492,
+        116.0
+      ],
+      [
+        "Airblaster",
+        "Dreamscythe",
+        0.71237,
+        113.0
+      ],
+      [
+        "Airdii",
+        "Dreamscythe",
+        83.7911,
+        116.0
+      ],
+      [
+        "Airdiix",
+        "Dreamscythe",
+        19.0092,
+        110.0
+      ],
+      [
+        "Airell",
+        "Dreamscythe",
+        43.7253,
+        107.0
+      ],
+      [
+        "Airetam",
+        "Dreamscythe",
+        80.9266,
+        106.0
+      ],
+      [
+        "Airezjr",
+        "Dreamscythe",
+        81.9512,
+        113.0
+      ],
+      [
+        "Airgolem",
+        "Dreamscythe",
+        57.6242,
+        109.0
+      ],
+      [
+        "Airhole",
+        "Dreamscythe",
+        68.56121299243489,
+        111.0
+      ],
+      [
+        "Airi",
+        "Dreamscythe",
+        95.091,
+        113.0
+      ],
+      [
+        "Airiy",
+        "Dreamscythe",
+        63.631,
+        114.0
+      ],
+      [
+        "Airmedhylda",
+        "Dreamscythe",
+        0.976656247696982,
+        102.0
+      ],
+      [
+        "Airnick",
+        "Dreamscythe",
+        40.0,
+        114.0
+      ],
+      [
+        "Airok",
+        "Dreamscythe",
+        21.8773,
+        103.0
+      ],
+      [
+        "Aironar",
+        "Dreamscythe",
+        89.2902584566435,
+        114.0
+      ],
+      [
+        "Airone",
+        "Dreamscythe",
+        26.71291686280003,
+        108.0
+      ],
+      [
+        "Aironk",
+        "Dreamscythe",
+        67.53531948874976,
+        112.0
+      ],
+      [
+        "Airowarlock",
+        "Dreamscythe",
+        22.502108370355785,
+        113.0
+      ],
+      [
+        "Airplaneears",
+        "Dreamscythe",
+        75.0,
+        110.0
+      ],
+      [
+        "Airportal",
+        "Dreamscythe",
+        56.25808304731588,
+        115.0
+      ],
+      [
+        "Airra",
+        "Dreamscythe",
+        75.0,
+        111.0
+      ],
+      [
+        "Airrashylie",
+        "Dreamscythe",
+        40.0,
+        115.0
+      ],
+      [
+        "Airrey",
+        "Dreamscythe",
+        65.75165095768115,
+        116.0
+      ],
+      [
+        "Airtaco",
+        "Dreamscythe",
+        45.9736,
+        113.0
+      ],
+      [
+        "Airtaxi",
+        "Dreamscythe",
+        25.3572,
+        113.0
+      ],
+      [
+        "Airtyte",
+        "Dreamscythe",
+        86.6743,
+        113.0
+      ],
+      [
+        "Airvaster",
+        "Dreamscythe",
+        80.1038,
+        114.0
+      ],
+      [
+        "Airymoo",
+        "Dreamscythe",
+        43.70152003807938,
+        115.0
+      ],
+      [
+        "Aisen",
+        "Dreamscythe",
+        88.12285097860817,
+        114.0
+      ],
+      [
+        "Aislehealzju",
+        "Dreamscythe",
+        51.85684468642545,
+        108.0
+      ],
+      [
+        "Aithur",
+        "Dreamscythe",
+        36.547648472482265,
+        113.0
+      ],
+      [
+        "Aithyr",
+        "Dreamscythe",
+        1.0817466843867976,
+        110.0
+      ],
+      [
+        "Aiunii",
+        "Dreamscythe",
+        91.73125766163275,
+        114.0
+      ],
+      [
+        "Aivana",
+        "Dreamscythe",
+        99.7827,
+        111.0
+      ],
+      [
+        "Aivenn",
+        "Dreamscythe",
+        91.23684490447991,
+        114.0
+      ],
+      [
+        "Aizlyn",
+        "Dreamscythe",
+        4.79566,
+        109.0
+      ],
+      [
+        "Aizuthegrand",
+        "Dreamscythe",
+        10.8373,
+        113.0
+      ],
+      [
+        "Ajabalaj",
+        "Dreamscythe",
+        40.034453148061715,
+        115.0
+      ],
+      [
+        "Ajack",
+        "Dreamscythe",
+        86.8876,
+        113.0
+      ],
+      [
+        "Ajackz",
+        "Dreamscythe",
+        91.8422,
+        115.0
+      ],
+      [
+        "Ajamian",
+        "Dreamscythe",
+        31.711894043093967,
+        111.0
+      ],
+      [
+        "Ajanis",
+        "Dreamscythe",
+        66.3777,
+        112.0
+      ],
+      [
+        "Ajaxx",
+        "Dreamscythe",
+        97.0164,
+        113.0
+      ],
+      [
+        "Ajontis",
+        "Dreamscythe",
+        75.4829,
+        113.0
+      ],
+      [
+        "Ajuladin",
+        "Dreamscythe",
+        80.59149530322235,
+        117.0
+      ],
+      [
+        "Ajumpstart",
+        "Dreamscythe",
+        62.0716,
+        109.0
+      ],
+      [
+        "Aka",
+        "Dreamscythe",
+        96.6169,
+        111.0
+      ],
+      [
+        "Akaattila",
+        "Dreamscythe",
+        70.0828,
+        115.0
+      ],
+      [
+        "Akabackwards",
+        "Dreamscythe",
+        54.92184342729077,
+        111.0
+      ],
+      [
+        "Akabo",
+        "Dreamscythe",
+        97.0884,
+        111.0
+      ],
+      [
+        "Akadiaqt",
+        "Dreamscythe",
+        66.1213,
+        111.0
+      ],
+      [
+        "Akaeden",
+        "Dreamscythe",
+        6.82605,
+        115.0
+      ],
+      [
+        "Akaeldama",
+        "Dreamscythe",
+        4.47933,
+        111.0
+      ],
+      [
+        "Akafoxslayer",
+        "Dreamscythe",
+        32.5245,
+        113.0
+      ],
+      [
+        "Akahime",
+        "Dreamscythe",
+        73.8231,
+        114.0
+      ],
+      [
+        "Akaholywater",
+        "Dreamscythe",
+        58.2144,
+        113.0
+      ],
+      [
+        "Akaim",
+        "Dreamscythe",
+        17.442174071099547,
+        113.0
+      ],
+      [
+        "Akala",
+        "Dreamscythe",
+        64.5562,
+        110.0
+      ],
+      [
+        "Akal\u00eea",
+        "Dreamscythe",
+        40.4125877890605,
+        114.0
+      ],
+      [
+        "Akamaitara",
+        "Dreamscythe",
+        7.985634027250035,
+        110.0
+      ],
+      [
+        "Akamanis",
+        "Dreamscythe",
+        13.788317467865026,
+        109.0
+      ],
+      [
+        "Akamaz",
+        "Dreamscythe",
+        85.4028,
+        114.0
+      ],
+      [
+        "Akamina",
+        "Dreamscythe",
+        80.0,
+        92.0
+      ],
+      [
+        "Akanah",
+        "Dreamscythe",
+        71.57537081644831,
+        113.0
+      ],
+      [
+        "Akano",
+        "Dreamscythe",
+        79.00533613031389,
+        109.0
+      ],
+      [
+        "Akan\u00f6s",
+        "Dreamscythe",
+        90.511,
+        111.0
+      ],
+      [
+        "Akaraka",
+        "Dreamscythe",
+        23.9214,
+        106.0
+      ],
+      [
+        "Akasuki",
+        "Dreamscythe",
+        21.2862,
+        102.0
       ]
     ],
     "1048:50649": [
@@ -45578,8 +50516,8 @@
       [
         "Aimee",
         "Dreamscythe",
-        59.2754,
-        114.0
+        82.95572944045031,
+        115.0
       ],
       [
         "Aimerengenn",
@@ -45658,6 +50596,546 @@
         "Dreamscythe",
         64.9074,
         115.0
+      ],
+      [
+        "Ahrihuny",
+        "Dreamscythe",
+        45.68251521604416,
+        116.0
+      ],
+      [
+        "Ahshoot",
+        "Dreamscythe",
+        21.717917691408676,
+        112.0
+      ],
+      [
+        "Aienzen",
+        "Dreamscythe",
+        54.121353917448026,
+        110.0
+      ],
+      [
+        "Ainnah",
+        "Dreamscythe",
+        72.7528,
+        114.0
+      ],
+      [
+        "Ainosora",
+        "Dreamscythe",
+        30.24032817866472,
+        111.0
+      ],
+      [
+        "Ainsley",
+        "Dreamscythe",
+        28.6156,
+        111.0
+      ],
+      [
+        "Ainsworth",
+        "Dreamscythe",
+        90.46865575736378,
+        115.0
+      ],
+      [
+        "Ainzyah",
+        "Dreamscythe",
+        63.4187,
+        111.0
+      ],
+      [
+        "Aioras",
+        "Dreamscythe",
+        58.6615,
+        113.0
+      ],
+      [
+        "Airacy",
+        "Dreamscythe",
+        5.92811,
+        110.0
+      ],
+      [
+        "Airathle",
+        "Dreamscythe",
+        56.4681,
+        105.0
+      ],
+      [
+        "Airbagit",
+        "Dreamscythe",
+        65.2989,
+        115.0
+      ],
+      [
+        "Airblaster",
+        "Dreamscythe",
+        56.418,
+        114.0
+      ],
+      [
+        "Airdii",
+        "Dreamscythe",
+        85.0830160247392,
+        116.0
+      ],
+      [
+        "Airdiix",
+        "Dreamscythe",
+        20.070669145564548,
+        113.0
+      ],
+      [
+        "Airenos",
+        "Dreamscythe",
+        91.5328,
+        116.0
+      ],
+      [
+        "Airetam",
+        "Dreamscythe",
+        75.915,
+        108.0
+      ],
+      [
+        "Airezjr",
+        "Dreamscythe",
+        82.2297,
+        112.0
+      ],
+      [
+        "Airgolem",
+        "Dreamscythe",
+        83.1606,
+        109.0
+      ],
+      [
+        "Airhole",
+        "Dreamscythe",
+        91.7384,
+        111.0
+      ],
+      [
+        "Airi",
+        "Dreamscythe",
+        84.3007,
+        113.0
+      ],
+      [
+        "Airise",
+        "Dreamscythe",
+        84.81653843222834,
+        109.0
+      ],
+      [
+        "Airiy",
+        "Dreamscythe",
+        65.3847,
+        114.0
+      ],
+      [
+        "Airizarimuni",
+        "Dreamscythe",
+        14.1678,
+        108.0
+      ],
+      [
+        "Airnick",
+        "Dreamscythe",
+        75.0,
+        112.0
+      ],
+      [
+        "Airok",
+        "Dreamscythe",
+        65.63,
+        109.0
+      ],
+      [
+        "Aironar",
+        "Dreamscythe",
+        72.6436,
+        115.0
+      ],
+      [
+        "Airone",
+        "Dreamscythe",
+        54.5349,
+        107.0
+      ],
+      [
+        "Airowarlock",
+        "Dreamscythe",
+        61.3338,
+        110.0
+      ],
+      [
+        "Airplaneears",
+        "Dreamscythe",
+        90.0,
+        111.0
+      ],
+      [
+        "Airportal",
+        "Dreamscythe",
+        72.3439,
+        115.0
+      ],
+      [
+        "Airra",
+        "Dreamscythe",
+        95.44328743357742,
+        112.0
+      ],
+      [
+        "Airrashylie",
+        "Dreamscythe",
+        50.00535647879619,
+        116.0
+      ],
+      [
+        "Airrey",
+        "Dreamscythe",
+        60.0,
+        110.0
+      ],
+      [
+        "Airtaco",
+        "Dreamscythe",
+        78.2997,
+        110.0
+      ],
+      [
+        "Airtaxi",
+        "Dreamscythe",
+        28.4188,
+        109.0
+      ],
+      [
+        "Airtyte",
+        "Dreamscythe",
+        87.0525,
+        115.0
+      ],
+      [
+        "Airvaster",
+        "Dreamscythe",
+        64.1796,
+        113.0
+      ],
+      [
+        "Airymoo",
+        "Dreamscythe",
+        93.54391670424198,
+        113.0
+      ],
+      [
+        "Aisen",
+        "Dreamscythe",
+        83.3712,
+        112.0
+      ],
+      [
+        "Aisiad",
+        "Dreamscythe",
+        3.94882,
+        110.0
+      ],
+      [
+        "Aislehealzju",
+        "Dreamscythe",
+        80.0,
+        102.0
+      ],
+      [
+        "Aitabulas",
+        "Dreamscythe",
+        43.9402,
+        114.0
+      ],
+      [
+        "Aithur",
+        "Dreamscythe",
+        64.21053133200618,
+        112.0
+      ],
+      [
+        "Aithyr",
+        "Dreamscythe",
+        52.3404,
+        110.0
+      ],
+      [
+        "Aiunii",
+        "Dreamscythe",
+        33.24356791244064,
+        112.0
+      ],
+      [
+        "Aivana",
+        "Dreamscythe",
+        92.1044,
+        111.0
+      ],
+      [
+        "Aivenn",
+        "Dreamscythe",
+        82.57428184110945,
+        113.0
+      ],
+      [
+        "Aivwana",
+        "Dreamscythe",
+        28.8018,
+        112.0
+      ],
+      [
+        "Aiyen",
+        "Dreamscythe",
+        1.72558,
+        113.0
+      ],
+      [
+        "Aizlyn",
+        "Dreamscythe",
+        44.9423,
+        112.0
+      ],
+      [
+        "Aizuthegrand",
+        "Dreamscythe",
+        9.480198243492818,
+        110.0
+      ],
+      [
+        "Ajabalaj",
+        "Dreamscythe",
+        82.26186107310842,
+        114.0
+      ],
+      [
+        "Ajabaralani",
+        "Dreamscythe",
+        7.3465301605221365,
+        110.0
+      ],
+      [
+        "Ajack",
+        "Dreamscythe",
+        55.6287,
+        113.0
+      ],
+      [
+        "Ajackz",
+        "Dreamscythe",
+        81.1595,
+        112.0
+      ],
+      [
+        "Ajamian",
+        "Dreamscythe",
+        47.391,
+        112.0
+      ],
+      [
+        "Ajanis",
+        "Dreamscythe",
+        88.108,
+        102.0
+      ],
+      [
+        "Ajaxx",
+        "Dreamscythe",
+        82.4729,
+        113.0
+      ],
+      [
+        "Ajontis",
+        "Dreamscythe",
+        47.794,
+        113.0
+      ],
+      [
+        "Ajoobe",
+        "Dreamscythe",
+        23.231767615278454,
+        111.0
+      ],
+      [
+        "Ajuladin",
+        "Dreamscythe",
+        80.0,
+        117.0
+      ],
+      [
+        "Ajumpstart",
+        "Dreamscythe",
+        61.6763,
+        112.0
+      ],
+      [
+        "Aj\u00e3pplegate",
+        "Dreamscythe",
+        6.13449,
+        111.0
+      ],
+      [
+        "Aka",
+        "Dreamscythe",
+        96.6634,
+        111.0
+      ],
+      [
+        "Akaattila",
+        "Dreamscythe",
+        88.179,
+        115.0
+      ],
+      [
+        "Akabackwards",
+        "Dreamscythe",
+        72.48308394857547,
+        112.0
+      ],
+      [
+        "Akabo",
+        "Dreamscythe",
+        64.6948,
+        109.0
+      ],
+      [
+        "Akadan",
+        "Dreamscythe",
+        2.75138,
+        107.0
+      ],
+      [
+        "Akadiaqt",
+        "Dreamscythe",
+        54.3686,
+        111.0
+      ],
+      [
+        "Akaeden",
+        "Dreamscythe",
+        10.3111,
+        110.0
+      ],
+      [
+        "Akaeldama",
+        "Dreamscythe",
+        15.1161,
+        111.0
+      ],
+      [
+        "Akafoxslayer",
+        "Dreamscythe",
+        70.6063,
+        115.0
+      ],
+      [
+        "Akahime",
+        "Dreamscythe",
+        79.6811,
+        114.0
+      ],
+      [
+        "Akahmah",
+        "Dreamscythe",
+        75.562,
+        105.0
+      ],
+      [
+        "Akaholywater",
+        "Dreamscythe",
+        61.7118,
+        113.0
+      ],
+      [
+        "Akaim",
+        "Dreamscythe",
+        31.1738,
+        111.0
+      ],
+      [
+        "Akala",
+        "Dreamscythe",
+        82.7623,
+        110.0
+      ],
+      [
+        "Akal\u00eea",
+        "Dreamscythe",
+        24.3456,
+        112.0
+      ],
+      [
+        "Akamaitara",
+        "Dreamscythe",
+        73.81115807682148,
+        113.0
+      ],
+      [
+        "Akamanis",
+        "Dreamscythe",
+        67.1912,
+        112.0
+      ],
+      [
+        "Akamaz",
+        "Dreamscythe",
+        97.3364,
+        114.0
+      ],
+      [
+        "Akame",
+        "Dreamscythe",
+        64.6486,
+        112.0
+      ],
+      [
+        "Akamina",
+        "Dreamscythe",
+        38.9867,
+        114.0
+      ],
+      [
+        "Akanah",
+        "Dreamscythe",
+        53.86546233166274,
+        113.0
+      ],
+      [
+        "Akanesh",
+        "Dreamscythe",
+        58.759600344553746,
+        116.0
+      ],
+      [
+        "Akano",
+        "Dreamscythe",
+        53.5088,
+        109.0
+      ],
+      [
+        "Akan\u00f6s",
+        "Dreamscythe",
+        80.7904,
+        111.0
+      ],
+      [
+        "Akaraka",
+        "Dreamscythe",
+        49.6258,
+        110.0
+      ],
+      [
+        "Akasuki",
+        "Dreamscythe",
+        80.1388,
+        102.0
       ]
     ],
     "1048:50650": [
@@ -49972,7 +55450,7 @@
       [
         "Aimee",
         "Dreamscythe",
-        74.3877,
+        74.38771288012148,
         114.0
       ],
       [
@@ -49984,7 +55462,7 @@
       [
         "Aimersmay",
         "Dreamscythe",
-        26.809,
+        26.80902603199369,
         113.0
       ],
       [
@@ -50052,6 +55530,540 @@
         "Dreamscythe",
         68.605,
         115.0
+      ],
+      [
+        "Ahrihuny",
+        "Dreamscythe",
+        46.69391324763881,
+        116.0
+      ],
+      [
+        "Ahshoot",
+        "Dreamscythe",
+        25.128127553251083,
+        112.0
+      ],
+      [
+        "Aienzen",
+        "Dreamscythe",
+        38.5405011224306,
+        110.0
+      ],
+      [
+        "Ainnah",
+        "Dreamscythe",
+        86.2532,
+        116.0
+      ],
+      [
+        "Ainosora",
+        "Dreamscythe",
+        3.499976920205518,
+        111.0
+      ],
+      [
+        "Ainsley",
+        "Dreamscythe",
+        26.4806,
+        111.0
+      ],
+      [
+        "Ainsworth",
+        "Dreamscythe",
+        76.16630739412813,
+        114.0
+      ],
+      [
+        "Ainzyah",
+        "Dreamscythe",
+        56.5959,
+        115.0
+      ],
+      [
+        "Aioras",
+        "Dreamscythe",
+        73.9066,
+        113.0
+      ],
+      [
+        "Airacy",
+        "Dreamscythe",
+        8.66213,
+        110.0
+      ],
+      [
+        "Airathle",
+        "Dreamscythe",
+        84.6072,
+        112.0
+      ],
+      [
+        "Airbagit",
+        "Dreamscythe",
+        43.5302,
+        115.0
+      ],
+      [
+        "Airblaster",
+        "Dreamscythe",
+        72.4715,
+        106.0
+      ],
+      [
+        "Airdii",
+        "Dreamscythe",
+        94.17893364912509,
+        116.0
+      ],
+      [
+        "Airdiix",
+        "Dreamscythe",
+        25.531627606708074,
+        113.0
+      ],
+      [
+        "Airenos",
+        "Dreamscythe",
+        85.7362,
+        112.0
+      ],
+      [
+        "Airetam",
+        "Dreamscythe",
+        75.776,
+        114.0
+      ],
+      [
+        "Airezjr",
+        "Dreamscythe",
+        68.5835,
+        112.0
+      ],
+      [
+        "Airgolem",
+        "Dreamscythe",
+        75.7095,
+        107.0
+      ],
+      [
+        "Airhole",
+        "Dreamscythe",
+        87.4183,
+        111.0
+      ],
+      [
+        "Airi",
+        "Dreamscythe",
+        90.7,
+        113.0
+      ],
+      [
+        "Airise",
+        "Dreamscythe",
+        67.46521848435533,
+        109.0
+      ],
+      [
+        "Airiy",
+        "Dreamscythe",
+        47.9145,
+        114.0
+      ],
+      [
+        "Airizarimuni",
+        "Dreamscythe",
+        18.3767,
+        108.0
+      ],
+      [
+        "Airnick",
+        "Dreamscythe",
+        62.955174049124416,
+        112.0
+      ],
+      [
+        "Airok",
+        "Dreamscythe",
+        36.5504,
+        109.0
+      ],
+      [
+        "Aironar",
+        "Dreamscythe",
+        90.5254,
+        115.0
+      ],
+      [
+        "Airone",
+        "Dreamscythe",
+        52.1484,
+        107.0
+      ],
+      [
+        "Airowarlock",
+        "Dreamscythe",
+        39.7244,
+        110.0
+      ],
+      [
+        "Airplaneears",
+        "Dreamscythe",
+        97.1451533672609,
+        111.0
+      ],
+      [
+        "Airportal",
+        "Dreamscythe",
+        85.7671,
+        115.0
+      ],
+      [
+        "Airra",
+        "Dreamscythe",
+        80.0,
+        112.0
+      ],
+      [
+        "Airrashylie",
+        "Dreamscythe",
+        77.98663849349171,
+        115.0
+      ],
+      [
+        "Airrey",
+        "Dreamscythe",
+        40.0,
+        110.0
+      ],
+      [
+        "Airtaco",
+        "Dreamscythe",
+        58.7961,
+        112.0
+      ],
+      [
+        "Airtaxi",
+        "Dreamscythe",
+        34.6769,
+        113.0
+      ],
+      [
+        "Airtyte",
+        "Dreamscythe",
+        57.9208,
+        114.0
+      ],
+      [
+        "Airvaster",
+        "Dreamscythe",
+        62.2606,
+        116.0
+      ],
+      [
+        "Airymoo",
+        "Dreamscythe",
+        94.74153820959545,
+        114.0
+      ],
+      [
+        "Aisen",
+        "Dreamscythe",
+        82.3556,
+        112.0
+      ],
+      [
+        "Aisiad",
+        "Dreamscythe",
+        39.9974,
+        110.0
+      ],
+      [
+        "Aislehealzju",
+        "Dreamscythe",
+        88.38373354519338,
+        102.0
+      ],
+      [
+        "Aitabulas",
+        "Dreamscythe",
+        36.7479,
+        114.0
+      ],
+      [
+        "Aithur",
+        "Dreamscythe",
+        33.56086082094463,
+        112.0
+      ],
+      [
+        "Aithyr",
+        "Dreamscythe",
+        47.1107,
+        110.0
+      ],
+      [
+        "Aiunii",
+        "Dreamscythe",
+        1.187845549315875,
+        112.0
+      ],
+      [
+        "Aivana",
+        "Dreamscythe",
+        97.694,
+        109.0
+      ],
+      [
+        "Aivenn",
+        "Dreamscythe",
+        74.74494190972516,
+        114.0
+      ],
+      [
+        "Aivwana",
+        "Dreamscythe",
+        24.7477,
+        112.0
+      ],
+      [
+        "Aiyen",
+        "Dreamscythe",
+        1.81898,
+        113.0
+      ],
+      [
+        "Aizlyn",
+        "Dreamscythe",
+        44.838,
+        112.0
+      ],
+      [
+        "Aizuthegrand",
+        "Dreamscythe",
+        22.519578179393047,
+        113.0
+      ],
+      [
+        "Ajabalaj",
+        "Dreamscythe",
+        58.298172822126176,
+        114.0
+      ],
+      [
+        "Ajabaralani",
+        "Dreamscythe",
+        6.212300965693471,
+        110.0
+      ],
+      [
+        "Ajack",
+        "Dreamscythe",
+        79.9784,
+        112.0
+      ],
+      [
+        "Ajackz",
+        "Dreamscythe",
+        91.0607,
+        114.0
+      ],
+      [
+        "Ajamian",
+        "Dreamscythe",
+        62.7482,
+        111.0
+      ],
+      [
+        "Ajanis",
+        "Dreamscythe",
+        78.1146,
+        108.0
+      ],
+      [
+        "Ajaxx",
+        "Dreamscythe",
+        3.58501,
+        113.0
+      ],
+      [
+        "Ajontis",
+        "Dreamscythe",
+        78.6381,
+        110.0
+      ],
+      [
+        "Ajoobe",
+        "Dreamscythe",
+        32.21200425892528,
+        111.0
+      ],
+      [
+        "Ajuladin",
+        "Dreamscythe",
+        60.0,
+        115.0
+      ],
+      [
+        "Ajumpstart",
+        "Dreamscythe",
+        59.4696,
+        112.0
+      ],
+      [
+        "Aj\u00e3pplegate",
+        "Dreamscythe",
+        21.6751,
+        111.0
+      ],
+      [
+        "Aka",
+        "Dreamscythe",
+        97.9193,
+        111.0
+      ],
+      [
+        "Akaattila",
+        "Dreamscythe",
+        66.3399,
+        115.0
+      ],
+      [
+        "Akabackwards",
+        "Dreamscythe",
+        58.8050586794235,
+        112.0
+      ],
+      [
+        "Akabo",
+        "Dreamscythe",
+        73.286,
+        111.0
+      ],
+      [
+        "Akadiaqt",
+        "Dreamscythe",
+        74.4232,
+        112.0
+      ],
+      [
+        "Akaeden",
+        "Dreamscythe",
+        16.5326,
+        112.0
+      ],
+      [
+        "Akaeldama",
+        "Dreamscythe",
+        13.3309,
+        111.0
+      ],
+      [
+        "Akafoxslayer",
+        "Dreamscythe",
+        75.898,
+        115.0
+      ],
+      [
+        "Akahime",
+        "Dreamscythe",
+        61.3145,
+        114.0
+      ],
+      [
+        "Akahmah",
+        "Dreamscythe",
+        85.4358,
+        107.0
+      ],
+      [
+        "Akaholywater",
+        "Dreamscythe",
+        86.0186,
+        113.0
+      ],
+      [
+        "Akaim",
+        "Dreamscythe",
+        41.245,
+        113.0
+      ],
+      [
+        "Akala",
+        "Dreamscythe",
+        67.6434,
+        110.0
+      ],
+      [
+        "Akal\u00eea",
+        "Dreamscythe",
+        18.8743,
+        112.0
+      ],
+      [
+        "Akamaitara",
+        "Dreamscythe",
+        50.0,
+        113.0
+      ],
+      [
+        "Akamanis",
+        "Dreamscythe",
+        51.6841,
+        109.0
+      ],
+      [
+        "Akamaz",
+        "Dreamscythe",
+        96.9729,
+        113.0
+      ],
+      [
+        "Akame",
+        "Dreamscythe",
+        41.9576,
+        112.0
+      ],
+      [
+        "Akamina",
+        "Dreamscythe",
+        69.6883,
+        114.0
+      ],
+      [
+        "Akanah",
+        "Dreamscythe",
+        40.718927345600605,
+        113.0
+      ],
+      [
+        "Akanesh",
+        "Dreamscythe",
+        65.38445237862423,
+        116.0
+      ],
+      [
+        "Akano",
+        "Dreamscythe",
+        76.8089,
+        113.0
+      ],
+      [
+        "Akan\u00f6s",
+        "Dreamscythe",
+        95.2136,
+        111.0
+      ],
+      [
+        "Akaraka",
+        "Dreamscythe",
+        46.7527,
+        110.0
+      ],
+      [
+        "Akasuki",
+        "Dreamscythe",
+        38.5543,
+        106.0
       ]
     ],
     "1048:50651": [
@@ -54024,7 +60036,7 @@
       [
         "Aiara",
         "Dreamscythe",
-        44.2311,
+        44.23111491578718,
         115.0
       ],
       [
@@ -54114,7 +60126,7 @@
       [
         "Aiinzz",
         "Dreamscythe",
-        7.586307052191036,
+        7.58631,
         109.0
       ],
       [
@@ -54240,8 +60252,8 @@
       [
         "Aimildeen",
         "Dreamscythe",
-        28.163714610168782,
-        112.0
+        29.949925369040514,
+        115.0
       ],
       [
         "Aimless",
@@ -54284,6 +60296,522 @@
         "Dreamscythe",
         64.9516,
         115.0
+      ],
+      [
+        "Ahrihuny",
+        "Dreamscythe",
+        75.22335419053515,
+        116.0
+      ],
+      [
+        "Ahshoot",
+        "Dreamscythe",
+        45.42220933911027,
+        112.0
+      ],
+      [
+        "Ainnah",
+        "Dreamscythe",
+        80.4028,
+        116.0
+      ],
+      [
+        "Ainosora",
+        "Dreamscythe",
+        37.77611358109783,
+        111.0
+      ],
+      [
+        "Ainsley",
+        "Dreamscythe",
+        24.696,
+        110.0
+      ],
+      [
+        "Ainsworth",
+        "Dreamscythe",
+        78.43789128451286,
+        112.0
+      ],
+      [
+        "Ainzyah",
+        "Dreamscythe",
+        47.4675,
+        111.0
+      ],
+      [
+        "Aioh",
+        "Dreamscythe",
+        33.9078,
+        112.0
+      ],
+      [
+        "Aioras",
+        "Dreamscythe",
+        65.8489,
+        113.0
+      ],
+      [
+        "Airacy",
+        "Dreamscythe",
+        4.91295,
+        110.0
+      ],
+      [
+        "Airathle",
+        "Dreamscythe",
+        51.8161,
+        112.0
+      ],
+      [
+        "Airbagit",
+        "Dreamscythe",
+        57.1953,
+        112.0
+      ],
+      [
+        "Airblaster",
+        "Dreamscythe",
+        71.5117,
+        106.0
+      ],
+      [
+        "Airdii",
+        "Dreamscythe",
+        89.9989,
+        116.0
+      ],
+      [
+        "Airdiix",
+        "Dreamscythe",
+        23.395050346308697,
+        114.0
+      ],
+      [
+        "Airenos",
+        "Dreamscythe",
+        73.172,
+        113.0
+      ],
+      [
+        "Airetam",
+        "Dreamscythe",
+        75.8792,
+        114.0
+      ],
+      [
+        "Airezjr",
+        "Dreamscythe",
+        54.8011,
+        112.0
+      ],
+      [
+        "Airgolem",
+        "Dreamscythe",
+        61.2979,
+        109.0
+      ],
+      [
+        "Airhole",
+        "Dreamscythe",
+        40.2938,
+        111.0
+      ],
+      [
+        "Airi",
+        "Dreamscythe",
+        98.8332,
+        113.0
+      ],
+      [
+        "Airise",
+        "Dreamscythe",
+        77.29820698691934,
+        109.0
+      ],
+      [
+        "Airiy",
+        "Dreamscythe",
+        63.9676,
+        109.0
+      ],
+      [
+        "Airizarimuni",
+        "Dreamscythe",
+        35.9513,
+        111.0
+      ],
+      [
+        "Airok",
+        "Dreamscythe",
+        56.6232,
+        108.0
+      ],
+      [
+        "Aironar",
+        "Dreamscythe",
+        96.4366,
+        115.0
+      ],
+      [
+        "Airone",
+        "Dreamscythe",
+        72.2926,
+        107.0
+      ],
+      [
+        "Airowarlock",
+        "Dreamscythe",
+        23.4578,
+        113.0
+      ],
+      [
+        "Airplaneears",
+        "Dreamscythe",
+        97.01962551659193,
+        114.0
+      ],
+      [
+        "Airportal",
+        "Dreamscythe",
+        79.9163,
+        115.0
+      ],
+      [
+        "Airra",
+        "Dreamscythe",
+        75.0,
+        112.0
+      ],
+      [
+        "Airrashylie",
+        "Dreamscythe",
+        92.26458451687864,
+        115.0
+      ],
+      [
+        "Airrey",
+        "Dreamscythe",
+        10.0,
+        110.0
+      ],
+      [
+        "Airtaco",
+        "Dreamscythe",
+        57.6225,
+        113.0
+      ],
+      [
+        "Airtaxi",
+        "Dreamscythe",
+        38.3989,
+        113.0
+      ],
+      [
+        "Airtyte",
+        "Dreamscythe",
+        75.5696,
+        116.0
+      ],
+      [
+        "Airvaster",
+        "Dreamscythe",
+        64.8023,
+        115.0
+      ],
+      [
+        "Airymoo",
+        "Dreamscythe",
+        85.72485935708646,
+        114.0
+      ],
+      [
+        "Aisalinn",
+        "Dreamscythe",
+        30.0,
+        98.0
+      ],
+      [
+        "Aisen",
+        "Dreamscythe",
+        91.9223,
+        111.0
+      ],
+      [
+        "Aisiad",
+        "Dreamscythe",
+        47.1257,
+        110.0
+      ],
+      [
+        "Aislehealzju",
+        "Dreamscythe",
+        91.3088726212718,
+        106.0
+      ],
+      [
+        "Aitabulas",
+        "Dreamscythe",
+        29.4018,
+        114.0
+      ],
+      [
+        "Aithur",
+        "Dreamscythe",
+        64.9059706642411,
+        112.0
+      ],
+      [
+        "Aithyr",
+        "Dreamscythe",
+        11.1724,
+        110.0
+      ],
+      [
+        "Aiunii",
+        "Dreamscythe",
+        33.628268760197464,
+        111.0
+      ],
+      [
+        "Aivana",
+        "Dreamscythe",
+        94.1195,
+        111.0
+      ],
+      [
+        "Aivenn",
+        "Dreamscythe",
+        71.86819188787992,
+        114.0
+      ],
+      [
+        "Aiyen",
+        "Dreamscythe",
+        13.1724,
+        112.0
+      ],
+      [
+        "Aizlyn",
+        "Dreamscythe",
+        60.337,
+        112.0
+      ],
+      [
+        "Aizuthegrand",
+        "Dreamscythe",
+        18.69617764513879,
+        110.0
+      ],
+      [
+        "Ajabalaj",
+        "Dreamscythe",
+        83.69970454889108,
+        113.0
+      ],
+      [
+        "Ajabaralani",
+        "Dreamscythe",
+        42.468630220436275,
+        113.0
+      ],
+      [
+        "Ajack",
+        "Dreamscythe",
+        63.0961,
+        112.0
+      ],
+      [
+        "Ajackz",
+        "Dreamscythe",
+        93.9527,
+        115.0
+      ],
+      [
+        "Ajamian",
+        "Dreamscythe",
+        56.3834,
+        112.0
+      ],
+      [
+        "Ajanis",
+        "Dreamscythe",
+        85.4531,
+        108.0
+      ],
+      [
+        "Ajaxx",
+        "Dreamscythe",
+        70.5803,
+        113.0
+      ],
+      [
+        "Ajontis",
+        "Dreamscythe",
+        60.9604,
+        113.0
+      ],
+      [
+        "Ajuladin",
+        "Dreamscythe",
+        62.36256114744758,
+        116.0
+      ],
+      [
+        "Ajumpstart",
+        "Dreamscythe",
+        42.0295,
+        109.0
+      ],
+      [
+        "Aka",
+        "Dreamscythe",
+        97.0982,
+        111.0
+      ],
+      [
+        "Akaattila",
+        "Dreamscythe",
+        31.5915,
+        115.0
+      ],
+      [
+        "Akabackwards",
+        "Dreamscythe",
+        59.29009397248504,
+        113.0
+      ],
+      [
+        "Akabo",
+        "Dreamscythe",
+        95.2114,
+        109.0
+      ],
+      [
+        "Akadiaqt",
+        "Dreamscythe",
+        64.7863,
+        112.0
+      ],
+      [
+        "Akaeden",
+        "Dreamscythe",
+        30.5729,
+        113.0
+      ],
+      [
+        "Akaeldama",
+        "Dreamscythe",
+        17.5099,
+        111.0
+      ],
+      [
+        "Akafoxslayer",
+        "Dreamscythe",
+        59.7114,
+        115.0
+      ],
+      [
+        "Akahime",
+        "Dreamscythe",
+        63.5069,
+        114.0
+      ],
+      [
+        "Akahmah",
+        "Dreamscythe",
+        92.4805,
+        109.0
+      ],
+      [
+        "Akaholywater",
+        "Dreamscythe",
+        85.5684,
+        112.0
+      ],
+      [
+        "Akaim",
+        "Dreamscythe",
+        22.42,
+        114.0
+      ],
+      [
+        "Akala",
+        "Dreamscythe",
+        95.1119,
+        111.0
+      ],
+      [
+        "Akal\u00eea",
+        "Dreamscythe",
+        49.5369,
+        112.0
+      ],
+      [
+        "Akamaitara",
+        "Dreamscythe",
+        28.41301832930548,
+        113.0
+      ],
+      [
+        "Akamanis",
+        "Dreamscythe",
+        55.6725,
+        112.0
+      ],
+      [
+        "Akamaz",
+        "Dreamscythe",
+        99.5677,
+        113.0
+      ],
+      [
+        "Akame",
+        "Dreamscythe",
+        34.4407,
+        112.0
+      ],
+      [
+        "Akamina",
+        "Dreamscythe",
+        53.9635,
+        114.0
+      ],
+      [
+        "Akanah",
+        "Dreamscythe",
+        85.37715185544366,
+        110.0
+      ],
+      [
+        "Akanesh",
+        "Dreamscythe",
+        35.7114,
+        115.0
+      ],
+      [
+        "Akano",
+        "Dreamscythe",
+        81.9805,
+        113.0
+      ],
+      [
+        "Akan\u00f6s",
+        "Dreamscythe",
+        93.7245,
+        111.0
+      ],
+      [
+        "Akaraka",
+        "Dreamscythe",
+        31.2931,
+        110.0
+      ],
+      [
+        "Akasuki",
+        "Dreamscythe",
+        28.3574,
+        112.0
       ]
     ]
   },
@@ -54297,8 +60825,8 @@
       "nextPage": 1
     },
     "us/dreamscythe": {
-      "done": false,
-      "nextPage": 19
+      "done": true,
+      "nextPage": 21
     },
     "us/maladath": {
       "done": false,
