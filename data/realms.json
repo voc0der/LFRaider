@@ -4,7 +4,8 @@
     {
       "name": "Dreamscythe",
       "region": "us",
-      "slug": "dreamscythe"
+      "slug": "dreamscythe",
+      "knownCharacters": ["Vocoder"]
     }
   ]
 }
