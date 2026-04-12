@@ -26,7 +26,7 @@ from typing import Any, NamedTuple
 TOKEN_URL = "https://www.warcraftlogs.com/oauth/token"
 GRAPHQL_URL = "https://www.warcraftlogs.com/api/v2/client"
 TERMS_URL = "https://www.archon.gg/wow/articles/help/rpg-logs-api-terms-of-service"
-API_MAX_PAGE = 20
+API_MAX_PAGE = 10_000
 DEFAULT_PAGE_SIZE = 1000
 DEFAULT_CHARACTER_QUERY_BATCH_SIZE = 25
 DEFAULT_RESUME_OVERLAP_PAGES = 2
@@ -884,9 +884,6 @@ def fetch_realm_character_chunk(
             exhausted = True
             break
 
-    if not exhausted and not interrupted and next_page > start_page and end_page >= args.max_pages:
-        exhausted = True
-
     return RealmChunkResult(encounter_raw, exhausted, next_page, rate_limited, interrupted)
 
 
@@ -1268,9 +1265,6 @@ def fetch_chunk(
             exhausted = True
             break
 
-    if not exhausted and end_page >= args.max_pages:
-        exhausted = True
-
     return encounter_raw, exhausted
 
 
@@ -1405,9 +1399,7 @@ def main() -> int:
     parser.add_argument("--distribution-approved", action="store_true")
     args = parser.parse_args()
 
-    if args.max_pages > API_MAX_PAGE:
-        print(f"clamping --max-pages from {args.max_pages} to Warcraft Logs API max page {API_MAX_PAGE}")
-        args.max_pages = API_MAX_PAGE
+
     if args.pages_per_chunk <= 0:
         raise SystemExit("--pages-per-chunk must be a positive integer")
     if args.resume_overlap_pages < 0:
