@@ -779,15 +779,19 @@ def fetch_character_batch_entries(
     zone_ids: list[int],
     realm_name: str,
     characters: list[dict[str, str]],
-) -> tuple[dict[str, list[tuple[str, str, float, float | None]]], int]:
+) -> tuple[dict[str, list[tuple[str, str, float, float | None]]], int, float | None, int | None]:
     if not characters:
-        return {}, 0
+        return {}, 0, None, None
 
     query, alias_map = build_character_batch_query(zone_ids, characters, args.partition)
     data = graphql(args.graphql_url, token, query, {})
     character_data = data.get("characterData") or {}
     if not isinstance(character_data, dict):
         raise RuntimeError(f"Warcraft Logs characterData payload was not an object: {character_data!r}")
+
+    rate_limit = data.get("rateLimitData") or {}
+    spent = float(rate_limit["pointsSpentThisHour"]) if rate_limit.get("pointsSpentThisHour") is not None else None
+    limit = int(rate_limit["limitPerHour"]) if rate_limit.get("limitPerHour") is not None else None
 
     encounter_raw: dict[str, list[tuple[str, str, float, float | None]]] = {}
     ranked_characters = 0
@@ -808,7 +812,7 @@ def fetch_character_batch_entries(
             ranked_characters += 1
             merge_encounter_raw(encounter_raw, character_entries)
 
-    return encounter_raw, ranked_characters
+    return encounter_raw, ranked_characters, spent, limit
 
 
 def fetch_realm_character_chunk(
@@ -974,7 +978,7 @@ def score_characters_chunk(
 
     for batch in chunked(chunk, batch_size):
         try:
-            batch_entries, ranked = fetch_character_batch_entries(args, token, zone_ids, realm_name, batch)
+            batch_entries, ranked, pts_spent, pts_limit = fetch_character_batch_entries(args, token, zone_ids, realm_name, batch)
         except RateLimitExceededError as exc:
             print(f"rate limited during scoring of {realm_name}: {exc}")
             return encounter_raw, offset + processed, True
@@ -985,9 +989,10 @@ def score_characters_chunk(
         merge_encounter_raw(encounter_raw, batch_entries)
         processed += len(batch)
         total = len(char_dicts)
+        rate_info = f" [pts: {pts_spent}/{pts_limit}]" if pts_spent is not None else ""
         print(
             f"scored {realm_name}: {offset + processed}/{total} characters "
-            f"({ranked} with rankings in this batch)"
+            f"({ranked} with rankings in this batch){rate_info}"
         )
 
     return encounter_raw, offset + processed, False
