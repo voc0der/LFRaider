@@ -16,7 +16,14 @@
 - Keeps the runtime addon small: one Lua lookup file plus one generated Lua data file
 - Includes CI plumbing for weekly data refreshes and release packaging
 
-Current version: `0.1.7`
+Current version: `0.1.8`
+
+## Install
+
+1. Download the latest release from [GitHub](https://github.com/voc0der/LFRaider/releases/latest) or [CurseForge](https://www.curseforge.com/wow/addons/lfraider).
+2. Extract the `LFRaider` folder into:
+   `World of Warcraft/_anniversary_/Interface/AddOns/`
+3. Start the game and make sure the addon is enabled.
 
 ## Status
 

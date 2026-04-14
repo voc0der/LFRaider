@@ -18,8 +18,10 @@ Before automated release can work end-to-end, configure:
 2. GitHub Actions secret `CF_API_KEY`
    - CurseForge API token used by `BigWigsMods/packager`
 3. CurseForge project metadata in addon TOC
-   - Add `## X-Curse-Project-ID: <your_project_id>` to `LFRaider.toc` after CurseForge creates the project
-   - Without this, packager can still build archives but cannot upload to CurseForge
+   - `LFRaider.toc` now includes `## X-Curse-Project-ID: 1514107`
+   - If you fork the repo, replace that value with your own CurseForge project ID
+   - Packager can build archives without this metadata, but cannot upload to CurseForge
+   - If the CurseForge project is still awaiting approval, wait to push the release commit until uploads are allowed
 
 ## Data Refresh Prerequisites
 
@@ -62,7 +64,8 @@ Data-only release:
 - Tag created but no release upload:
   - Confirm `RELEASE_PAT` exists so tag pushes trigger the release workflow
   - Confirm `CF_API_KEY` exists in repo secrets
-  - Confirm `## X-Curse-Project-ID:` is set after CurseForge project creation
+  - Confirm `## X-Curse-Project-ID: 1514107` is present in `LFRaider.toc`
+  - Confirm the CurseForge project is approved and ready to accept uploads
 - Data refresh skipped:
   - Confirm `LFR_WCL_DISTRIBUTION_APPROVED=true`
   - Confirm WCL credentials and `WCL_ZONE_IDS` or `WCL_ZONE_ID` are configured
