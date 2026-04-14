@@ -375,10 +375,9 @@ local function test_lfg_search_entry_annotation()
     entry.DataDisplay = _G.CreateFrame("Frame")
 
     _G.LFRaider.AnnotateLFGSearchEntry(entry)
-    assert_true(entry.LFRaiderWCLText ~= nil, "LFG row should create a WCL metric label")
-    assert_true(entry.LFRaiderItemText ~= nil, "LFG row should create an item metric label")
-    assert_true(string.find(entry.LFRaiderWCLText:GetText(), "74.7%", 1, true), "LFG row should include compact WCL percent")
-    assert_true(string.find(entry.LFRaiderItemText:GetText(), "i126", 1, true), "LFG row should include compact item text")
+    assert_true(entry.LFRaiderMetricText ~= nil, "LFG row should create a compact metric label")
+    assert_true(string.find(entry.LFRaiderMetricText:GetText(), "74.7%", 1, true), "LFG row should include compact WCL percent")
+    assert_true(string.find(entry.LFRaiderMetricText:GetText(), "i126", 1, true), "LFG row should include compact item text")
     assert_equal(entry.ActivityName:GetText(), "Dungeon", "LFG activity label should remain readable")
 end
 
@@ -390,7 +389,8 @@ local function test_lfg_applicant_annotation()
     }
 
     _G.LFRaider.AnnotateLFGApplicantMember(member, 42, 1)
-    assert_true(string.find(member.Name:GetText(), "WCL 74.7", 1, true), "LFG applicant should include WCL summary")
+    assert_true(string.find(member.Name:GetText(), "74.7%", 1, true), "LFG applicant should include compact WCL percent")
+    assert_true(string.find(member.Name:GetText(), "i126", 1, true), "LFG applicant should include compact item text")
 end
 
 local function test_lfg_browse_tooltip_annotation()
@@ -438,14 +438,17 @@ local function test_who_list_annotation()
     _G.WhoFrameButton1Name = new_font_string("Vocoder")
 
     _G.LFRaider.AnnotateWhoList()
-    assert_true(string.find(_G.WhoFrameButton1Name:GetText(), "iScore 126", 1, true), "Who pane should include item summary")
+    assert_true(string.find(_G.WhoFrameButton1Name:GetText(), "74.7%", 1, true), "Who pane should include compact WCL percent")
+    assert_true(string.find(_G.WhoFrameButton1Name:GetText(), "i126", 1, true), "Who pane should include compact item text")
 end
 
 local function test_who_chat_filter_appends_summary()
     setup_env()
 
     local _, message = _G.LFRaider.ChatSystemMessageFilter(nil, "CHAT_MSG_SYSTEM", "Vocoder: Level 70 Mage")
-    assert_true(string.find(message, "WCL 74.7", 1, true), "system chat filter should append WCL summary")
+    assert_true(string.find(message, "74.7%", 1, true), "system chat filter should append compact WCL percent")
+    assert_true(string.find(message, "i126", 1, true), "system chat filter should append compact item text")
+    assert_true(not string.find(message, "Vocoder: 74.7%", 1, true), "single-name chat summaries should avoid repeating the character name")
 end
 
 local function test_minimap_button_opens_menu()

@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [0.1.7] - 2026-04-14
+
+### Fixed
+- Kept compact LFG browse row metrics on a single aligned line so they do not overlap Blizzard's stock row layout
+- Switched Who-pane and `/who` chat summaries to the same compact `WCL%` and `i###` style
+
 ## [0.1.6] - 2026-04-14
 
 ### Changed
