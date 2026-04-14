@@ -8,8 +8,6 @@ local MINIMAP_RADIUS = 80
 local SUMMARY_COLOR = "|cff33ff99"
 local RESET_COLOR = "|r"
 local ITEM_SCORE_COLOR = "|cffffd100"
-local LFG_WCL_WIDTH = 48
-local LFG_ITEM_WIDTH = 40
 local LFG_TOOLTIP_MIN_WIDTH = 270
 
 local DEFAULT_DB = {
@@ -319,10 +317,10 @@ local function BuildCompactSummary(record)
     local db = EnsureSavedVariables()
     local parts = {}
     if db.showWCL and record.wclOverall ~= nil then
-        parts[#parts + 1] = "WCL " .. FormatScore(record.wclOverall)
+        parts[#parts + 1] = FormatScore(record.wclOverall) .. "%"
     end
     if db.showItemScore and record.itemScore ~= nil then
-        parts[#parts + 1] = "iScore " .. FormatItemScore(record.itemScore)
+        parts[#parts + 1] = "i" .. FormatItemScore(record.itemScore)
     end
 
     if #parts == 0 then
@@ -332,16 +330,18 @@ local function BuildCompactSummary(record)
     return table.concat(parts, " / ")
 end
 
+local BuildCompactLFGSummary
+
 local function BuildColoredSummary(record)
-    local summary = BuildCompactSummary(record)
+    local summary = BuildCompactLFGSummary(record)
     if not summary then
         return nil
     end
 
-    return SUMMARY_COLOR .. "[" .. summary .. "]" .. RESET_COLOR
+    return SUMMARY_COLOR .. "[" .. RESET_COLOR .. summary .. SUMMARY_COLOR .. "]" .. RESET_COLOR
 end
 
-local function BuildCompactLFGSummary(record)
+BuildCompactLFGSummary = function(record)
     if not record or not HasAnyEnabledValue(record) then
         return nil
     end
@@ -360,24 +360,6 @@ local function BuildCompactLFGSummary(record)
     end
 
     return table.concat(parts, " ")
-end
-
-local function GetLFGMetricTexts(record)
-    if not record or not HasAnyEnabledValue(record) then
-        return nil, nil
-    end
-
-    local db = EnsureSavedVariables()
-    local wclText = nil
-    local itemText = nil
-    if db.showWCL and record.wclOverall ~= nil then
-        wclText = WrapColor(GetScoreColor(record.wclOverall), FormatScore(record.wclOverall) .. "%")
-    end
-    if db.showItemScore and record.itemScore ~= nil then
-        itemText = WrapColor(ITEM_SCORE_COLOR, "i" .. FormatItemScore(record.itemScore))
-    end
-
-    return wclText, itemText
 end
 
 local function BuildSlashSummary(record)
@@ -623,7 +605,7 @@ local function EnsureLFGMetricFontString(entry, key, width)
     if type(fontString.SetJustifyH) == "function" then
         fontString:SetJustifyH("RIGHT")
     end
-    if type(fontString.SetWidth) == "function" then
+    if width and type(fontString.SetWidth) == "function" then
         fontString:SetWidth(width)
     end
 
@@ -646,50 +628,63 @@ local function SetMetricFontText(fontString, text)
     end
 end
 
-local function GetLFGMetricAnchor(entry)
+local function GetLFGMetricLeftAnchor(entry)
+    if entry and entry.NewPlayerFriendlyIcon and IsRegionShown(entry.NewPlayerFriendlyIcon) then
+        return entry.NewPlayerFriendlyIcon, "RIGHT", 4
+    end
+
+    if entry and entry.ClassIcon and IsRegionShown(entry.ClassIcon) then
+        return entry.ClassIcon, "RIGHT", 4
+    end
+
+    if entry and entry.Level and IsRegionShown(entry.Level) then
+        return entry.Level, "RIGHT", 4
+    end
+
+    if entry and entry.VoiceChat and IsRegionShown(entry.VoiceChat) then
+        return entry.VoiceChat, "RIGHT", 4
+    end
+
+    if entry and entry.Name then
+        return entry.Name, "RIGHT", 6
+    end
+
+    return entry, "LEFT", 10
+end
+
+local function GetLFGMetricRightAnchor(entry)
     if entry and entry.DataDisplay and IsRegionShown(entry.DataDisplay) then
-        return entry.DataDisplay, "TOPLEFT", "LEFT", "BOTTOMLEFT", -8
+        return entry.DataDisplay, "LEFT", -8
     end
 
     if entry and entry.PendingLabel and IsRegionShown(entry.PendingLabel) then
-        return entry.PendingLabel, "TOPLEFT", "LEFT", "BOTTOMLEFT", -6
+        return entry.PendingLabel, "LEFT", -6
     end
 
     if entry and entry.ExpirationTime and IsRegionShown(entry.ExpirationTime) then
-        return entry.ExpirationTime, "TOPLEFT", "LEFT", "BOTTOMLEFT", -6
+        return entry.ExpirationTime, "LEFT", -6
     end
 
-    return entry, "TOPRIGHT", "RIGHT", "BOTTOMRIGHT", -10
+    return entry, "RIGHT", -10
 end
 
-local function LayoutLFGMetricTexts(entry, wclFont, itemFont, hasWCL, hasItem)
-    local anchor, topPoint, middlePoint, bottomPoint, xOffset = GetLFGMetricAnchor(entry)
-    if not anchor then
+local function LayoutLFGMetricText(entry, fontString)
+    if not fontString then
         return
     end
 
-    if wclFont and type(wclFont.ClearAllPoints) == "function" then
-        wclFont:ClearAllPoints()
-    end
-    if itemFont and type(itemFont.ClearAllPoints) == "function" then
-        itemFont:ClearAllPoints()
+    local leftAnchor, leftPoint, leftOffset = GetLFGMetricLeftAnchor(entry)
+    local rightAnchor, rightPoint, rightOffset = GetLFGMetricRightAnchor(entry)
+    if not leftAnchor or not rightAnchor then
+        return
     end
 
-    if hasWCL and hasItem then
-        if wclFont and type(wclFont.SetPoint) == "function" then
-            wclFont:SetPoint("TOPRIGHT", anchor, topPoint, xOffset, -6)
-        end
-        if itemFont and type(itemFont.SetPoint) == "function" then
-            itemFont:SetPoint("BOTTOMRIGHT", anchor, bottomPoint, xOffset, 6)
-        end
-    elseif hasWCL then
-        if wclFont and type(wclFont.SetPoint) == "function" then
-            wclFont:SetPoint("RIGHT", anchor, middlePoint, xOffset, 0)
-        end
-    elseif hasItem then
-        if itemFont and type(itemFont.SetPoint) == "function" then
-            itemFont:SetPoint("RIGHT", anchor, middlePoint, xOffset, 0)
-        end
+    if type(fontString.ClearAllPoints) == "function" then
+        fontString:ClearAllPoints()
+    end
+    if type(fontString.SetPoint) == "function" then
+        fontString:SetPoint("LEFT", leftAnchor, leftPoint, leftOffset, -1)
+        fontString:SetPoint("RIGHT", rightAnchor, rightPoint, rightOffset, -1)
     end
 end
 
@@ -699,18 +694,22 @@ local function SetLFGEntryMetrics(entry, name, realm)
     end
 
     local record = GetCharacterRecord(name, realm)
-    local wclText, itemText = GetLFGMetricTexts(record)
-
-    local wclFont = EnsureLFGMetricFontString(entry, "LFRaiderWCLText", LFG_WCL_WIDTH)
-    local itemFont = EnsureLFGMetricFontString(entry, "LFRaiderItemText", LFG_ITEM_WIDTH)
-    if not wclFont and not itemFont then
+    local summary = BuildCompactLFGSummary(record)
+    local fontString = EnsureLFGMetricFontString(entry, "LFRaiderMetricText")
+    if not fontString then
         return false
     end
 
-    SetMetricFontText(wclFont, wclText)
-    SetMetricFontText(itemFont, itemText)
-    LayoutLFGMetricTexts(entry, wclFont, itemFont, wclText ~= nil, itemText ~= nil)
-    return wclText ~= nil or itemText ~= nil
+    if entry.LFRaiderWCLText then
+        SetMetricFontText(entry.LFRaiderWCLText, nil)
+    end
+    if entry.LFRaiderItemText then
+        SetMetricFontText(entry.LFRaiderItemText, nil)
+    end
+
+    SetMetricFontText(fontString, summary)
+    LayoutLFGMetricText(entry, fontString)
+    return summary ~= nil
 end
 
 local function AnnotateLFGBrowseTooltipMember(frame, realm)
@@ -860,7 +859,7 @@ end
 
 local function BuildMessageSummaries(message)
     local db = EnsureSavedVariables()
-    if not db.whoChat or type(message) ~= "string" or string.find(message, "WCL ", 1, true) then
+    if not db.whoChat or type(message) ~= "string" or string.find(message, SUMMARY_COLOR .. "[", 1, true) then
         return nil
     end
 
@@ -869,9 +868,12 @@ local function BuildMessageSummaries(message)
     for token in string.gmatch(message, "[%a][%a'%-]+") do
         if not seen[token] then
             local record = GetCharacterRecord(token, GetCurrentRealm())
-            local summary = BuildCompactSummary(record)
+            local summary = BuildCompactLFGSummary(record)
             if summary then
-                summaries[#summaries + 1] = token .. ": " .. summary
+                summaries[#summaries + 1] = {
+                    name = token,
+                    summary = summary,
+                }
                 seen[token] = true
             end
         end
@@ -884,7 +886,16 @@ local function BuildMessageSummaries(message)
         return nil
     end
 
-    return SUMMARY_COLOR .. "[" .. table.concat(summaries, "; ") .. "]" .. RESET_COLOR
+    if #summaries == 1 then
+        return SUMMARY_COLOR .. "[" .. RESET_COLOR .. summaries[1].summary .. SUMMARY_COLOR .. "]" .. RESET_COLOR
+    end
+
+    local parts = {}
+    for _, summary in ipairs(summaries) do
+        parts[#parts + 1] = summary.name .. ": " .. summary.summary
+    end
+
+    return SUMMARY_COLOR .. "[" .. RESET_COLOR .. table.concat(parts, "; ") .. SUMMARY_COLOR .. "]" .. RESET_COLOR
 end
 
 local function ChatSystemMessageFilter(_, _, message, ...)
