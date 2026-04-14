@@ -9,14 +9,14 @@
 # LFRaider
 
 - Adds bundled Warcraft Logs and last-known item score signals to player tooltips
-- Adds the same compact signals to LFG rows when a known leader or applicant appears
+- Adds the same compact signals to LFG rows and browse hover panes when a known leader or member appears
 - Appends compact signals to matching `/who` system-chat results
 - Supports `/lfr` lookups for target, self, or `Name-Realm`
 - Starts from a minimap menu with display toggles
 - Keeps the runtime addon small: one Lua lookup file plus one generated Lua data file
 - Includes CI plumbing for weekly data refreshes and release packaging
 
-Current version: `0.1.5`
+Current version: `0.1.6`
 
 ## Status
 
@@ -77,7 +77,7 @@ Right-click the minimap button to look up your target.
 ## Display Surfaces
 
 - Unit tooltips: adds one line for Warcraft Logs and one line for item score when known
-- LFG browse rows: annotates known leaders
+- LFG browse rows and hover panes: annotates known leaders and listed members
 - LFG applicants: annotates known applicants
 - Who pane: annotates known names in the Who tab
 - `/who` chat: appends a compact summary to matching system messages when a bundled character name is found

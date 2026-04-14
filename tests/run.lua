@@ -32,8 +32,15 @@ local function new_font_string(text)
 
     function font:SetTextColor() end
     function font:SetPoint() end
+    function font:ClearAllPoints() self.point = nil end
+    function font:SetJustifyH(value) self.justify = value end
     function font:SetWidth(width) self.width = width end
-    function font:GetWidth() return #tostring(self.text or "") * 6 end
+    function font:GetWidth()
+        if self.width and self.width > 0 then
+            return self.width
+        end
+        return #tostring(self.text or "") * 6
+    end
     function font:IsTruncated() return false end
     function font:Show() self.shown = true end
     function font:Hide() self.shown = false end
@@ -130,6 +137,8 @@ local function setup_env(opts)
         function frame:RegisterEvent(event) self.events[event] = true end
         function frame:SetScript(scriptName, handler) self.scripts[scriptName] = handler end
         function frame:SetSize(width, height) self.width = width; self.height = height end
+        function frame:SetWidth(width) self.width = width end
+        function frame:GetWidth() return self.width or 0 end
         function frame:SetFrameStrata(value) self.strata = value end
         function frame:SetFrameLevel(value) self.level = value end
         function frame:SetHighlightTexture(value) self.highlight = value end
@@ -267,6 +276,7 @@ local function setup_env(opts)
     _G.WhoList_Update = function() end
     _G.LFGListSearchEntry_Update = function() end
     _G.LFGBrowseSearchEntry_Update = function() end
+    _G.LFGBrowseSearchEntryTooltip_UpdateAndShow = function() end
     _G.LFGListApplicationViewer_UpdateApplicantMember = function() end
     _G.LFGListApplicantMember_OnEnter = function() end
     _G.LFGListUtil_SetSearchEntryTooltip = function() end
@@ -358,15 +368,18 @@ end
 local function test_lfg_search_entry_annotation()
     setup_env()
 
-    local entry = {
-        resultID = 1,
-        Name = new_font_string("Heroic Slave Pens"),
-        ActivityName = new_font_string("Dungeon"),
-    }
+    local entry = _G.CreateFrame("Button")
+    entry.resultID = 1
+    entry.Name = new_font_string("Heroic Slave Pens")
+    entry.ActivityName = new_font_string("Dungeon")
+    entry.DataDisplay = _G.CreateFrame("Frame")
 
     _G.LFRaider.AnnotateLFGSearchEntry(entry)
-    assert_true(string.find(entry.ActivityName:GetText(), "WCL 74.7", 1, true), "LFG activity row should include WCL summary")
-    assert_true(string.find(entry.ActivityName:GetText(), "iScore 126", 1, true), "LFG activity row should include item summary")
+    assert_true(entry.LFRaiderWCLText ~= nil, "LFG row should create a WCL metric label")
+    assert_true(entry.LFRaiderItemText ~= nil, "LFG row should create an item metric label")
+    assert_true(string.find(entry.LFRaiderWCLText:GetText(), "74.7%", 1, true), "LFG row should include compact WCL percent")
+    assert_true(string.find(entry.LFRaiderItemText:GetText(), "i126", 1, true), "LFG row should include compact item text")
+    assert_equal(entry.ActivityName:GetText(), "Dungeon", "LFG activity label should remain readable")
 end
 
 local function test_lfg_applicant_annotation()
@@ -378,6 +391,44 @@ local function test_lfg_applicant_annotation()
 
     _G.LFRaider.AnnotateLFGApplicantMember(member, 42, 1)
     assert_true(string.find(member.Name:GetText(), "WCL 74.7", 1, true), "LFG applicant should include WCL summary")
+end
+
+local function test_lfg_browse_tooltip_annotation()
+    setup_env()
+
+    local extraMember = {
+        Name = new_font_string("Vocoder"),
+        Level = new_font_string("Lvl 70"),
+    }
+    local tooltip = {
+        width = 200,
+        Leader = {
+            Name = new_font_string("Vocoder"),
+            Level = new_font_string("Lvl 70"),
+        },
+        memberPool = {
+            EnumerateActive = function()
+                local index = 0
+                local active = { extraMember }
+                return function()
+                    index = index + 1
+                    return active[index]
+                end
+            end,
+        },
+        SetWidth = function(self, width)
+            self.width = width
+        end,
+        GetWidth = function(self)
+            return self.width
+        end,
+    }
+
+    _G.LFRaider.AnnotateLFGBrowseSearchEntryTooltip(tooltip, 1)
+    assert_true(string.find(tooltip.Leader.Level:GetText(), "74.7%", 1, true), "browse tooltip leader should include compact WCL percent")
+    assert_true(string.find(tooltip.Leader.Level:GetText(), "i126", 1, true), "browse tooltip leader should include compact item text")
+    assert_true(string.find(extraMember.Level:GetText(), "74.7%", 1, true), "browse tooltip members should include compact WCL percent")
+    assert_true(tooltip.width >= 270, "browse tooltip should widen for compact summary columns")
 end
 
 local function test_who_list_annotation()
@@ -414,6 +465,7 @@ local tests = {
     test_tooltip_adds_enabled_scores_once,
     test_lfg_search_entry_annotation,
     test_lfg_applicant_annotation,
+    test_lfg_browse_tooltip_annotation,
     test_who_list_annotation,
     test_who_chat_filter_appends_summary,
     test_minimap_button_opens_menu,

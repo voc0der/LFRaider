@@ -2,7 +2,7 @@
 ## Title: LFRaider
 ## Notes: Shows bundled Warcraft Logs and last-known item score signals for TBC Anniversary Classic characters.
 ## Author: voc0der
-## Version: 0.1.5
+## Version: 0.1.6
 ## SavedVariables: LFRaiderDB
 
 LFRaider_Data.lua

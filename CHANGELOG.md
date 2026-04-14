@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [0.1.6] - 2026-04-14
+
+### Changed
+- Reworked LFG browse row annotations into compact colored `WCL%` and `i###` markers so the list stays readable at a glance
+- Added the same compact score snippets to LFG hover panes and search-entry leader tooltips
+
 ## [0.1.5] - 2026-04-14
 
 ### Changed

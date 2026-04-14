@@ -7,6 +7,10 @@ local DEFAULT_REALM = "Dreamscythe"
 local MINIMAP_RADIUS = 80
 local SUMMARY_COLOR = "|cff33ff99"
 local RESET_COLOR = "|r"
+local ITEM_SCORE_COLOR = "|cffffd100"
+local LFG_WCL_WIDTH = 48
+local LFG_ITEM_WIDTH = 40
+local LFG_TOOLTIP_MIN_WIDTH = 270
 
 local DEFAULT_DB = {
     tooltips = true,
@@ -185,6 +189,14 @@ local function ColorScore(score)
     return GetScoreColor(score) .. FormatScore(score) .. RESET_COLOR
 end
 
+local function WrapColor(color, text)
+    if not text or text == "" then
+        return nil
+    end
+
+    return color .. text .. RESET_COLOR
+end
+
 local function Print(message)
     if _G.DEFAULT_CHAT_FRAME and type(_G.DEFAULT_CHAT_FRAME.AddMessage) == "function" then
         _G.DEFAULT_CHAT_FRAME:AddMessage(ADDON_PREFIX .. ": " .. tostring(message))
@@ -327,6 +339,45 @@ local function BuildColoredSummary(record)
     end
 
     return SUMMARY_COLOR .. "[" .. summary .. "]" .. RESET_COLOR
+end
+
+local function BuildCompactLFGSummary(record)
+    if not record or not HasAnyEnabledValue(record) then
+        return nil
+    end
+
+    local db = EnsureSavedVariables()
+    local parts = {}
+    if db.showWCL and record.wclOverall ~= nil then
+        parts[#parts + 1] = WrapColor(GetScoreColor(record.wclOverall), FormatScore(record.wclOverall) .. "%")
+    end
+    if db.showItemScore and record.itemScore ~= nil then
+        parts[#parts + 1] = WrapColor(ITEM_SCORE_COLOR, "i" .. FormatItemScore(record.itemScore))
+    end
+
+    if #parts == 0 then
+        return nil
+    end
+
+    return table.concat(parts, " ")
+end
+
+local function GetLFGMetricTexts(record)
+    if not record or not HasAnyEnabledValue(record) then
+        return nil, nil
+    end
+
+    local db = EnsureSavedVariables()
+    local wclText = nil
+    local itemText = nil
+    if db.showWCL and record.wclOverall ~= nil then
+        wclText = WrapColor(GetScoreColor(record.wclOverall), FormatScore(record.wclOverall) .. "%")
+    end
+    if db.showItemScore and record.itemScore ~= nil then
+        itemText = WrapColor(ITEM_SCORE_COLOR, "i" .. FormatItemScore(record.itemScore))
+    end
+
+    return wclText, itemText
 end
 
 local function BuildSlashSummary(record)
@@ -484,7 +535,7 @@ local function AreTooltipsEnabled()
     return db.tooltips ~= false
 end
 
-local function AddRecordToTooltip(tooltip, record)
+local function AddRecordToTooltip(tooltip, record, compact)
     if not record or not HasAnyEnabledValue(record) then
         return false
     end
@@ -493,12 +544,19 @@ local function AddRecordToTooltip(tooltip, record)
         return false
     end
 
-    local db = EnsureSavedVariables()
-    if db.showWCL and record.wclOverall ~= nil then
-        tooltip:AddLine("Warcraft Logs: " .. ColorScore(record.wclOverall))
-    end
-    if db.showItemScore and record.itemScore ~= nil then
-        tooltip:AddLine("Last known item score: " .. FormatItemScore(record.itemScore), 1, 1, 1)
+    if compact then
+        local summary = BuildCompactLFGSummary(record)
+        if summary then
+            tooltip:AddLine("LFRaider: " .. summary, 1, 1, 1)
+        end
+    else
+        local db = EnsureSavedVariables()
+        if db.showWCL and record.wclOverall ~= nil then
+            tooltip:AddLine("Warcraft Logs: " .. ColorScore(record.wclOverall))
+        end
+        if db.showItemScore and record.itemScore ~= nil then
+            tooltip:AddLine("Last known item score: " .. FormatItemScore(record.itemScore), 1, 1, 1)
+        end
     end
 
     if type(tooltip.Show) == "function" then
@@ -525,15 +583,185 @@ local function AddScoreToTooltip(tooltip, unit)
     if tooltip then
         tooltip.LFRaiderTooltipKey = tooltipKey
     end
-    AddRecordToTooltip(tooltip, lookup.record)
+    AddRecordToTooltip(tooltip, lookup.record, false)
 end
 
-local function AddNameToTooltip(tooltip, name, realm)
+local function AddNameToTooltip(tooltip, name, realm, compact)
     if not AreTooltipsEnabled() then
         return
     end
 
-    AddRecordToTooltip(tooltip, GetCharacterRecord(name, realm))
+    AddRecordToTooltip(tooltip, GetCharacterRecord(name, realm), compact)
+end
+
+local function IsRegionShown(region)
+    if not region then
+        return false
+    end
+
+    if type(region.IsShown) == "function" then
+        return region:IsShown()
+    end
+
+    return true
+end
+
+local function EnsureLFGMetricFontString(entry, key, width)
+    if entry[key] then
+        return entry[key]
+    end
+
+    if not entry or type(entry.CreateFontString) ~= "function" then
+        return nil
+    end
+
+    local fontString = entry:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    if not fontString then
+        return nil
+    end
+
+    if type(fontString.SetJustifyH) == "function" then
+        fontString:SetJustifyH("RIGHT")
+    end
+    if type(fontString.SetWidth) == "function" then
+        fontString:SetWidth(width)
+    end
+
+    entry[key] = fontString
+    return fontString
+end
+
+local function SetMetricFontText(fontString, text)
+    if not fontString or type(fontString.SetText) ~= "function" then
+        return
+    end
+
+    fontString:SetText(text or "")
+    if text and text ~= "" then
+        if type(fontString.Show) == "function" then
+            fontString:Show()
+        end
+    elseif type(fontString.Hide) == "function" then
+        fontString:Hide()
+    end
+end
+
+local function GetLFGMetricAnchor(entry)
+    if entry and entry.DataDisplay and IsRegionShown(entry.DataDisplay) then
+        return entry.DataDisplay, "TOPLEFT", "LEFT", "BOTTOMLEFT", -8
+    end
+
+    if entry and entry.PendingLabel and IsRegionShown(entry.PendingLabel) then
+        return entry.PendingLabel, "TOPLEFT", "LEFT", "BOTTOMLEFT", -6
+    end
+
+    if entry and entry.ExpirationTime and IsRegionShown(entry.ExpirationTime) then
+        return entry.ExpirationTime, "TOPLEFT", "LEFT", "BOTTOMLEFT", -6
+    end
+
+    return entry, "TOPRIGHT", "RIGHT", "BOTTOMRIGHT", -10
+end
+
+local function LayoutLFGMetricTexts(entry, wclFont, itemFont, hasWCL, hasItem)
+    local anchor, topPoint, middlePoint, bottomPoint, xOffset = GetLFGMetricAnchor(entry)
+    if not anchor then
+        return
+    end
+
+    if wclFont and type(wclFont.ClearAllPoints) == "function" then
+        wclFont:ClearAllPoints()
+    end
+    if itemFont and type(itemFont.ClearAllPoints) == "function" then
+        itemFont:ClearAllPoints()
+    end
+
+    if hasWCL and hasItem then
+        if wclFont and type(wclFont.SetPoint) == "function" then
+            wclFont:SetPoint("TOPRIGHT", anchor, topPoint, xOffset, -6)
+        end
+        if itemFont and type(itemFont.SetPoint) == "function" then
+            itemFont:SetPoint("BOTTOMRIGHT", anchor, bottomPoint, xOffset, 6)
+        end
+    elseif hasWCL then
+        if wclFont and type(wclFont.SetPoint) == "function" then
+            wclFont:SetPoint("RIGHT", anchor, middlePoint, xOffset, 0)
+        end
+    elseif hasItem then
+        if itemFont and type(itemFont.SetPoint) == "function" then
+            itemFont:SetPoint("RIGHT", anchor, middlePoint, xOffset, 0)
+        end
+    end
+end
+
+local function SetLFGEntryMetrics(entry, name, realm)
+    if not entry then
+        return false
+    end
+
+    local record = GetCharacterRecord(name, realm)
+    local wclText, itemText = GetLFGMetricTexts(record)
+
+    local wclFont = EnsureLFGMetricFontString(entry, "LFRaiderWCLText", LFG_WCL_WIDTH)
+    local itemFont = EnsureLFGMetricFontString(entry, "LFRaiderItemText", LFG_ITEM_WIDTH)
+    if not wclFont and not itemFont then
+        return false
+    end
+
+    SetMetricFontText(wclFont, wclText)
+    SetMetricFontText(itemFont, itemText)
+    LayoutLFGMetricTexts(entry, wclFont, itemFont, wclText ~= nil, itemText ~= nil)
+    return wclText ~= nil or itemText ~= nil
+end
+
+local function AnnotateLFGBrowseTooltipMember(frame, realm)
+    if not AreTooltipsEnabled() or not frame or not frame.Name or not frame.Level then
+        return false
+    end
+
+    if type(frame.Name.GetText) ~= "function" or type(frame.Level.GetText) ~= "function" or type(frame.Level.SetText) ~= "function" then
+        return false
+    end
+
+    local name = frame.Name:GetText()
+    local baseLevel = frame.Level:GetText() or ""
+    local summary = BuildCompactLFGSummary(GetCharacterRecord(name, realm))
+    if summary then
+        frame.Level:SetText(summary .. " " .. baseLevel)
+        return true
+    end
+
+    frame.Level:SetText(baseLevel)
+    return false
+end
+
+local function AnnotateLFGBrowseSearchEntryTooltip(tooltip, resultID)
+    if not AreTooltipsEnabled() or not tooltip or not resultID then
+        return
+    end
+
+    local realm = GetCurrentRealm()
+    local addedSummary = false
+
+    if tooltip.Leader then
+        addedSummary = AnnotateLFGBrowseTooltipMember(tooltip.Leader, realm) or addedSummary
+    end
+
+    if tooltip.memberPool and type(tooltip.memberPool.EnumerateActive) == "function" then
+        for frame in tooltip.memberPool:EnumerateActive() do
+            addedSummary = AnnotateLFGBrowseTooltipMember(frame, realm) or addedSummary
+        end
+    end
+
+    if addedSummary and type(tooltip.SetWidth) == "function" then
+        local width = 0
+        if type(tooltip.GetWidth) == "function" then
+            width = tooltip:GetWidth() or 0
+        end
+
+        if width < LFG_TOOLTIP_MIN_WIDTH then
+            tooltip:SetWidth(LFG_TOOLTIP_MIN_WIDTH)
+        end
+    end
 end
 
 local function HookTooltips()
@@ -596,12 +824,7 @@ local function AnnotateLFGSearchEntry(entry)
         return
     end
 
-    local nameText = entry.Name and type(entry.Name.GetText) == "function" and entry.Name:GetText() or nil
-    if entry.ActivityName and info.name and nameText == info.name and info.name ~= leaderName then
-        AppendSummaryToFontString(entry.ActivityName, leaderName, GetCurrentRealm(), true)
-    else
-        AppendSummaryToFontString(entry.Name, leaderName, GetCurrentRealm(), true)
-    end
+    SetLFGEntryMetrics(entry, leaderName, GetCurrentRealm())
 end
 
 local function AnnotateLFGApplicantMember(member, appID, memberIdx)
@@ -697,16 +920,17 @@ local function HookWhoAndChat()
             local parent = member:GetParent()
             if parent and parent.applicantID and member.memberIdx and _G.C_LFGList and type(_G.C_LFGList.GetApplicantMemberInfo) == "function" then
                 local name = _G.C_LFGList.GetApplicantMemberInfo(parent.applicantID, member.memberIdx)
-                AddNameToTooltip(_G.GameTooltip, name, GetCurrentRealm())
+                AddNameToTooltip(_G.GameTooltip, name, GetCurrentRealm(), true)
             end
         end
     end)
     HookGlobalFunctionOnce("LFGListUtil_SetSearchEntryTooltip", function(tooltip, resultID)
         if _G.C_LFGList and type(_G.C_LFGList.GetSearchResultInfo) == "function" then
             local info = _G.C_LFGList.GetSearchResultInfo(resultID)
-            AddNameToTooltip(tooltip, info and info.leaderName, GetCurrentRealm())
+            AddNameToTooltip(tooltip, info and info.leaderName, GetCurrentRealm(), true)
         end
     end)
+    HookGlobalFunctionOnce("LFGBrowseSearchEntryTooltip_UpdateAndShow", AnnotateLFGBrowseSearchEntryTooltip)
 
     if not LFRaider.chatFilterHooked then
         if type(ChatFrame_AddMessageEventFilter) == "function" then
@@ -1044,8 +1268,10 @@ LFRaider.ColorScore = ColorScore
 LFRaider.LookupUnit = LookupUnit
 LFRaider.AddScoreToTooltip = AddScoreToTooltip
 LFRaider.AppendSummaryToFontString = AppendSummaryToFontString
+LFRaider.BuildCompactLFGSummary = BuildCompactLFGSummary
 LFRaider.AnnotateLFGSearchEntry = AnnotateLFGSearchEntry
 LFRaider.AnnotateLFGApplicantMember = AnnotateLFGApplicantMember
+LFRaider.AnnotateLFGBrowseSearchEntryTooltip = AnnotateLFGBrowseSearchEntryTooltip
 LFRaider.AnnotateWhoList = AnnotateWhoList
 LFRaider.BuildMessageSummaries = BuildMessageSummaries
 LFRaider.ChatSystemMessageFilter = ChatSystemMessageFilter
