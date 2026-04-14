@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+## [0.1.5] - 2026-04-14
+
+### Changed
+- Refreshed bundled score dataset.
+
 ### Fixed
 - Rewind a small overlap window when chunked Warcraft Logs refreshes resume so live pagination drift is less likely to skip characters between runs
 
