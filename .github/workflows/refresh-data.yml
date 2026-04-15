@@ -134,11 +134,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- data/scores.json data/fetch_state.json LFRaider_Data.lua; then
+          if git status --porcelain -- data/scores.json data/fetch_state.json LFRaider_Data.lua | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No data changes."
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Commit updated data
