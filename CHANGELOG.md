@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [0.1.8] - 2026-04-14
+
+### Changed
+- Wired the release metadata to CurseForge project `1514107` so automated packager uploads are ready once the project is approved
+- Added GitHub and CurseForge install links to the README
+
 ## [0.1.7] - 2026-04-14
 
 ### Fixed

@@ -20,8 +20,10 @@ Data refresh releases are different: the refresh workflow bumps the patch versio
   - Required so workflow-created tag pushes can trigger downstream workflows
 - `CF_API_KEY` repository secret:
   - Required for CurseForge upload in packager step
-- `## X-Curse-Project-ID: <id>` in `LFRaider.toc`:
+- `## X-Curse-Project-ID: 1514107` in `LFRaider.toc`:
   - Required by packager to know which CurseForge project to publish to
+  - Replace it if you fork this repo for a different CurseForge project
+  - Wait for CurseForge project approval before pushing a release commit that should upload there
 
 ## Manual Steps
 
