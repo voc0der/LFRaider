@@ -94,6 +94,33 @@ query LFRaiderRankings(
 }
 """
 
+SERVER_CHARACTERS_QUERY = """
+query LFRaiderServerCharacterNames(
+  $serverRegion: String!
+  $serverSlug: String!
+  $page: Int!
+  $limit: Int!
+) {
+  worldData {
+    server(region: $serverRegion, slug: $serverSlug) {
+      characters(page: $page, limit: $limit) {
+        data {
+          name
+          hidden
+        }
+        has_more_pages
+        total
+      }
+    }
+  }
+  rateLimitData {
+    limitPerHour
+    pointsSpentThisHour
+    pointsResetIn
+  }
+}
+"""
+
 def require_distribution_permission(args: argparse.Namespace) -> None:
     approved = args.distribution_approved or os.getenv("LFR_WCL_DISTRIBUTION_APPROVED") == "true"
     if approved:
@@ -998,6 +1025,76 @@ def score_characters_chunk(
     return encounter_raw, offset + processed, False
 
 
+def supplement_realm_characters_chunk(
+    args: argparse.Namespace,
+    token: str,
+    region: str,
+    realm: dict[str, str],
+    start_page: int,
+) -> tuple[list[str], bool, int, bool]:
+    """
+    Page through WCL's server character registry to find names missed by encounter rankings.
+    The registry uses a character-level index that includes characters whose fight-log entries
+    lack a server ID association, which the encounter-rankings discovery misses.
+    Returns (names, all_exhausted, next_page, rate_limited).
+    """
+    realm_name = realm["name"]
+    realm_region = realm.get("region") or region
+    realm_slug = realm.get("slug") or realm_name.lower().replace(" ", "")
+
+    names: list[str] = []
+    next_page = start_page
+    end_page = start_page + args.pages_per_chunk - 1
+
+    for page in range(start_page, end_page + 1):
+        try:
+            data = graphql(args.graphql_url, token, SERVER_CHARACTERS_QUERY, {
+                "serverRegion": realm_region,
+                "serverSlug": realm_slug,
+                "page": page,
+                "limit": SERVER_CHARACTERS_MAX_LIMIT,
+            })
+        except RateLimitExceededError as exc:
+            print(f"rate limited during server supplement for {realm_region}/{realm_slug}: {exc}")
+            return names, False, next_page, True
+        except TransientRequestError as exc:
+            print(f"transient failure during server supplement for {realm_region}/{realm_slug}: {exc}")
+            return names, False, next_page, True
+
+        world_data = data.get("worldData") or {}
+        server_data = world_data.get("server") or {}
+        characters_payload = server_data.get("characters") or {}
+        items = pagination_items(characters_payload)
+        rate_limit = data.get("rateLimitData") or {}
+        spent = rate_limit.get("pointsSpentThisHour")
+        limit_per_hour = rate_limit.get("limitPerHour")
+        total = characters_payload.get("total") if isinstance(characters_payload, dict) else None
+
+        page_names: list[str] = []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            name = item.get("name")
+            if not name or item.get("hidden"):
+                continue
+            page_names.append(str(name))
+
+        names.extend(page_names)
+        next_page = page + 1
+        print(
+            f"server supplement {realm_region}/{realm_name} page {page}: "
+            f"{len(page_names)} names, total {total}, rate {spent}/{limit_per_hour}"
+        )
+
+        if args.sleep_seconds > 0:
+            time.sleep(args.sleep_seconds)
+
+        if not pagination_has_more(characters_payload):
+            return names, True, next_page, False
+
+    return names, False, next_page, False
+
+
 def run_hybrid_incremental(
     args: argparse.Namespace,
     zone_ids: list[int],
@@ -1006,9 +1103,11 @@ def run_hybrid_incremental(
     token: str,
 ) -> bool:
     """
-    Two-phase incremental fetch:
-      1. Discovery — page through encounter rankings (server-filtered) to collect character names.
-      2. Scoring   — batch-query zoneRankings for discovered characters for correct server percentiles.
+    Three-phase incremental fetch:
+      1. Discovery        — page through encounter rankings (server-filtered) to collect character names.
+      2. Server supplement — page through WCL's server character registry to catch names whose fight-log
+                             entries lack a server ID, which the encounter-rankings discovery misses.
+      3. Scoring          — batch-query zoneRankings for all discovered characters.
     Returns True when the full cycle is complete.
     """
     state = load_state(args.state_file)
@@ -1056,9 +1155,40 @@ def run_hybrid_incremental(
                     existing.add(name)
 
             if all_exhausted:
-                combo["phase"] = "scoring"
+                combo["phase"] = "server_supplement"
+                combo.setdefault("supplementPage", 1)
                 print(
                     f"{combo_key}: discovery complete — "
+                    f"{len(combo['discoveredNames'])} names from encounter rankings, "
+                    f"starting server supplement"
+                )
+
+            if rate_limited:
+                save_state(args.state_file, state)
+                return False
+
+        if combo.get("phase") == "server_supplement":
+            supp_page = combo.get("supplementPage", 1)
+            new_names, supp_exhausted, next_supp_page, rate_limited = supplement_realm_characters_chunk(
+                args, token, region, realm, supp_page
+            )
+            combo["supplementPage"] = next_supp_page
+
+            existing = set(combo["discoveredNames"])
+            added = 0
+            for name in new_names:
+                if name not in existing:
+                    combo["discoveredNames"].append(name)
+                    existing.add(name)
+                    added += 1
+
+            if added:
+                print(f"{combo_key}: server supplement added {added} characters missed by encounter rankings")
+
+            if supp_exhausted:
+                combo["phase"] = "scoring"
+                print(
+                    f"{combo_key}: server supplement complete — "
                     f"{len(combo['discoveredNames'])} unique characters to score"
                 )
 
