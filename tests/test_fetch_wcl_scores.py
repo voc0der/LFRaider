@@ -391,7 +391,7 @@ class FetchWclScoresTests(unittest.TestCase):
                         [1047],
                         "us",
                         [{"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"}],
-                        "token",
+                        ["token"],
                     )
 
                 state = fetch_wcl_scores.load_state(state_file)
@@ -430,7 +430,7 @@ class FetchWclScoresTests(unittest.TestCase):
                             {"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"},
                             {"name": "Nightslayer", "slug": "nightslayer", "region": "us"},
                         ],
-                        "token",
+                        ["token"],
                     )
 
                 state = fetch_wcl_scores.load_state(state_file)
@@ -474,7 +474,7 @@ class FetchWclScoresTests(unittest.TestCase):
                             {"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"},
                             {"name": "Nightslayer", "slug": "nightslayer", "region": "us"},
                         ],
-                        "token",
+                        ["token"],
                     )
 
                 state = fetch_wcl_scores.load_state(state_file)
@@ -523,7 +523,7 @@ class FetchWclScoresTests(unittest.TestCase):
                         [1047],
                         "us",
                         [{"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"}],
-                        "token",
+                        ["token"],
                     )
 
                 state = fetch_wcl_scores.load_state(state_file)
@@ -568,7 +568,7 @@ class FetchWclScoresTests(unittest.TestCase):
                         [1047],
                         "us",
                         [{"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"}],
-                        "token",
+                        ["token"],
                     )
 
                 state = fetch_wcl_scores.load_state(state_file)
@@ -728,7 +728,7 @@ class FetchWclScoresTests(unittest.TestCase):
                         [1047],
                         "us",
                         [{"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"}],
-                        "token",
+                        ["token"],
                     )
 
                 state = fetch_wcl_scores.load_state(state_file)
@@ -774,7 +774,7 @@ class FetchWclScoresTests(unittest.TestCase):
                             {"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"},
                             {"name": "Nightslayer", "slug": "nightslayer", "region": "us"},
                         ],
-                        "token",
+                        ["token"],
                     )
 
                 state = fetch_wcl_scores.load_state(state_file)
@@ -805,7 +805,7 @@ class FetchWclScoresTests(unittest.TestCase):
                         [1047],
                         "us",
                         [{"name": "Dreamscythe", "slug": "dreamscythe", "region": "us"}],
-                        "token",
+                        ["token"],
                     )
 
                 state = fetch_wcl_scores.load_state(state_file)

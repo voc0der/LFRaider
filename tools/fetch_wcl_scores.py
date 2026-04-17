@@ -1100,7 +1100,7 @@ def run_hybrid_incremental(
     zone_ids: list[int],
     region: str,
     realms: list[dict[str, str]],
-    token: str,
+    tokens: list[str],
 ) -> bool:
     """
     Three-phase incremental fetch:
@@ -1110,6 +1110,18 @@ def run_hybrid_incremental(
       3. Scoring          — batch-query zoneRankings for all discovered characters.
     Returns True when the full cycle is complete.
     """
+    token_idx = 0
+    token = tokens[token_idx]
+
+    def next_token() -> bool:
+        nonlocal token_idx, token
+        token_idx += 1
+        if token_idx < len(tokens):
+            token = tokens[token_idx]
+            print(f"API key {token_idx} exhausted, rotating to key {token_idx + 1}/{len(tokens)}")
+            return True
+        return False
+
     state = load_state(args.state_file)
     if state.get("scorePolicyVersion") != SCORE_POLICY_VERSION:
         print("Score policy version mismatch — resetting hybrid state.")
@@ -1164,59 +1176,67 @@ def run_hybrid_incremental(
                 )
 
             if rate_limited:
-                save_state(args.state_file, state)
-                return False
+                if not next_token():
+                    save_state(args.state_file, state)
+                    return False
 
         if combo.get("phase") == "server_supplement":
             supp_page = combo.get("supplementPage", 1)
-            new_names, supp_exhausted, next_supp_page, rate_limited = supplement_realm_characters_chunk(
-                args, token, region, realm, supp_page
-            )
-            combo["supplementPage"] = next_supp_page
-
-            existing = set(combo["discoveredNames"])
-            added = 0
-            for name in new_names:
-                if name not in existing:
-                    combo["discoveredNames"].append(name)
-                    existing.add(name)
-                    added += 1
-
-            if added:
-                print(f"{combo_key}: server supplement added {added} characters missed by encounter rankings")
-
-            if supp_exhausted:
-                combo["phase"] = "scoring"
-                print(
-                    f"{combo_key}: server supplement complete — "
-                    f"{len(combo['discoveredNames'])} unique characters to score"
+            while True:
+                new_names, supp_exhausted, next_supp_page, rate_limited = supplement_realm_characters_chunk(
+                    args, token, region, realm, supp_page
                 )
+                combo["supplementPage"] = next_supp_page
 
-            if rate_limited:
-                save_state(args.state_file, state)
-                return False
+                existing = set(combo["discoveredNames"])
+                added = 0
+                for name in new_names:
+                    if name not in existing:
+                        combo["discoveredNames"].append(name)
+                        existing.add(name)
+                        added += 1
+
+                if added:
+                    print(f"{combo_key}: server supplement added {added} characters missed by encounter rankings")
+
+                if supp_exhausted:
+                    combo["phase"] = "scoring"
+                    print(
+                        f"{combo_key}: server supplement complete — "
+                        f"{len(combo['discoveredNames'])} unique characters to score"
+                    )
+
+                if not rate_limited:
+                    break
+                if not next_token():
+                    save_state(args.state_file, state)
+                    return False
+                supp_page = combo.get("supplementPage", 1)
 
         if combo.get("phase") == "scoring":
             all_chars = combo["discoveredNames"]
-            offset = combo.get("scoringOffset", 0)
             char_dicts = [
                 {"name": name, "region": realm_region, "slug": realm_slug}
                 for name in all_chars
             ]
 
-            batch_raw, new_offset, rate_limited = score_characters_chunk(
-                args, token, zone_ids, realm_name, char_dicts, offset
-            )
-            merge_state_entries(enc_entries, batch_raw)
-            combo["scoringOffset"] = new_offset
+            while True:
+                offset = combo.get("scoringOffset", 0)
+                batch_raw, new_offset, rate_limited = score_characters_chunk(
+                    args, token, zone_ids, realm_name, char_dicts, offset
+                )
+                merge_state_entries(enc_entries, batch_raw)
+                combo["scoringOffset"] = new_offset
 
-            if new_offset >= len(all_chars):
-                combo["done"] = True
-                print(f"{combo_key}: scoring complete")
+                if new_offset >= len(all_chars):
+                    combo["done"] = True
+                    print(f"{combo_key}: scoring complete")
 
-            if rate_limited:
-                save_state(args.state_file, state)
-                return False
+                if not rate_limited:
+                    break
+                if not next_token():
+                    save_state(args.state_file, state)
+                    return False
 
     all_done = all(c.get("done", False) for c in progress.values()) and bool(progress)
     state["complete"] = all_done
@@ -1611,8 +1631,20 @@ def fetch_chunk(
     return encounter_raw, exhausted
 
 
-def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, realms: list[dict[str, str]], token: str) -> bool:
+def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, realms: list[dict[str, str]], tokens: list[str]) -> bool:
     """Fetch incremental chunks for pending realms. Returns True when the full cycle is complete."""
+    token_idx = 0
+    token = tokens[token_idx]
+
+    def next_token() -> bool:
+        nonlocal token_idx, token
+        token_idx += 1
+        if token_idx < len(tokens):
+            token = tokens[token_idx]
+            print(f"API key {token_idx} exhausted, rotating to key {token_idx + 1}/{len(tokens)}")
+            return True
+        return False
+
     state = load_state(args.state_file)
 
     if state.get("scorePolicyVersion") != SCORE_POLICY_VERSION:
@@ -1658,6 +1690,8 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
                 "to recheck live pagination drift"
             )
         chunk = fetch_realm_character_chunk(args, token, region, realm, zone_ids, start_page)
+        if chunk.rate_limited:
+            next_token()
         chunk_interrupted = chunk.rate_limited or chunk.interrupted
         merge_state_entries(enc_entries, chunk.encounter_raw)
 
@@ -1701,6 +1735,29 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
     print(f"state: {sum(1 for c in progress.values() if c.get('done'))} / {len(progress)} combos done, ~{total_chars} characters accumulated")
     save_state(args.state_file, state)
     return all_combos_done
+
+
+def _load_api_credentials() -> list[tuple[str, str]]:
+    """Load WCL API credential pairs from env vars.
+
+    Always reads WCL_CLIENT_ID / WCL_CLIENT_SECRET as the first key, then
+    WCL_CLIENT_ID_2 / WCL_CLIENT_SECRET_2, WCL_CLIENT_ID_3 / WCL_CLIENT_SECRET_3, …
+    stopping at the first missing numbered pair.
+    """
+    pairs: list[tuple[str, str]] = []
+    base_id = os.getenv("WCL_CLIENT_ID")
+    base_secret = os.getenv("WCL_CLIENT_SECRET")
+    if base_id and base_secret:
+        pairs.append((base_id, base_secret))
+    n = 2
+    while True:
+        cid = os.getenv(f"WCL_CLIENT_ID_{n}")
+        csecret = os.getenv(f"WCL_CLIENT_SECRET_{n}")
+        if not cid or not csecret:
+            break
+        pairs.append((cid, csecret))
+        n += 1
+    return pairs
 
 
 def main() -> int:
@@ -1773,27 +1830,35 @@ def main() -> int:
 
     require_distribution_permission(args)
 
-    client_id = os.getenv("WCL_CLIENT_ID")
-    client_secret = os.getenv("WCL_CLIENT_SECRET")
-    if not client_id or not client_secret:
+    credentials = _load_api_credentials()
+    if not credentials:
         raise SystemExit("WCL_CLIENT_ID and WCL_CLIENT_SECRET are required")
 
     region, realms = load_realms(args.realms)
-    try:
-        token = get_access_token(client_id, client_secret, args.token_url)
-    except TransientRequestError as exc:
-        if args.state_file:
-            print(f"Transient upstream failure while requesting OAuth token: {exc}")
-            print("Cycle incomplete — leaving existing scores.json unchanged.")
-            return 0
-        raise SystemExit(str(exc)) from exc
+    tokens: list[str] = []
+    for idx, (cid, csecret) in enumerate(credentials, start=1):
+        try:
+            tokens.append(get_access_token(cid, csecret, args.token_url))
+        except TransientRequestError as exc:
+            if args.state_file:
+                key_suffix = f" (key {idx})" if len(credentials) > 1 else ""
+                print(f"Transient upstream failure while requesting OAuth token{key_suffix}: {exc}")
+                if not tokens:
+                    print("Cycle incomplete — leaving existing scores.json unchanged.")
+                    return 0
+            else:
+                raise SystemExit(str(exc)) from exc
+    if not tokens:
+        print("Cycle incomplete — leaving existing scores.json unchanged.")
+        return 0
+    print(f"Loaded {len(tokens)} API key(s)")
 
     # ── Incremental / chunked mode ────────────────────────────────────────────
     if args.state_file:
         if args.hybrid:
-            cycle_complete = run_hybrid_incremental(args, zone_ids, region, realms, token)
+            cycle_complete = run_hybrid_incremental(args, zone_ids, region, realms, tokens)
         else:
-            cycle_complete = run_incremental(args, zone_ids, region, realms, token)
+            cycle_complete = run_incremental(args, zone_ids, region, realms, tokens)
         if not cycle_complete:
             print("Cycle incomplete — leaving existing scores.json unchanged.")
             return 0
@@ -1825,6 +1890,7 @@ def main() -> int:
         return 0
 
     # ── Full / one-shot mode ─────────────────────────────────────────────────
+    token = tokens[0]
     full_state = new_state()
     enc_entries: dict[str, list[list[Any]]] = full_state["encounterEntries"]
     for realm in realms:

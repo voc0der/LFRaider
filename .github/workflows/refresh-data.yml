@@ -31,6 +31,24 @@ jobs:
       RELEASE_PAT: ${{ secrets.RELEASE_PAT }}
       WCL_CLIENT_ID: ${{ secrets.WCL_CLIENT_ID }}
       WCL_CLIENT_SECRET: ${{ secrets.WCL_CLIENT_SECRET }}
+      WCL_CLIENT_ID_2: ${{ secrets.WCL_CLIENT_ID_2 }}
+      WCL_CLIENT_SECRET_2: ${{ secrets.WCL_CLIENT_SECRET_2 }}
+      WCL_CLIENT_ID_3: ${{ secrets.WCL_CLIENT_ID_3 }}
+      WCL_CLIENT_SECRET_3: ${{ secrets.WCL_CLIENT_SECRET_3 }}
+      WCL_CLIENT_ID_4: ${{ secrets.WCL_CLIENT_ID_4 }}
+      WCL_CLIENT_SECRET_4: ${{ secrets.WCL_CLIENT_SECRET_4 }}
+      WCL_CLIENT_ID_5: ${{ secrets.WCL_CLIENT_ID_5 }}
+      WCL_CLIENT_SECRET_5: ${{ secrets.WCL_CLIENT_SECRET_5 }}
+      WCL_CLIENT_ID_6: ${{ secrets.WCL_CLIENT_ID_6 }}
+      WCL_CLIENT_SECRET_6: ${{ secrets.WCL_CLIENT_SECRET_6 }}
+      WCL_CLIENT_ID_7: ${{ secrets.WCL_CLIENT_ID_7 }}
+      WCL_CLIENT_SECRET_7: ${{ secrets.WCL_CLIENT_SECRET_7 }}
+      WCL_CLIENT_ID_8: ${{ secrets.WCL_CLIENT_ID_8 }}
+      WCL_CLIENT_SECRET_8: ${{ secrets.WCL_CLIENT_SECRET_8 }}
+      WCL_CLIENT_ID_9: ${{ secrets.WCL_CLIENT_ID_9 }}
+      WCL_CLIENT_SECRET_9: ${{ secrets.WCL_CLIENT_SECRET_9 }}
+      WCL_CLIENT_ID_10: ${{ secrets.WCL_CLIENT_ID_10 }}
+      WCL_CLIENT_SECRET_10: ${{ secrets.WCL_CLIENT_SECRET_10 }}
       WCL_ZONE_IDS: ${{ vars.WCL_ZONE_IDS }}
       WCL_ZONE_ID: ${{ vars.WCL_ZONE_ID }}
       WCL_METRIC: ${{ vars.WCL_METRIC || 'dps' }}
