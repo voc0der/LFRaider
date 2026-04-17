@@ -56,6 +56,7 @@ class RealmChunkResult(NamedTuple):
     next_page: int
     rate_limited: bool = False
     interrupted: bool = False
+    reset_in: int | None = None
 
 
 RANKINGS_QUERY = """
@@ -806,9 +807,9 @@ def fetch_character_batch_entries(
     zone_ids: list[int],
     realm_name: str,
     characters: list[dict[str, str]],
-) -> tuple[dict[str, list[tuple[str, str, float, float | None]]], int, float | None, int | None]:
+) -> tuple[dict[str, list[tuple[str, str, float, float | None]]], int, float | None, int | None, int | None]:
     if not characters:
-        return {}, 0, None, None
+        return {}, 0, None, None, None
 
     query, alias_map = build_character_batch_query(zone_ids, characters, args.partition)
     data = graphql(args.graphql_url, token, query, {})
@@ -819,6 +820,7 @@ def fetch_character_batch_entries(
     rate_limit = data.get("rateLimitData") or {}
     spent = float(rate_limit["pointsSpentThisHour"]) if rate_limit.get("pointsSpentThisHour") is not None else None
     limit = int(rate_limit["limitPerHour"]) if rate_limit.get("limitPerHour") is not None else None
+    reset_in = int(rate_limit["pointsResetIn"]) if rate_limit.get("pointsResetIn") is not None else None
 
     encounter_raw: dict[str, list[tuple[str, str, float, float | None]]] = {}
     ranked_characters = 0
@@ -839,7 +841,7 @@ def fetch_character_batch_entries(
             ranked_characters += 1
             merge_encounter_raw(encounter_raw, character_entries)
 
-    return encounter_raw, ranked_characters, spent, limit
+    return encounter_raw, ranked_characters, spent, limit, reset_in
 
 
 def fetch_realm_character_chunk(
@@ -860,6 +862,7 @@ def fetch_realm_character_chunk(
     next_page = start_page
     rate_limited = False
     interrupted = False
+    last_reset_in: int | None = None
 
     if start_page > args.max_pages:
         print(
@@ -902,6 +905,7 @@ def fetch_realm_character_chunk(
         merge_encounter_raw(encounter_raw, page_entries)
         encounter_rows = sum(len(rows) for rows in page_entries.values())
         next_page = page + 1
+        last_reset_in = reset_in
         print(
             f"realm {realm_region}/{realm_name} page {page}: "
             f"{page_character_count} characters, {ranked_characters} with rankings, "
@@ -915,7 +919,7 @@ def fetch_realm_character_chunk(
             exhausted = True
             break
 
-    return RealmChunkResult(encounter_raw, exhausted, next_page, rate_limited, interrupted)
+    return RealmChunkResult(encounter_raw, exhausted, next_page, rate_limited, interrupted, last_reset_in)
 
 
 def discover_realm_characters_chunk(
@@ -925,10 +929,10 @@ def discover_realm_characters_chunk(
     realm: dict[str, str],
     zone_ids: list[int],
     zone_next_pages: dict[str, int],
-) -> tuple[dict[str, int], list[str], bool, bool]:
+) -> tuple[dict[str, int], list[str], bool, bool, int | None]:
     """
     Page through encounter rankings (server-filtered) to discover character names.
-    Returns (updated_zone_pages, new_names, all_zones_exhausted, rate_limited).
+    Returns (updated_zone_pages, new_names, all_zones_exhausted, rate_limited, last_reset_in).
     """
     realm_name = realm["name"]
     realm_region = realm.get("region") or region
@@ -937,6 +941,7 @@ def discover_realm_characters_chunk(
     discovered: list[str] = []
     next_pages = dict(zone_next_pages)
     zones_done: set[str] = set()
+    last_reset_in: int | None = None
 
     for zone_id in zone_ids:
         zone_key = str(zone_id)
@@ -948,10 +953,10 @@ def discover_realm_characters_chunk(
                 data = graphql_rankings_page(args, token, zone_id, realm_region, realm_name, realm_slug, page)
             except RateLimitExceededError as exc:
                 print(f"rate limited during discovery of {realm_region}/{realm_slug} zone {zone_id}: {exc}")
-                return next_pages, discovered, False, True
+                return next_pages, discovered, False, True, last_reset_in
             except TransientRequestError as exc:
                 print(f"transient failure during discovery of {realm_region}/{realm_slug}: {exc}")
-                return next_pages, discovered, False, True
+                return next_pages, discovered, False, True, last_reset_in
 
             world_data = data.get("worldData") or {}
             zone_data = world_data.get("zone") or {}
@@ -960,6 +965,8 @@ def discover_realm_characters_chunk(
             spent = rate_limit.get("pointsSpentThisHour")
             limit = rate_limit.get("limitPerHour")
             reset_in = rate_limit.get("pointsResetIn")
+            if reset_in is not None:
+                last_reset_in = int(reset_in)
 
             any_more = False
             page_names: list[str] = []
@@ -983,7 +990,7 @@ def discover_realm_characters_chunk(
                 break
 
     all_exhausted = len(zones_done) == len(zone_ids)
-    return next_pages, discovered, all_exhausted, False
+    return next_pages, discovered, all_exhausted, False, last_reset_in
 
 
 def score_characters_chunk(
@@ -993,26 +1000,29 @@ def score_characters_chunk(
     realm_name: str,
     char_dicts: list[dict[str, str]],
     offset: int,
-) -> tuple[dict[str, list[tuple[str, str, float, float | None]]], int, bool]:
+) -> tuple[dict[str, list[tuple[str, str, float, float | None]]], int, bool, int | None]:
     """
     Batch-query zoneRankings for a chunk of discovered characters starting at offset.
-    Returns (encounter_raw, new_offset, rate_limited).
+    Returns (encounter_raw, new_offset, rate_limited, last_reset_in).
     """
     encounter_raw: dict[str, list[tuple[str, str, float, float | None]]] = {}
     batch_size = args.character_query_batch_size
     chunk = char_dicts[offset: offset + args.pages_per_chunk * batch_size]
     processed = 0
+    last_reset_in: int | None = None
 
     for batch in chunked(chunk, batch_size):
         try:
-            batch_entries, ranked, pts_spent, pts_limit = fetch_character_batch_entries(args, token, zone_ids, realm_name, batch)
+            batch_entries, ranked, pts_spent, pts_limit, batch_reset_in = fetch_character_batch_entries(args, token, zone_ids, realm_name, batch)
         except RateLimitExceededError as exc:
             print(f"rate limited during scoring of {realm_name}: {exc}")
-            return encounter_raw, offset + processed, True
+            return encounter_raw, offset + processed, True, last_reset_in
         except TransientRequestError as exc:
             print(f"transient failure during scoring of {realm_name}: {exc}")
-            return encounter_raw, offset + processed, True
+            return encounter_raw, offset + processed, True, last_reset_in
 
+        if batch_reset_in is not None:
+            last_reset_in = batch_reset_in
         merge_encounter_raw(encounter_raw, batch_entries)
         processed += len(batch)
         total = len(char_dicts)
@@ -1022,7 +1032,7 @@ def score_characters_chunk(
             f"({ranked} with rankings in this batch){rate_info}"
         )
 
-    return encounter_raw, offset + processed, False
+    return encounter_raw, offset + processed, False, last_reset_in
 
 
 def supplement_realm_characters_chunk(
@@ -1031,12 +1041,12 @@ def supplement_realm_characters_chunk(
     region: str,
     realm: dict[str, str],
     start_page: int,
-) -> tuple[list[str], bool, int, bool]:
+) -> tuple[list[str], bool, int, bool, int | None]:
     """
     Page through WCL's server character registry to find names missed by encounter rankings.
     The registry uses a character-level index that includes characters whose fight-log entries
     lack a server ID association, which the encounter-rankings discovery misses.
-    Returns (names, all_exhausted, next_page, rate_limited).
+    Returns (names, all_exhausted, next_page, rate_limited, last_reset_in).
     """
     realm_name = realm["name"]
     realm_region = realm.get("region") or region
@@ -1045,6 +1055,7 @@ def supplement_realm_characters_chunk(
     names: list[str] = []
     next_page = start_page
     end_page = start_page + args.pages_per_chunk - 1
+    last_reset_in: int | None = None
 
     for page in range(start_page, end_page + 1):
         try:
@@ -1056,10 +1067,10 @@ def supplement_realm_characters_chunk(
             })
         except RateLimitExceededError as exc:
             print(f"rate limited during server supplement for {realm_region}/{realm_slug}: {exc}")
-            return names, False, next_page, True
+            return names, False, next_page, True, last_reset_in
         except TransientRequestError as exc:
             print(f"transient failure during server supplement for {realm_region}/{realm_slug}: {exc}")
-            return names, False, next_page, True
+            return names, False, next_page, True, last_reset_in
 
         world_data = data.get("worldData") or {}
         server_data = world_data.get("server") or {}
@@ -1068,6 +1079,8 @@ def supplement_realm_characters_chunk(
         rate_limit = data.get("rateLimitData") or {}
         spent = rate_limit.get("pointsSpentThisHour")
         limit_per_hour = rate_limit.get("limitPerHour")
+        if rate_limit.get("pointsResetIn") is not None:
+            last_reset_in = int(rate_limit["pointsResetIn"])
         total = characters_payload.get("total") if isinstance(characters_payload, dict) else None
 
         page_names: list[str] = []
@@ -1090,9 +1103,9 @@ def supplement_realm_characters_chunk(
             time.sleep(args.sleep_seconds)
 
         if not pagination_has_more(characters_payload):
-            return names, True, next_page, False
+            return names, True, next_page, False, last_reset_in
 
-    return names, False, next_page, False
+    return names, False, next_page, False, last_reset_in
 
 
 def run_hybrid_incremental(
@@ -1112,15 +1125,31 @@ def run_hybrid_incremental(
     """
     token_idx = 0
     token = tokens[token_idx]
+    key_available_at: list[float] = [0.0] * len(tokens)
 
-    def next_token() -> bool:
+    def next_token(reset_in: int | None = None) -> bool:
         nonlocal token_idx, token
+        if reset_in is not None:
+            key_available_at[token_idx] = time.time() + reset_in
         token_idx += 1
         if token_idx < len(tokens):
             token = tokens[token_idx]
             print(f"API key {token_idx} exhausted, rotating to key {token_idx + 1}/{len(tokens)}")
             return True
-        return False
+        known = [(at, i) for i, at in enumerate(key_available_at) if at > 0]
+        if not known:
+            return False
+        earliest_at, earliest_idx = min(known)
+        wait = earliest_at - time.time()
+        if wait > 180:
+            return False
+        if wait > 0:
+            print(f"All API keys exhausted; sleeping {wait:.0f}s until key {earliest_idx + 1} resets")
+            time.sleep(wait)
+        token_idx = earliest_idx
+        token = tokens[token_idx]
+        print(f"Resuming with API key {token_idx + 1}")
+        return True
 
     state = load_state(args.state_file)
     if state.get("scorePolicyVersion") != SCORE_POLICY_VERSION:
@@ -1155,7 +1184,7 @@ def run_hybrid_incremental(
         phase = combo.get("phase", "discovery")
 
         if phase == "discovery":
-            next_pages, names, all_exhausted, rate_limited = discover_realm_characters_chunk(
+            next_pages, names, all_exhausted, rate_limited, disc_reset_in = discover_realm_characters_chunk(
                 args, token, region, realm, zone_ids, combo.setdefault("discoveryPages", {})
             )
             combo["discoveryPages"] = next_pages
@@ -1176,14 +1205,14 @@ def run_hybrid_incremental(
                 )
 
             if rate_limited:
-                if not next_token():
+                if not next_token(disc_reset_in):
                     save_state(args.state_file, state)
                     return False
 
         if combo.get("phase") == "server_supplement":
             supp_page = combo.get("supplementPage", 1)
             while True:
-                new_names, supp_exhausted, next_supp_page, rate_limited = supplement_realm_characters_chunk(
+                new_names, supp_exhausted, next_supp_page, rate_limited, supp_reset_in = supplement_realm_characters_chunk(
                     args, token, region, realm, supp_page
                 )
                 combo["supplementPage"] = next_supp_page
@@ -1208,7 +1237,7 @@ def run_hybrid_incremental(
 
                 if not rate_limited:
                     break
-                if not next_token():
+                if not next_token(supp_reset_in):
                     save_state(args.state_file, state)
                     return False
                 supp_page = combo.get("supplementPage", 1)
@@ -1222,7 +1251,7 @@ def run_hybrid_incremental(
 
             while True:
                 offset = combo.get("scoringOffset", 0)
-                batch_raw, new_offset, rate_limited = score_characters_chunk(
+                batch_raw, new_offset, rate_limited, score_reset_in = score_characters_chunk(
                     args, token, zone_ids, realm_name, char_dicts, offset
                 )
                 merge_state_entries(enc_entries, batch_raw)
@@ -1234,7 +1263,7 @@ def run_hybrid_incremental(
 
                 if not rate_limited:
                     break
-                if not next_token():
+                if not next_token(score_reset_in):
                     save_state(args.state_file, state)
                     return False
 
@@ -1635,15 +1664,31 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
     """Fetch incremental chunks for pending realms. Returns True when the full cycle is complete."""
     token_idx = 0
     token = tokens[token_idx]
+    key_available_at: list[float] = [0.0] * len(tokens)
 
-    def next_token() -> bool:
+    def next_token(reset_in: int | None = None) -> bool:
         nonlocal token_idx, token
+        if reset_in is not None:
+            key_available_at[token_idx] = time.time() + reset_in
         token_idx += 1
         if token_idx < len(tokens):
             token = tokens[token_idx]
             print(f"API key {token_idx} exhausted, rotating to key {token_idx + 1}/{len(tokens)}")
             return True
-        return False
+        known = [(at, i) for i, at in enumerate(key_available_at) if at > 0]
+        if not known:
+            return False
+        earliest_at, earliest_idx = min(known)
+        wait = earliest_at - time.time()
+        if wait > 180:
+            return False
+        if wait > 0:
+            print(f"All API keys exhausted; sleeping {wait:.0f}s until key {earliest_idx + 1} resets")
+            time.sleep(wait)
+        token_idx = earliest_idx
+        token = tokens[token_idx]
+        print(f"Resuming with API key {token_idx + 1}")
+        return True
 
     state = load_state(args.state_file)
 
@@ -1691,7 +1736,7 @@ def run_incremental(args: argparse.Namespace, zone_ids: list[int], region: str, 
             )
         chunk = fetch_realm_character_chunk(args, token, region, realm, zone_ids, start_page)
         if chunk.rate_limited:
-            next_token()
+            next_token(chunk.reset_in)
         chunk_interrupted = chunk.rate_limited or chunk.interrupted
         merge_state_entries(enc_entries, chunk.encounter_raw)
 
