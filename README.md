@@ -8,7 +8,7 @@
 
 # LFRaider
 
-- Adds bundled Warcraft Logs and last-known item score signals to player tooltips
+- Adds bundled Warcraft Logs score signals to player tooltips
 - Adds the same compact signals to LFG rows and browse hover panes when a known leader or member appears
 - Appends compact signals to matching `/who` system-chat results
 - Supports `/lfr` lookups for target, self, or `Name-Realm`
@@ -31,9 +31,9 @@ The addon shell works today with the seed data in `LFRaider_Data.lua`.
 
 The Warcraft Logs collector is present but guarded. Do not enable scheduled data publishing until Warcraft Logs/RPGLogs approves this addon use case.
 
-The collector supports one or more Warcraft Logs ranking zones. In GitHub Actions, prefer the repository variable `WCL_ZONE_IDS` with a comma-separated value such as `1047,1048`. The older single-zone `WCL_ZONE_ID` variable still works.
+The collector fetches the top ranked guilds for each configured zone and scores their members using recent logs (`timeframe: Recent`). Configure zones via the repository variable `WCL_ZONE_IDS` with a comma-separated value such as `1047,1048`. The older single-zone `WCL_ZONE_ID` variable still works.
 
-The collector requests larger Warcraft Logs ranking pages with `WCL_PAGE_SIZE`, defaulting to `1000`, while still respecting the API's 20-page cap. This keeps lower-ranked but still useful characters from being dropped just because they were beyond the first small default pages.
+By default the collector fetches all ranked guilds. Set `WCL_MAX_GUILDS` to cap the number of guilds per zone.
 
 ## Why The Guard Exists
 
@@ -57,8 +57,6 @@ Relevant docs:
 - `/lfr minimap`: Show or hide the minimap button
 - `/lfr wcl on`: Show Warcraft Logs overall ranking
 - `/lfr wcl off`: Hide Warcraft Logs overall ranking
-- `/lfr item on`: Show last known item score
-- `/lfr item off`: Hide last known item score
 - `/lfr lfg on`: Enable LFG pane annotations
 - `/lfr lfg off`: Disable LFG pane annotations
 - `/lfr who on`: Enable Who pane annotations
@@ -73,7 +71,6 @@ Relevant docs:
 Left-click the minimap button for display toggles:
 
 - Warcraft Logs overall
-- Last known item score
 - LFG pane annotations
 - Who pane annotations
 - `/who` chat annotations
@@ -83,7 +80,7 @@ Right-click the minimap button to look up your target.
 
 ## Display Surfaces
 
-- Unit tooltips: adds one line for Warcraft Logs and one line for item score when known
+- Unit tooltips: adds one line for Warcraft Logs overall when known
 - LFG browse rows and hover panes: annotates known leaders and listed members
 - LFG applicants: annotates known applicants
 - Who pane: annotates known names in the Who tab
@@ -96,20 +93,15 @@ Runtime data is generated into `LFRaider_Data.lua`:
 ```lua
 LFRaiderData = {
     scoreScale = 10,
-    itemScoreScale = 1,
-    fields = {
-        wclOverall = 1,
-        itemScore = 2,
-    },
     realms = {
         ["dreamscythe"] = {
-            ["vocoder"] = {747, 126},
+            ["vocoder"] = 747,
         },
     },
 }
 ```
 
-Warcraft Logs scores are stored as tenths, so `747` displays as `74.7`. Item score is stored as a whole number by default.
+Warcraft Logs scores are stored as tenths, so `747` displays as `74.7`.
 
 ## Contributing
 
