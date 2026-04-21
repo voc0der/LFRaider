@@ -35,10 +35,7 @@ Only configure these after Warcraft Logs/RPGLogs approves redistribution for thi
 - Optional repository variable `WCL_METRIC`, default `dps`
 - Optional repository variable `WCL_PARTITION`
 - Optional repository variable `WCL_GRAPHQL_URL`, default `https://www.warcraftlogs.com/api/v2/client`
-- Optional repository variable `WCL_MAX_PAGES`, default `20`, which is the current WCL API maximum
-- Optional repository variable `WCL_PAGE_SIZE`, default `1000`, to request more rankings within each capped WCL page
-- Optional repository variable `WCL_REALM_CHUNKS_PER_RUN`, default `0`, to keep processing pending realms in one incremental run until all are done or the API interrupts the run. Set a positive number to cap the number of realm chunks per run.
-- Optional repository variable `WCL_RESUME_OVERLAP_PAGES`, default `2`, to re-fetch a small overlap window before the saved chunk frontier and reduce live pagination drift
+- Optional repository variable `WCL_MAX_GUILDS`, default `0` (collect all ranked guilds)
 - Optional repository variable `WCL_SLEEP_SECONDS`, default `0`
 
 ## Automated Release Process

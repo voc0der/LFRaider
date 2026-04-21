@@ -71,11 +71,7 @@ def build_payload(document: dict[str, Any]) -> dict[str, Any]:
     if scale <= 0:
         raise ValueError("scoreScale must be greater than zero")
 
-    item_score_scale = int(document.get("itemScoreScale") or 1)
-    if item_score_scale <= 0:
-        raise ValueError("itemScoreScale must be greater than zero")
-
-    realms: dict[str, dict[str, dict[str, int]]] = {}
+    realms: dict[str, dict[str, int]] = {}
     realm_names: dict[str, str] = {}
 
     for character in load_characters(document):
@@ -85,26 +81,16 @@ def build_payload(document: dict[str, Any]) -> dict[str, Any]:
             raise ValueError(f"character entry is missing name or realm: {character!r}")
 
         score_value = character.get("wclOverall", character.get("wclScore", character.get("ranking", character.get("score"))))
-        item_score_value = character.get("itemScore", character.get("itemLevel", character.get("ilvl", character.get("gearScore"))))
+        if score_value is None:
+            continue
+
+        score = float(score_value)
+        if score < 0 or score > 100:
+            raise ValueError(f"WCL score for {name}-{realm} must be between 0 and 100")
 
         name_key = normalize_name(name)
         realm_key = normalize_realm(realm)
-        entry: dict[str, int] = {}
-        if score_value is not None:
-            score = float(score_value)
-            if score < 0 or score > 100:
-                raise ValueError(f"WCL score for {name}-{realm} must be between 0 and 100")
-            entry["wclOverall"] = int(round(score * scale))
-
-        if item_score_value is not None:
-            item_score = float(item_score_value)
-            if item_score > 0:
-                entry["itemScore"] = int(round(item_score * item_score_scale))
-
-        if not entry:
-            continue
-
-        realms.setdefault(realm_key, {})[name_key] = entry
+        realms.setdefault(realm_key, {})[name_key] = int(round(score * scale))
         realm_names.setdefault(realm_key, realm)
 
     return {
@@ -112,7 +98,6 @@ def build_payload(document: dict[str, Any]) -> dict[str, Any]:
         or datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "source": document.get("source") or "unknown",
         "scoreScale": scale,
-        "itemScoreScale": item_score_scale,
         "totalCharacters": sum(len(scores) for scores in realms.values()),
         "realms": realms,
         "realmNames": realm_names,
@@ -126,27 +111,14 @@ def render_lua(payload: dict[str, Any]) -> str:
         f"    generatedAt = {lua_string(str(payload['generatedAt']))},",
         f"    source = {lua_string(str(payload['source']))},",
         f"    scoreScale = {int(payload['scoreScale'])},",
-        f"    itemScoreScale = {int(payload['itemScoreScale'])},",
         f"    totalCharacters = {int(payload['totalCharacters'])},",
-        "    fields = {",
-        "        wclOverall = 1,",
-        "        itemScore = 2,",
-        "    },",
         "    realms = {",
     ]
 
     for realm_key in sorted(payload["realms"]):
         lines.append(f"        [{lua_string(realm_key)}] = {{")
         for name_key in sorted(payload["realms"][realm_key]):
-            entry = payload["realms"][realm_key][name_key]
-            wcl_score = entry.get("wclOverall")
-            item_score = entry.get("itemScore")
-            if item_score is None and wcl_score is not None:
-                lines.append(f"            [{lua_string(name_key)}] = {int(wcl_score)},")
-            else:
-                wcl_text = "nil" if wcl_score is None else str(int(wcl_score))
-                item_text = "nil" if item_score is None else str(int(item_score))
-                lines.append(f"            [{lua_string(name_key)}] = {{{wcl_text}, {item_text}}},")
+            lines.append(f"            [{lua_string(name_key)}] = {int(payload['realms'][realm_key][name_key])},")
         lines.append("        },")
 
     lines.extend([

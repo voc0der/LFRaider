@@ -7,7 +7,6 @@ local DEFAULT_REALM = "Dreamscythe"
 local MINIMAP_RADIUS = 80
 local SUMMARY_COLOR = "|cff33ff99"
 local RESET_COLOR = "|r"
-local ITEM_SCORE_COLOR = "|cffffd100"
 local LFG_TOOLTIP_MIN_WIDTH = 270
 
 local DEFAULT_DB = {
@@ -16,7 +15,6 @@ local DEFAULT_DB = {
     who = true,
     whoChat = true,
     showWCL = true,
-    showItemScore = true,
     minimapButton = {
         show = true,
         position = 220,
@@ -170,19 +168,6 @@ local function FormatScore(score)
     return string.format("%.1f", score)
 end
 
-local function FormatItemScore(score)
-    score = tonumber(score)
-    if not score then
-        return "n/a"
-    end
-
-    if math.abs(score - math.floor(score)) < 0.05 then
-        return tostring(math.floor(score))
-    end
-
-    return string.format("%.1f", score)
-end
-
 local function ColorScore(score)
     return GetScoreColor(score) .. FormatScore(score) .. RESET_COLOR
 end
@@ -224,27 +209,20 @@ local function BuildCharacterRecord(name, realm, rawEntry)
 
     local dataset = GetDataset()
     local scoreScale = tonumber(dataset.scoreScale) or 10
-    local itemScoreScale = tonumber(dataset.itemScoreScale) or 1
     if scoreScale <= 0 then
         scoreScale = 10
     end
-    if itemScoreScale <= 0 then
-        itemScoreScale = 1
-    end
 
     local rawWCL
-    local rawItemScore
     if type(rawEntry) == "number" then
         rawWCL = rawEntry
     elseif type(rawEntry) == "table" then
         rawWCL = GetRawField(rawEntry, 1, "wcl", "wclOverall", "score", "ranking")
-        rawItemScore = GetRawField(rawEntry, 2, "itemScore", "item", "itemLevel", "ilvl", "gearScore")
     end
 
     rawWCL = tonumber(rawWCL)
-    rawItemScore = tonumber(rawItemScore)
 
-    if rawWCL == nil and rawItemScore == nil then
+    if rawWCL == nil then
         return nil
     end
 
@@ -259,8 +237,6 @@ local function BuildCharacterRecord(name, realm, rawEntry)
         realm = realmDisplay or GetCurrentRealm(),
         wclOverall = rawWCL and (rawWCL / scoreScale) or nil,
         rawWCL = rawWCL,
-        itemScore = rawItemScore and (rawItemScore / itemScoreScale) or nil,
-        rawItemScore = rawItemScore,
     }
 end
 
@@ -295,18 +271,9 @@ local function GetScore(name, realm)
     return record.wclOverall, record.rawWCL
 end
 
-local function GetItemScore(name, realm)
-    local record = GetCharacterRecord(name, realm)
-    if not record then
-        return nil
-    end
-
-    return record.itemScore, record.rawItemScore
-end
-
 local function HasAnyEnabledValue(record)
     local db = EnsureSavedVariables()
-    return (db.showWCL and record.wclOverall ~= nil) or (db.showItemScore and record.itemScore ~= nil)
+    return db.showWCL and record.wclOverall ~= nil
 end
 
 local function BuildCompactSummary(record)
@@ -318,9 +285,6 @@ local function BuildCompactSummary(record)
     local parts = {}
     if db.showWCL and record.wclOverall ~= nil then
         parts[#parts + 1] = FormatScore(record.wclOverall) .. "%"
-    end
-    if db.showItemScore and record.itemScore ~= nil then
-        parts[#parts + 1] = "i" .. FormatItemScore(record.itemScore)
     end
 
     if #parts == 0 then
@@ -351,9 +315,6 @@ BuildCompactLFGSummary = function(record)
     if db.showWCL and record.wclOverall ~= nil then
         parts[#parts + 1] = WrapColor(GetScoreColor(record.wclOverall), FormatScore(record.wclOverall) .. "%")
     end
-    if db.showItemScore and record.itemScore ~= nil then
-        parts[#parts + 1] = WrapColor(ITEM_SCORE_COLOR, "i" .. FormatItemScore(record.itemScore))
-    end
 
     if #parts == 0 then
         return nil
@@ -371,9 +332,6 @@ local function BuildSlashSummary(record)
     local parts = {}
     if db.showWCL and record.wclOverall ~= nil then
         parts[#parts + 1] = "WCL " .. ColorScore(record.wclOverall)
-    end
-    if db.showItemScore and record.itemScore ~= nil then
-        parts[#parts + 1] = "iScore " .. FormatItemScore(record.itemScore)
     end
 
     return table.concat(parts, ", ")
@@ -442,8 +400,6 @@ local function LookupUnit(unit)
         realm = realm,
         score = record and record.wclOverall or nil,
         rawScore = record and record.rawWCL or nil,
-        itemScore = record and record.itemScore or nil,
-        rawItemScore = record and record.rawItemScore or nil,
         record = record,
     }
 end
@@ -483,7 +439,6 @@ local function PrintHelp()
     Print("/lfr Name-Realm - look up a character")
     Print("/lfr stats - show bundled dataset info")
     Print("/lfr wcl on|off - toggle Warcraft Logs overall")
-    Print("/lfr item on|off - toggle last known item score")
     Print("/lfr lfg on|off - toggle LFG pane annotations")
     Print("/lfr who on|off - toggle Who pane annotations")
     Print("/lfr whochat on|off - toggle /who chat annotations")
@@ -536,9 +491,6 @@ local function AddRecordToTooltip(tooltip, record, compact)
         if db.showWCL and record.wclOverall ~= nil then
             tooltip:AddLine("Warcraft Logs: " .. ColorScore(record.wclOverall))
         end
-        if db.showItemScore and record.itemScore ~= nil then
-            tooltip:AddLine("Last known item score: " .. FormatItemScore(record.itemScore), 1, 1, 1)
-        end
     end
 
     if type(tooltip.Show) == "function" then
@@ -557,7 +509,7 @@ local function AddScoreToTooltip(tooltip, unit)
         return
     end
 
-    local tooltipKey = lookup.name .. "-" .. lookup.realm .. ":" .. tostring(lookup.rawScore) .. ":" .. tostring(lookup.rawItemScore)
+    local tooltipKey = lookup.name .. "-" .. lookup.realm .. ":" .. tostring(lookup.rawScore)
     if tooltip and tooltip.LFRaiderTooltipKey == tooltipKey then
         return
     end
@@ -1013,9 +965,6 @@ local function OpenMinimapMenu(anchor)
         AddMenuButton("Show Warcraft Logs overall", db.showWCL, function()
             ToggleBooleanOption("showWCL", "Warcraft Logs overall")
         end)
-        AddMenuButton("Show last known item score", db.showItemScore, function()
-            ToggleBooleanOption("showItemScore", "Last known item score")
-        end)
         AddMenuButton("Annotate LFG pane", db.lfg, function()
             ToggleBooleanOption("lfg", "LFG pane annotations")
         end)
@@ -1219,11 +1168,6 @@ local function HandleSlash(input)
         return
     end
 
-    if command == "item" or command == "iscore" or command == "ilvl" then
-        HandleOptionCommand("showItemScore", "Last known item score", rest)
-        return
-    end
-
     local name, realm = SplitNameRealm(input, GetCurrentRealm())
     PrintLookup(name, realm)
 end
@@ -1271,10 +1215,8 @@ LFRaider.NormalizeName = NormalizeName
 LFRaider.NormalizeRealm = NormalizeRealm
 LFRaider.SplitNameRealm = SplitNameRealm
 LFRaider.GetScore = GetScore
-LFRaider.GetItemScore = GetItemScore
 LFRaider.GetCharacterRecord = GetCharacterRecord
 LFRaider.FormatScore = FormatScore
-LFRaider.FormatItemScore = FormatItemScore
 LFRaider.ColorScore = ColorScore
 LFRaider.LookupUnit = LookupUnit
 LFRaider.AddScoreToTooltip = AddScoreToTooltip

@@ -2,20 +2,9 @@ name: Refresh Score Data
 
 on:
   schedule:
-    # Chunk fetch: every 5 minutes, offset from the top of the hour to reduce schedule delays.
-    - cron: "2/5 * * * *"
-    # Weekly cycle reset (clears state, starts a fresh chunked cycle) — Tuesday 10:17 UTC
+    # Weekly refresh — Tuesday 10:17 UTC
     - cron: "17 10 * * 2"
   workflow_dispatch:
-    inputs:
-      mode:
-        description: "'chunk' (default) or 'full' (reset incremental state and restart the cycle)"
-        required: false
-        default: chunk
-      hybrid:
-        description: "Use hybrid encounter-discovery fetch. true/false"
-        required: false
-        default: "true"
 
 permissions:
   contents: write
@@ -53,13 +42,9 @@ jobs:
       WCL_ZONE_ID: ${{ vars.WCL_ZONE_ID }}
       WCL_METRIC: ${{ vars.WCL_METRIC || 'dps' }}
       WCL_PARTITION: ${{ vars.WCL_PARTITION }}
-      WCL_GRAPHQL_URL: ${{ vars.WCL_GRAPHQL_URL || 'https://www.warcraftlogs.com/api/v2/client' }}
-      WCL_PAGES_PER_CHUNK: ${{ vars.WCL_PAGES_PER_CHUNK || '200' }}
-      WCL_REALM_CHUNKS_PER_RUN: ${{ vars.WCL_REALM_CHUNKS_PER_RUN || '0' }}
-      WCL_RESUME_OVERLAP_PAGES: ${{ vars.WCL_RESUME_OVERLAP_PAGES || '2' }}
-      WCL_MAX_PAGES: ${{ vars.WCL_MAX_PAGES || '10000' }}
-      WCL_PAGE_SIZE: ${{ vars.WCL_PAGE_SIZE || '1000' }}
+      WCL_MAX_GUILDS: ${{ vars.WCL_MAX_GUILDS || '0' }}
       WCL_SLEEP_SECONDS: ${{ vars.WCL_SLEEP_SECONDS || '0' }}
+      WCL_GRAPHQL_URL: ${{ vars.WCL_GRAPHQL_URL || 'https://www.warcraftlogs.com/api/v2/client' }}
       LFR_WCL_DISTRIBUTION_APPROVED: ${{ vars.LFR_WCL_DISTRIBUTION_APPROVED }}
 
     steps:
@@ -77,7 +62,6 @@ jobs:
             echo "run=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-
           echo "::warning::LFR_WCL_DISTRIBUTION_APPROVED is not true. Skipping WCL collection until redistribution permission is confirmed."
           echo "run=false" >> "$GITHUB_OUTPUT"
 
@@ -90,49 +74,20 @@ jobs:
           [[ -n "${WCL_CLIENT_SECRET}" ]] || { echo "WCL_CLIENT_SECRET secret is required" >&2; exit 1; }
           [[ -n "${WCL_ZONE_IDS}" || -n "${WCL_ZONE_ID}" ]] || { echo "WCL_ZONE_IDS or WCL_ZONE_ID repository variable is required" >&2; exit 1; }
 
-      - name: Determine run mode
+      - name: Fetch Warcraft Logs scores
         if: steps.gate.outputs.run == 'true'
-        id: mode
-        shell: bash
-        run: |
-          # workflow_dispatch can override; the Tuesday cron resets the incremental cycle.
-          INPUT_MODE="${{ github.event.inputs.mode }}"
-          SCHEDULE="${{ github.event.schedule }}"
-          if [[ "${INPUT_MODE}" == "full" || "${SCHEDULE}" == "17 10 * * 2" ]]; then
-            echo "reset_state=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "reset_state=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Reset incremental fetch state
-        if: steps.gate.outputs.run == 'true' && steps.mode.outputs.reset_state == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -f data/fetch_state.json
-
-      - name: Fetch Warcraft Logs scores (chunk)
-        if: steps.gate.outputs.run == 'true'
-        id: chunk
+        id: fetch
         shell: bash
         run: |
           set -euo pipefail
           tmpfile=$(mktemp)
-          HYBRID_FLAG=""
-          if [[ "${{ github.event.inputs.hybrid }}" != "false" ]]; then
-            HYBRID_FLAG="--hybrid"
-          fi
           python3 tools/fetch_wcl_scores.py \
             --realms data/realms.json \
             --output data/scores.json \
             --state-file data/fetch_state.json \
-            --pages-per-chunk "${WCL_PAGES_PER_CHUNK}" \
-            --realm-chunks-per-run "${WCL_REALM_CHUNKS_PER_RUN}" \
-            --max-pages "${WCL_MAX_PAGES}" \
-            --page-size "${WCL_PAGE_SIZE}" \
             --zone-ids "${WCL_ZONE_IDS:-${WCL_ZONE_ID}}" \
             --metric "${WCL_METRIC}" \
-            ${HYBRID_FLAG} 2>&1 | tee "$tmpfile"
+            2>&1 | tee "$tmpfile"
           if grep -q "^CYCLE_COMPLETE$" "$tmpfile"; then
             echo "cycle_complete=true" >> "$GITHUB_OUTPUT"
           else
@@ -174,7 +129,7 @@ jobs:
         if: |
           steps.gate.outputs.run == 'true' &&
           steps.changed.outputs.changed == 'true' &&
-          steps.chunk.outputs.cycle_complete == 'true'
+          steps.fetch.outputs.cycle_complete == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -184,7 +139,7 @@ jobs:
       - name: Bump addon version and release (cycle complete)
         if: |
           steps.changed.outputs.changed == 'true' &&
-          steps.chunk.outputs.cycle_complete == 'true'
+          steps.fetch.outputs.cycle_complete == 'true'
         shell: bash
         run: |
           set -euo pipefail
