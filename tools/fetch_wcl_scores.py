@@ -37,8 +37,8 @@ REQUEST_MAX_ATTEMPTS = 4
 RETRYABLE_HTTP_STATUS_CODES: frozenset[int] = frozenset({408, 500, 502, 503, 504})
 SCORE_POLICY_VERSION = 4
 SCORE_POLICY = (
-    "Mean of recent WCL per-encounter rank percentiles across the configured zone IDs, "
-    "sourced from top guild rosters (timeframe: Recent)."
+    "Mean of WCL per-encounter rank percentiles across the configured zone IDs, "
+    "sourced from top guild rosters."
 )
 
 
@@ -92,7 +92,7 @@ query LFRaiderGuildList(
 def build_guild_members_query(zone_ids: list[int], metric: str | None, partition: int | None) -> str:
     zone_fields: list[str] = []
     for zone_id in zone_ids:
-        arguments = [f"zoneID: {zone_id}", "timeframe: Recent"]
+        arguments = [f"zoneID: {zone_id}", "timeframe: Historical"]
         if metric:
             arguments.append(f"metric: {metric}")
         if partition is not None:
