@@ -41,6 +41,19 @@ def type_fields(token: str, type_name: str) -> list[str]:
     return [f["name"] for f in (fields.get("fields") or [])]
 
 
+def field_args(token: str, type_name: str, field_name: str) -> list[str]:
+    q = f"""{{ __type(name: "{type_name}") {{ fields {{ name args {{ name type {{ name kind ofType {{ name kind }} }} }} }} }} }}"""
+    result = query(token, q)
+    fields = (result.get("data") or {}).get("__type") or {}
+    for field in (fields.get("fields") or []):
+        if field["name"] == field_name:
+            return [
+                f"{a['name']}: {a['type'].get('name') or a['type'].get('ofType', {}).get('name')}"
+                for a in (field.get("args") or [])
+            ]
+    return []
+
+
 def main() -> None:
     token = get_token()
     print(f"GraphQL URL: {GRAPHQL_URL}\n")
@@ -48,6 +61,14 @@ def main() -> None:
     for type_name in ["Zone", "GuildData", "WorldData", "Query"]:
         fields = type_fields(token, type_name)
         print(f"{type_name}: {fields}\n")
+
+    print("GuildData.guilds args:", field_args(token, "GuildData", "guilds"))
+    print("GuildData.guild args:", field_args(token, "GuildData", "guild"))
+
+    for type_name in ["Guild", "GuildPagination", "GuildDetail"]:
+        fields = type_fields(token, type_name)
+        if fields:
+            print(f"\n{type_name}: {fields}")
 
 
 if __name__ == "__main__":
