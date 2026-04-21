@@ -615,6 +615,11 @@ def run_guild_collection(
     if state.get("complete"):
         print("Previous cycle complete — starting new cycle.")
         state = new_state(int(state.get("cycle", 1) or 1) + 1)
+    if getattr(args, "guild_list_only", False) and state.get("phase") != "guild_list":
+        print("--guild-list-only: re-collecting guild list.")
+        cycle = int(state.get("cycle", 1) or 1)
+        state = new_state(cycle)
+        state["phase"] = "guild_list"
 
     enc_entries: dict[str, list[list[Any]]] = state.setdefault("encounterEntries", {})
     guilds: list[dict[str, Any]] = state.setdefault("guilds", [])
@@ -694,6 +699,9 @@ def run_guild_collection(
         state["phase"] = "scoring"
         print(f"Guild list complete: {len(guilds)} guilds to score")
         save_state(args.state_file, state)
+        if getattr(args, "guild_list_only", False):
+            print("GUILD_LIST_COMPLETE")
+            return True
 
     # ── Phase 2: score each guild's members ───────────────────────────────────
     if state.get("phase") == "scoring":
@@ -783,6 +791,11 @@ def main() -> int:
     parser.add_argument("--token-url", default=env_str("WCL_TOKEN_URL", TOKEN_URL))
     parser.add_argument("--graphql-url", default=env_str("WCL_GRAPHQL_URL", GRAPHQL_URL))
     parser.add_argument("--distribution-approved", action="store_true")
+    parser.add_argument(
+        "--guild-list-only",
+        action="store_true",
+        help="Collect guild IDs and exit without scoring. Always re-collects.",
+    )
     args = parser.parse_args()
 
     if not args.state_file:

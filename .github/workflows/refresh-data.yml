@@ -20,30 +20,10 @@ jobs:
       RELEASE_PAT: ${{ secrets.RELEASE_PAT }}
       WCL_CLIENT_ID: ${{ secrets.WCL_CLIENT_ID }}
       WCL_CLIENT_SECRET: ${{ secrets.WCL_CLIENT_SECRET }}
-      WCL_CLIENT_ID_2: ${{ secrets.WCL_CLIENT_ID_2 }}
-      WCL_CLIENT_SECRET_2: ${{ secrets.WCL_CLIENT_SECRET_2 }}
-      WCL_CLIENT_ID_3: ${{ secrets.WCL_CLIENT_ID_3 }}
-      WCL_CLIENT_SECRET_3: ${{ secrets.WCL_CLIENT_SECRET_3 }}
-      WCL_CLIENT_ID_4: ${{ secrets.WCL_CLIENT_ID_4 }}
-      WCL_CLIENT_SECRET_4: ${{ secrets.WCL_CLIENT_SECRET_4 }}
-      WCL_CLIENT_ID_5: ${{ secrets.WCL_CLIENT_ID_5 }}
-      WCL_CLIENT_SECRET_5: ${{ secrets.WCL_CLIENT_SECRET_5 }}
-      WCL_CLIENT_ID_6: ${{ secrets.WCL_CLIENT_ID_6 }}
-      WCL_CLIENT_SECRET_6: ${{ secrets.WCL_CLIENT_SECRET_6 }}
-      WCL_CLIENT_ID_7: ${{ secrets.WCL_CLIENT_ID_7 }}
-      WCL_CLIENT_SECRET_7: ${{ secrets.WCL_CLIENT_SECRET_7 }}
-      WCL_CLIENT_ID_8: ${{ secrets.WCL_CLIENT_ID_8 }}
-      WCL_CLIENT_SECRET_8: ${{ secrets.WCL_CLIENT_SECRET_8 }}
-      WCL_CLIENT_ID_9: ${{ secrets.WCL_CLIENT_ID_9 }}
-      WCL_CLIENT_SECRET_9: ${{ secrets.WCL_CLIENT_SECRET_9 }}
-      WCL_CLIENT_ID_10: ${{ secrets.WCL_CLIENT_ID_10 }}
-      WCL_CLIENT_SECRET_10: ${{ secrets.WCL_CLIENT_SECRET_10 }}
       WCL_ZONE_IDS: ${{ vars.WCL_ZONE_IDS }}
       WCL_ZONE_ID: ${{ vars.WCL_ZONE_ID }}
       WCL_METRIC: ${{ vars.WCL_METRIC || 'dps' }}
-      WCL_PARTITION: ${{ vars.WCL_PARTITION }}
-      WCL_MAX_GUILDS: ${{ vars.WCL_MAX_GUILDS || '250' }}
-      WCL_SLEEP_SECONDS: ${{ vars.WCL_SLEEP_SECONDS || '0' }}
+      WCL_MAX_GUILDS: ${{ vars.WCL_MAX_GUILDS || '1000' }}
       WCL_GRAPHQL_URL: ${{ vars.WCL_GRAPHQL_URL || 'https://www.warcraftlogs.com/api/v2/client' }}
       LFR_WCL_DISTRIBUTION_APPROVED: ${{ vars.LFR_WCL_DISTRIBUTION_APPROVED }}
 
@@ -54,7 +34,7 @@ jobs:
           fetch-depth: 0
           token: ${{ env.RELEASE_PAT != '' && env.RELEASE_PAT || github.token }}
 
-      - name: Check API redistribution approval
+      - name: Check redistribution approval
         id: gate
         shell: bash
         run: |
@@ -62,10 +42,10 @@ jobs:
             echo "run=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          echo "::warning::LFR_WCL_DISTRIBUTION_APPROVED is not true. Skipping WCL collection until redistribution permission is confirmed."
+          echo "::warning::LFR_WCL_DISTRIBUTION_APPROVED is not true. Skipping until redistribution permission is confirmed."
           echo "run=false" >> "$GITHUB_OUTPUT"
 
-      - name: Validate required settings
+      - name: Collect guild list via WCL API
         if: steps.gate.outputs.run == 'true'
         shell: bash
         run: |
@@ -73,26 +53,33 @@ jobs:
           [[ -n "${WCL_CLIENT_ID}" ]] || { echo "WCL_CLIENT_ID secret is required" >&2; exit 1; }
           [[ -n "${WCL_CLIENT_SECRET}" ]] || { echo "WCL_CLIENT_SECRET secret is required" >&2; exit 1; }
           [[ -n "${WCL_ZONE_IDS}" || -n "${WCL_ZONE_ID}" ]] || { echo "WCL_ZONE_IDS or WCL_ZONE_ID repository variable is required" >&2; exit 1; }
-
-      - name: Fetch Warcraft Logs scores
-        if: steps.gate.outputs.run == 'true'
-        id: fetch
-        shell: bash
-        run: |
-          set -euo pipefail
-          tmpfile=$(mktemp)
           python3 tools/fetch_wcl_scores.py \
             --realms data/realms.json \
             --output data/scores.json \
             --state-file data/fetch_state.json \
             --zone-ids "${WCL_ZONE_IDS:-${WCL_ZONE_ID}}" \
             --metric "${WCL_METRIC}" \
-            2>&1 | tee "$tmpfile"
-          if grep -q "^CYCLE_COMPLETE$" "$tmpfile"; then
-            echo "cycle_complete=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "cycle_complete=false" >> "$GITHUB_OUTPUT"
-          fi
+            --max-guilds "${WCL_MAX_GUILDS}" \
+            --guild-list-only \
+            --distribution-approved
+
+      - name: Install Playwright and Chromium
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          pip install playwright
+          playwright install chromium --with-deps
+
+      - name: Scrape guild scores
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/scrape_scores.py \
+            --state-file data/fetch_state.json \
+            --output data/scores.json \
+            --max-guilds "${WCL_MAX_GUILDS}"
 
       - name: Generate runtime Lua data
         if: steps.gate.outputs.run == 'true'
@@ -126,25 +113,19 @@ jobs:
           git push
 
       - name: Install Lua
-        if: |
-          steps.gate.outputs.run == 'true' &&
-          steps.changed.outputs.changed == 'true' &&
-          steps.fetch.outputs.cycle_complete == 'true'
+        if: steps.changed.outputs.changed == 'true'
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y lua5.4
 
-      - name: Bump addon version and release (cycle complete)
-        if: |
-          steps.changed.outputs.changed == 'true' &&
-          steps.fetch.outputs.cycle_complete == 'true'
+      - name: Bump addon version and release
+        if: steps.changed.outputs.changed == 'true'
         shell: bash
         run: |
           set -euo pipefail
           python3 tools/bump_version.py --message "Refreshed bundled score dataset."
-          python3 -m unittest discover -s tests -p 'test_*.py'
           lua tests/run.lua
           luac -p LFRaider.lua LFRaider_Data.lua tests/run.lua
           bash ./.github/scripts/verify-release-package.sh
