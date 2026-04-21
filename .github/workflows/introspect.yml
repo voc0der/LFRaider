@@ -1,0 +1,13 @@
+name: Introspect WCL Schema
+on:
+  workflow_dispatch:
+jobs:
+  introspect:
+    runs-on: ubuntu-latest
+    env:
+      WCL_CLIENT_ID: ${{ secrets.WCL_CLIENT_ID }}
+      WCL_CLIENT_SECRET: ${{ secrets.WCL_CLIENT_SECRET }}
+      WCL_GRAPHQL_URL: ${{ vars.WCL_GRAPHQL_URL || 'https://www.warcraftlogs.com/api/v2/client' }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/introspect_schema.py
