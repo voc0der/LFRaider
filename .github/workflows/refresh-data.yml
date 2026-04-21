@@ -2,8 +2,8 @@ name: Refresh Score Data
 
 on:
   schedule:
-    # Hourly refresh, offset from the top of the hour to reduce schedule delays.
-    - cron: "17 * * * *"
+    # Every 6 hours, offset from the top of the hour to reduce schedule delays.
+    - cron: "17 */6 * * *"
   workflow_dispatch:
 
 permissions:
