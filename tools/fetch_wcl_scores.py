@@ -53,32 +53,31 @@ class TransientRequestError(RuntimeError):
 # ── GraphQL queries ───────────────────────────────────────────────────────────
 
 GUILD_LIST_QUERY = """
-query LFRaiderGuildRankings(
-  $zoneID: Int!
+query LFRaiderGuildList(
   $serverRegion: String!
   $serverSlug: String!
   $page: Int!
 ) {
-  worldData {
-    zone(id: $zoneID) {
-      guildRankings(
-        serverRegion: $serverRegion
-        serverSlug: $serverSlug
-        page: $page
-      ) {
-        guilds {
-          id
+  guildData {
+    guilds(
+      serverRegion: $serverRegion
+      serverSlug: $serverSlug
+      page: $page
+    ) {
+      data {
+        id
+        name
+        server {
           name
-          server {
-            name
+          slug
+          region {
             slug
-            region {
-              slug
-            }
           }
         }
-        hasMorePages
       }
+      has_more_pages
+      current_page
+      last_page
     }
   }
   rateLimitData {
@@ -529,7 +528,6 @@ def make_token_rotator(tokens: list[str]) -> Any:
 def fetch_guild_list_page(
     graphql_url: str,
     token: str,
-    zone_id: int,
     realm_region: str,
     realm_slug: str,
     page: int,
@@ -538,13 +536,12 @@ def fetch_guild_list_page(
         graphql_url,
         token,
         GUILD_LIST_QUERY,
-        {"zoneID": zone_id, "serverRegion": realm_region, "serverSlug": realm_slug, "page": page},
+        {"serverRegion": realm_region, "serverSlug": realm_slug, "page": page},
     )
-    world_data = data.get("worldData") or {}
-    zone_data = world_data.get("zone") or {}
-    guild_rankings = zone_data.get("guildRankings") or {}
-    raw_guilds = guild_rankings.get("guilds") or []
-    has_more = bool(guild_rankings.get("hasMorePages"))
+    guild_data = data.get("guildData") or {}
+    guilds_payload = guild_data.get("guilds") or {}
+    raw_guilds = guilds_payload.get("data") or []
+    has_more = bool(guilds_payload.get("has_more_pages"))
     spent, limit, reset_in = extract_rate_limit(data)
 
     guilds: list[dict[str, Any]] = []
@@ -626,72 +623,71 @@ def run_guild_collection(
 
     # ── Phase 1: collect guild list ───────────────────────────────────────────
     if state.get("phase") == "guild_list":
-        guild_list_state: dict[str, Any] = state.setdefault("guildListState", {})
         known_ids: set[int] = {g["id"] for g in guilds}
         max_guilds = args.max_guilds or 0
+        guild_list_state: dict[str, Any] = state.setdefault("guildListState", {})
 
         for realm in realms:
             realm_region = realm.get("region") or region
             realm_slug = realm.get("slug") or realm["name"].lower().replace(" ", "")
+            realm_key = f"{realm_region}/{realm_slug}"
+            realm_state = guild_list_state.setdefault(realm_key, {"page": 1, "done": False})
+            if realm_state.get("done"):
+                continue
 
-            for zone_id in zone_ids:
-                zone_key = str(zone_id)
-                zone_state = guild_list_state.setdefault(zone_key, {"page": 1, "done": False})
-                if zone_state.get("done"):
-                    continue
+            page = int(realm_state.get("page") or 1)
+            while True:
+                if max_guilds and len(guilds) >= max_guilds:
+                    realm_state["done"] = True
+                    break
 
-                page = int(zone_state.get("page") or 1)
-                while True:
-                    if max_guilds and len(guilds) >= max_guilds:
-                        zone_state["done"] = True
-                        break
-
-                    last_reset_in: int | None = None
-                    try:
-                        page_guilds, has_more, spent, limit, last_reset_in = fetch_guild_list_page(
-                            args.graphql_url, current_token(), zone_id, realm_region, realm_slug, page
-                        )
-                    except RateLimitExceededError as exc:
-                        print(f"rate limited fetching guild list zone {zone_id} page {page}: {exc}")
-                        zone_state["page"] = page
-                        save_state(args.state_file, state)
-                        if not rotate_token(last_reset_in):
-                            return False
-                        continue
-                    except TransientRequestError as exc:
-                        print(f"transient failure fetching guild list zone {zone_id}: {exc}")
-                        zone_state["page"] = page
-                        save_state(args.state_file, state)
-                        return False
-
-                    added = 0
-                    for g in page_guilds:
-                        if g["id"] not in known_ids:
-                            if not max_guilds or len(guilds) < max_guilds:
-                                guilds.append(g)
-                                known_ids.add(g["id"])
-                                added += 1
-
-                    print(
-                        f"guild list zone {zone_id} page {page}: "
-                        f"{len(page_guilds)} guilds, {added} new, total {len(guilds)}, "
-                        f"rate {spent}/{limit}, reset {last_reset_in}s"
+                last_reset_in: int | None = None
+                try:
+                    page_guilds, has_more, spent, limit, last_reset_in = fetch_guild_list_page(
+                        args.graphql_url, current_token(), realm_region, realm_slug, page
                     )
-                    page += 1
-                    zone_state["page"] = page
+                except RateLimitExceededError as exc:
+                    print(f"rate limited fetching guild list {realm_key} page {page}: {exc}")
+                    realm_state["page"] = page
+                    save_state(args.state_file, state)
+                    if not rotate_token(last_reset_in):
+                        return False
+                    continue
+                except TransientRequestError as exc:
+                    print(f"transient failure fetching guild list {realm_key}: {exc}")
+                    realm_state["page"] = page
+                    save_state(args.state_file, state)
+                    return False
 
-                    if args.sleep_seconds > 0:
-                        time.sleep(args.sleep_seconds)
+                added = 0
+                for g in page_guilds:
+                    if g["id"] not in known_ids:
+                        if not max_guilds or len(guilds) < max_guilds:
+                            guilds.append(g)
+                            known_ids.add(g["id"])
+                            added += 1
 
-                    if not has_more or (max_guilds and len(guilds) >= max_guilds):
-                        zone_state["done"] = True
-                        break
+                print(
+                    f"guild list {realm_key} page {page}: "
+                    f"{len(page_guilds)} guilds, {added} new, total {len(guilds)}, "
+                    f"rate {spent}/{limit}, reset {last_reset_in}s"
+                )
+                page += 1
+                realm_state["page"] = page
 
-        all_zones_done = all(
-            guild_list_state.get(str(z), {}).get("done") for z in zone_ids
+                if args.sleep_seconds > 0:
+                    time.sleep(args.sleep_seconds)
+
+                if not has_more or (max_guilds and len(guilds) >= max_guilds):
+                    realm_state["done"] = True
+                    break
+
+        all_realms_done = all(
+            guild_list_state.get(f"{r.get('region') or region}/{r.get('slug') or r['name'].lower().replace(' ', '')}", {}).get("done")
+            for r in realms
         ) or (max_guilds and len(guilds) >= max_guilds)
 
-        if not all_zones_done:
+        if not all_realms_done:
             save_state(args.state_file, state)
             return False
 
