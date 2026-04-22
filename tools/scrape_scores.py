@@ -98,14 +98,13 @@ async def scrape_guild_zone(browser, guild_id: int, zone_id: int) -> list[tuple[
 
 
 async def scrape_guild(browser, guild_id: int) -> dict[str, float]:
-    """Scrape all configured zones for a guild and return {name: best_score}."""
-    scores: dict[str, float] = {}
+    """Scrape all configured zones for a guild and return {name: avg_score}."""
+    zone_scores: dict[str, list[float]] = {}
     for zone_id in ZONE_IDS:
         rows = await scrape_guild_zone(browser, guild_id, zone_id)
         for name, avg in rows:
-            if name not in scores or avg > scores[name]:
-                scores[name] = avg
-    return scores
+            zone_scores.setdefault(name, []).append(avg)
+    return {name: sum(avgs) / len(avgs) for name, avgs in zone_scores.items()}
 
 
 async def main() -> None:
