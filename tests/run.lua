@@ -322,13 +322,11 @@ local function setup_env(opts)
     return state
 end
 
-local function test_lookup_score_and_item_score()
+local function test_lookup_score()
     setup_env()
 
     local score = _G.LFRaider.GetScore("Vocoder", "Dreamscythe")
-    local item_score = _G.LFRaider.GetItemScore("Vocoder", "Dreamscythe")
     assert_equal(_G.LFRaider.FormatScore(score), "74.7")
-    assert_equal(_G.LFRaider.FormatItemScore(item_score), "126")
     assert_nil(_G.LFRaider.GetScore("Unknown", "Dreamscythe"))
 end
 
@@ -339,12 +337,11 @@ local function test_normalizes_realm_display_names()
     assert_equal(_G.LFRaider.NormalizeRealm("Dream scythe"), "dreamscythe")
 end
 
-local function test_slash_lookup_prints_both_scores()
+local function test_slash_lookup_prints_score()
     local state = setup_env()
 
     _G.SlashCmdList.LFRAIDER("Vocoder-Dreamscythe")
     assert_true(string.find(state.chat[#state.chat], "74.7", 1, true), "slash lookup should print WCL score")
-    assert_true(string.find(state.chat[#state.chat], "iScore 126", 1, true), "slash lookup should print item score")
 end
 
 local function test_stats_print_dataset_info()
@@ -360,9 +357,8 @@ local function test_tooltip_adds_enabled_scores_once()
     _G.LFRaider.AddScoreToTooltip(_G.GameTooltip, "mouseover")
     _G.LFRaider.AddScoreToTooltip(_G.GameTooltip, "mouseover")
 
-    assert_equal(#state.tooltip_lines, 2)
+    assert_equal(#state.tooltip_lines, 1)
     assert_true(string.find(state.tooltip_lines[1], "74.7", 1, true), "tooltip should include WCL score")
-    assert_true(string.find(state.tooltip_lines[2], "126", 1, true), "tooltip should include item score")
 end
 
 local function test_lfg_search_entry_annotation()
@@ -377,7 +373,6 @@ local function test_lfg_search_entry_annotation()
     _G.LFRaider.AnnotateLFGSearchEntry(entry)
     assert_true(entry.LFRaiderMetricText ~= nil, "LFG row should create a compact metric label")
     assert_true(string.find(entry.LFRaiderMetricText:GetText(), "74.7%", 1, true), "LFG row should include compact WCL percent")
-    assert_true(string.find(entry.LFRaiderMetricText:GetText(), "i126", 1, true), "LFG row should include compact item text")
     assert_equal(entry.ActivityName:GetText(), "Dungeon", "LFG activity label should remain readable")
 end
 
@@ -390,7 +385,6 @@ local function test_lfg_applicant_annotation()
 
     _G.LFRaider.AnnotateLFGApplicantMember(member, 42, 1)
     assert_true(string.find(member.Name:GetText(), "74.7%", 1, true), "LFG applicant should include compact WCL percent")
-    assert_true(string.find(member.Name:GetText(), "i126", 1, true), "LFG applicant should include compact item text")
 end
 
 local function test_lfg_browse_tooltip_annotation()
@@ -426,7 +420,6 @@ local function test_lfg_browse_tooltip_annotation()
 
     _G.LFRaider.AnnotateLFGBrowseSearchEntryTooltip(tooltip, 1)
     assert_true(string.find(tooltip.Leader.Level:GetText(), "74.7%", 1, true), "browse tooltip leader should include compact WCL percent")
-    assert_true(string.find(tooltip.Leader.Level:GetText(), "i126", 1, true), "browse tooltip leader should include compact item text")
     assert_true(string.find(extraMember.Level:GetText(), "74.7%", 1, true), "browse tooltip members should include compact WCL percent")
     assert_true(tooltip.width >= 270, "browse tooltip should widen for compact summary columns")
 end
@@ -439,7 +432,6 @@ local function test_who_list_annotation()
 
     _G.LFRaider.AnnotateWhoList()
     assert_true(string.find(_G.WhoFrameButton1Name:GetText(), "74.7%", 1, true), "Who pane should include compact WCL percent")
-    assert_true(string.find(_G.WhoFrameButton1Name:GetText(), "i126", 1, true), "Who pane should include compact item text")
 end
 
 local function test_who_chat_filter_appends_summary()
@@ -447,7 +439,6 @@ local function test_who_chat_filter_appends_summary()
 
     local _, message = _G.LFRaider.ChatSystemMessageFilter(nil, "CHAT_MSG_SYSTEM", "Vocoder: Level 70 Mage")
     assert_true(string.find(message, "74.7%", 1, true), "system chat filter should append compact WCL percent")
-    assert_true(string.find(message, "i126", 1, true), "system chat filter should append compact item text")
     assert_true(not string.find(message, "Vocoder: 74.7%", 1, true), "single-name chat summaries should avoid repeating the character name")
 end
 
@@ -461,9 +452,9 @@ local function test_minimap_button_opens_menu()
 end
 
 local tests = {
-    test_lookup_score_and_item_score,
+    test_lookup_score,
     test_normalizes_realm_display_names,
-    test_slash_lookup_prints_both_scores,
+    test_slash_lookup_prints_score,
     test_stats_print_dataset_info,
     test_tooltip_adds_enabled_scores_once,
     test_lfg_search_entry_annotation,
