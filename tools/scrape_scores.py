@@ -67,7 +67,11 @@ async def scrape_guild_zone(browser, guild_id: int, zone_id: int) -> list[tuple[
     page.on("response", on_response)
 
     url = f"https://fresh.warcraftlogs.com/guild/rankings/{guild_id}/{zone_id}?recent=true"
-    await page.goto(url, wait_until="domcontentloaded")
+    try:
+        await page.goto(url, wait_until="domcontentloaded")
+    except Exception:
+        await context.close()
+        return []
 
     try:
         await asyncio.wait_for(ajax_done.wait(), timeout=AJAX_TIMEOUT)
