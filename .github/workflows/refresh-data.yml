@@ -79,56 +79,24 @@ jobs:
           python3 tools/scrape_scores.py \
             --state-file data/fetch_state.json \
             --output data/scores.json \
-            --max-guilds "${WCL_MAX_GUILDS}"
+            --max-guilds "${WCL_MAX_GUILDS}" \
+            --failed-guilds data/retry_guilds.json
 
-      - name: Generate runtime Lua data
+      - name: Commit initial scan results
         if: steps.gate.outputs.run == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tools/generate_data.py data/scores.json LFRaider_Data.lua
-
-      - name: Check for data changes
-        if: steps.gate.outputs.run == 'true'
-        id: changed
-        shell: bash
-        run: |
-          set -euo pipefail
-          if git status --porcelain -- data/scores.json data/fetch_state.json LFRaider_Data.lua | grep -q .; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No data changes."
-          fi
-
-      - name: Commit updated data
-        if: steps.changed.outputs.changed == 'true'
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/scores.json data/fetch_state.json LFRaider_Data.lua
-          git commit -m "chore(data): refresh score dataset"
-          git push
-
-      - name: Install Lua
-        if: steps.changed.outputs.changed == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y lua5.4
-
-      - name: Bump addon version and release
-        if: steps.changed.outputs.changed == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tools/bump_version.py --message "Refreshed bundled score dataset."
-          lua tests/run.lua
-          luac -p LFRaider.lua LFRaider_Data.lua tests/run.lua
-          bash ./.github/scripts/verify-release-package.sh
-          git add LFRaider.toc README.md CHANGELOG.md
-          git commit -m "chore(data): release refreshed score dataset"
-          git push
+          git add data/scores.json data/fetch_state.json
+          # Stage retry list only when guilds failed (file only written when non-empty)
+          if [[ -f data/retry_guilds.json ]]; then
+            git add data/retry_guilds.json
+          fi
+          if git diff --cached --quiet; then
+            echo "No data changes, nothing to commit."
+          else
+            git commit -m "chore(data): scrape initial score data"
+            git push
+          fi

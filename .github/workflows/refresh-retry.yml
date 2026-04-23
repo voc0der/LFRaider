@@ -1,0 +1,147 @@
+name: Refresh Score Data — Retry Pass
+
+on:
+  schedule:
+    # Wednesdays and Saturdays at 10:17 UTC (4 hours after the initial scrape)
+    - cron: "17 10 * * 3,6"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-score-retry
+  cancel-in-progress: false
+
+jobs:
+  retry:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_PAT: ${{ secrets.RELEASE_PAT }}
+      WCL_MAX_GUILDS: ${{ vars.WCL_MAX_GUILDS || '1000' }}
+      LFR_WCL_DISTRIBUTION_APPROVED: ${{ vars.LFR_WCL_DISTRIBUTION_APPROVED }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ env.RELEASE_PAT != '' && env.RELEASE_PAT || github.token }}
+
+      - name: Check redistribution approval
+        id: gate
+        shell: bash
+        run: |
+          if [[ "${LFR_WCL_DISTRIBUTION_APPROVED}" == "true" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "::warning::LFR_WCL_DISTRIBUTION_APPROVED is not true. Skipping."
+          echo "run=false" >> "$GITHUB_OUTPUT"
+
+      - name: Check for retry guilds
+        if: steps.gate.outputs.run == 'true'
+        id: retries
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f data/retry_guilds.json ]]; then
+            count=$(python3 -c "import json; print(len(json.load(open('data/retry_guilds.json')).get('guild_ids', [])))")
+            if [[ "$count" -gt 0 ]]; then
+              echo "has_retries=true" >> "$GITHUB_OUTPUT"
+              echo "$count guilds queued for retry."
+            else
+              echo "has_retries=false" >> "$GITHUB_OUTPUT"
+              echo "Retry file present but empty."
+            fi
+          else
+            echo "has_retries=false" >> "$GITHUB_OUTPUT"
+            echo "No retry file found — proceeding to generate and release."
+          fi
+
+      - name: Install Playwright and Chromium
+        if: steps.gate.outputs.run == 'true' && steps.retries.outputs.has_retries == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          pip install playwright
+          playwright install chromium --with-deps
+
+      - name: Scrape retry guilds
+        if: steps.gate.outputs.run == 'true' && steps.retries.outputs.has_retries == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/scrape_scores.py \
+            --retry-from data/retry_guilds.json \
+            --output data/scores.json \
+            --max-guilds "${WCL_MAX_GUILDS}"
+
+      - name: Remove retry guild list
+        if: steps.gate.outputs.run == 'true' && steps.retries.outputs.has_retries == 'true'
+        shell: bash
+        run: rm -f data/retry_guilds.json
+
+      - name: Generate runtime Lua data
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/generate_data.py data/scores.json LFRaider_Data.lua
+
+      - name: Check for data changes
+        if: steps.gate.outputs.run == 'true'
+        id: changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          # lua_changed drives the release; needs_commit also covers retry cleanup
+          if git status --porcelain -- LFRaider_Data.lua | grep -q .; then
+            echo "lua_changed=true" >> "$GITHUB_OUTPUT"
+            echo "needs_commit=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "lua_changed=false" >> "$GITHUB_OUTPUT"
+            # Still need a commit if retries ran (scores updated, retry file removed)
+            if [[ "${{ steps.retries.outputs.has_retries }}" == "true" ]]; then
+              echo "needs_commit=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "needs_commit=false" >> "$GITHUB_OUTPUT"
+              echo "No data changes."
+            fi
+          fi
+
+      - name: Commit updated data
+        if: steps.changed.outputs.needs_commit == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add LFRaider_Data.lua
+          if [[ "${{ steps.retries.outputs.has_retries }}" == "true" ]]; then
+            git add data/scores.json
+            git rm --ignore-unmatch data/retry_guilds.json
+          fi
+          git commit -m "chore(data): refresh score dataset"
+          git push
+
+      - name: Install Lua
+        if: steps.changed.outputs.lua_changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y lua5.4
+
+      - name: Bump addon version and release
+        if: steps.changed.outputs.lua_changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/bump_version.py --message "Refreshed bundled score dataset."
+          lua tests/run.lua
+          luac -p LFRaider.lua LFRaider_Data.lua tests/run.lua
+          bash ./.github/scripts/verify-release-package.sh
+          git add LFRaider.toc README.md CHANGELOG.md
+          git commit -m "chore(data): release refreshed score dataset"
+          git push

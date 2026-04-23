@@ -116,6 +116,14 @@ async def main() -> None:
     parser.add_argument("--max-guilds", type=int, default=MAX_GUILDS, metavar="N")
     parser.add_argument("--state-file", type=Path, default=STATE_FILE)
     parser.add_argument("--output", type=Path, default=OUTPUT_FILE)
+    parser.add_argument(
+        "--failed-guilds", type=Path, default=None, metavar="PATH",
+        help="write guild IDs that returned 0 results to this JSON file",
+    )
+    parser.add_argument(
+        "--retry-from", type=Path, default=None, metavar="PATH",
+        help="scrape only guild IDs in this JSON file; pre-loads existing --output as base scores",
+    )
     args = parser.parse_args()
 
     try:
@@ -124,15 +132,30 @@ async def main() -> None:
         print("playwright not installed.  Run:  pip install playwright")
         sys.exit(1)
 
-    guild_ids = load_guild_ids()[:args.max_guilds]
-    print(f"Loaded {len(guild_ids)} guilds from {args.state_file.name}")
+    if args.retry_from:
+        with open(args.retry_from) as f:
+            retry_data = json.load(f)
+        guild_ids = retry_data.get("guild_ids", [])[:args.max_guilds]
+        print(f"Retry mode: {len(guild_ids)} guild IDs from {args.retry_from.name}")
+    else:
+        guild_ids = load_guild_ids()[:args.max_guilds]
+        print(f"Loaded {len(guild_ids)} guilds from {args.state_file.name}")
     print(f"Scraping zones {ZONE_IDS} for each guild (recent=true) ...")
     print()
 
     all_scores: dict[str, float] = {}
+
+    if args.retry_from and args.output.exists():
+        with open(args.output) as f:
+            existing = json.load(f)
+        for char in existing.get("characters", []):
+            all_scores[char["name"]] = char["score"]
+        print(f"Pre-loaded {len(all_scores)} existing scores from {args.output.name}")
+
     t_start = time.perf_counter()
     done = 0
     non_empty = 0
+    failed_guild_ids: list[int] = []
 
     async with async_playwright() as pw:
         launch_kwargs: dict = {"headless": True}
@@ -152,6 +175,8 @@ async def main() -> None:
             done += 1
             if guild_scores:
                 non_empty += 1
+            else:
+                failed_guild_ids.append(guild_id)
             elapsed = time.perf_counter() - t_start
             rate = done / elapsed
             remaining = (len(guild_ids) - done) / rate if rate > 0 else 0
@@ -168,6 +193,13 @@ async def main() -> None:
     wall = time.perf_counter() - t_start
     print()
     print(f"Done in {wall:.0f}s. {len(all_scores)} unique characters from {non_empty}/{done} guilds.")
+    if failed_guild_ids:
+        print(f"{len(failed_guild_ids)} guilds returned 0 results: {failed_guild_ids}")
+
+    if args.failed_guilds is not None and failed_guild_ids:
+        with open(args.failed_guilds, "w") as f:
+            json.dump({"guild_ids": failed_guild_ids}, f, indent=2)
+        print(f"Wrote {len(failed_guild_ids)} failed guild IDs to {args.failed_guilds}")
 
     characters = [
         {"name": name, "realm": REALM, "score": round(score, 1)}
