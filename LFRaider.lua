@@ -816,8 +816,10 @@ local function BuildMessageSummaries(message)
     end
 
     -- Skip labeled system messages like "Quest accepted: ...", "Quest completed: ...", etc.
-    -- /who results don't follow this "Label: content" pattern.
-    if message:match("^[%a%s]+:") then
+    -- /who results have only a player name before the colon ("Vocoder: Level 70 Mage"),
+    -- while system labels have multiple words before it ("Quest accepted: ...").
+    local colon_pos = message:find(":")
+    if colon_pos and message:sub(1, colon_pos - 1):find("%s") then
         return nil
     end
 
