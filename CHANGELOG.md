@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+## [0.1.14] - 2026-04-25
+
+### Fixed
+- Prevent false-positive score annotations on quest/achievement system messages (e.g. "Quest accepted: Super Hot Stew").
+
 ## [0.1.13] - 2026-04-25
 
 ### Changed

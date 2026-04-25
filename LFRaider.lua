@@ -815,6 +815,12 @@ local function BuildMessageSummaries(message)
         return nil
     end
 
+    -- Skip labeled system messages like "Quest accepted: ...", "Quest completed: ...", etc.
+    -- /who results don't follow this "Label: content" pattern.
+    if message:match("^[%a%s]+:") then
+        return nil
+    end
+
     local summaries = {}
     local seen = {}
     for token in string.gmatch(message, "[%a][%a'%-]+") do
