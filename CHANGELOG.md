@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+## [0.1.15] - 2026-04-26
+
+### Fixed
+- Prevent score annotations on dice roll messages (e.g. "Vocoder rolls 26 (1-100)").
+
 ## [0.1.14] - 2026-04-25
 
 ### Fixed

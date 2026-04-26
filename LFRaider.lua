@@ -823,6 +823,11 @@ local function BuildMessageSummaries(message)
         return nil
     end
 
+    -- Skip dice roll messages: "Vocoder rolls 26 (1-100)"
+    if message:find(" rolls %d+ %(") then
+        return nil
+    end
+
     local summaries = {}
     local seen = {}
     for token in string.gmatch(message, "[%a][%a'%-]+") do

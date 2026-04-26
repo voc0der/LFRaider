@@ -442,6 +442,13 @@ local function test_who_chat_filter_appends_summary()
     assert_true(not string.find(message, "Vocoder: 74.7%", 1, true), "single-name chat summaries should avoid repeating the character name")
 end
 
+local function test_who_chat_filter_skips_roll_messages()
+    setup_env()
+
+    local _, msg = _G.LFRaider.ChatSystemMessageFilter(nil, "CHAT_MSG_SYSTEM", "Vocoder rolls 26 (1-100)")
+    assert_true(not string.find(msg, "74.7%", 1, true), "roll messages should not be annotated with a score")
+end
+
 local function test_minimap_button_opens_menu()
     local state = setup_env()
 
@@ -462,6 +469,7 @@ local tests = {
     test_lfg_browse_tooltip_annotation,
     test_who_list_annotation,
     test_who_chat_filter_appends_summary,
+    test_who_chat_filter_skips_roll_messages,
     test_minimap_button_opens_menu,
 }
 
