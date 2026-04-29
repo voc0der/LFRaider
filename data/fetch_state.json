@@ -1788,13 +1788,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 779272,
-      "name": "Zug Zug",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 779277,
       "name": "The Lazy Elite",
       "realm": "Dreamscythe",
@@ -7005,6 +6998,13 @@
     {
       "id": 813727,
       "name": "Humble",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813735,
+      "name": "Fractum",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
