@@ -2,8 +2,8 @@ name: Refresh Score Data — Retry Pass
 
 on:
   schedule:
-    # Wednesdays and Saturdays at 10:17 UTC (4 hours after the initial scrape)
-    - cron: "17 10 * * 3,6"
+    # Wednesdays and Saturdays at 15:17 UTC (9 hours after the initial scrape)
+    - cron: "17 15 * * 3,6"
   workflow_dispatch:
 
 permissions:
