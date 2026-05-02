@@ -3,6 +3,8 @@ name: Tag from TOC version
 on:
   push:
     branches: [main]
+    paths:
+      - LFRaider.toc
 
 permissions:
   contents: write
