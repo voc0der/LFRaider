@@ -809,17 +809,30 @@ local function AnnotateWhoList()
     end
 end
 
+local function IsWhoResultMessage(message)
+    local colon_pos = message:find(":")
+    if not colon_pos then
+        return false
+    end
+
+    local playerName = Trim(message:sub(1, colon_pos - 1))
+    if not playerName or playerName == "" or playerName:find("%s") then
+        return false
+    end
+
+    local details = Trim(message:sub(colon_pos + 1))
+    return details and (details:match("^Level%s+%d+") or details:match("^Lvl%s+%d+")) ~= nil
+end
+
 local function BuildMessageSummaries(message)
     local db = EnsureSavedVariables()
     if not db.whoChat or type(message) ~= "string" or string.find(message, SUMMARY_COLOR .. "[", 1, true) then
         return nil
     end
 
-    -- Skip labeled system messages like "Quest accepted: ...", "Quest completed: ...", etc.
-    -- /who results have only a player name before the colon ("Vocoder: Level 70 Mage"),
-    -- while system labels have multiple words before it ("Quest accepted: ...").
-    local colon_pos = message:find(":")
-    if colon_pos and message:sub(1, colon_pos - 1):find("%s") then
+    -- Only annotate /who result lines like "Vocoder: Level 70 Mage". Plain
+    -- system messages can contain bundled character names such as "group".
+    if not IsWhoResultMessage(message) then
         return nil
     end
 

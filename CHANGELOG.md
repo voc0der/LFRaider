@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+## [0.1.19] - 2026-05-06
+
+### Fixed
+- Restrict /who chat annotations to actual /who result lines.
+
 ## [0.1.18] - 2026-05-06
 
 ### Changed

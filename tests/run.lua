@@ -449,6 +449,14 @@ local function test_who_chat_filter_skips_roll_messages()
     assert_true(not string.find(msg, "74.7%", 1, true), "roll messages should not be annotated with a score")
 end
 
+local function test_who_chat_filter_skips_plain_system_messages()
+    setup_env()
+    _G.LFRaiderData.realms.dreamscythe.group = { 696, 0 }
+
+    local _, msg = _G.LFRaider.ChatSystemMessageFilter(nil, "CHAT_MSG_SYSTEM", "You leave the group.")
+    assert_equal(msg, "You leave the group.", "plain system messages should not be annotated with a score")
+end
+
 local function test_minimap_button_opens_menu()
     local state = setup_env()
 
@@ -470,6 +478,7 @@ local tests = {
     test_who_list_annotation,
     test_who_chat_filter_appends_summary,
     test_who_chat_filter_skips_roll_messages,
+    test_who_chat_filter_skips_plain_system_messages,
     test_minimap_button_opens_menu,
 }
 
