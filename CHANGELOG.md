@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+## [0.1.20] - 2026-05-06
+
+### Fixed
+- Restore /who chat annotations for bracketed and linked Classic who results.
+
 ## [0.1.19] - 2026-05-06
 
 ### Fixed
