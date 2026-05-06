@@ -442,6 +442,23 @@ local function test_who_chat_filter_appends_summary()
     assert_true(not string.find(message, "Vocoder: 74.7%", 1, true), "single-name chat summaries should avoid repeating the character name")
 end
 
+local function test_who_chat_filter_appends_summary_to_bracketed_who_result()
+    setup_env()
+    _G.LFRaiderData.realms.dreamscythe.lydya = { 696, 0 }
+
+    local _, message = _G.LFRaider.ChatSystemMessageFilter(nil, "CHAT_MSG_SYSTEM", "[Lydya]: Level 70 Undead Warlock <Shenangigans> - Orgrimmar")
+    assert_true(string.find(message, "69.6%", 1, true), "bracketed /who chat results should include compact WCL percent")
+end
+
+local function test_who_chat_filter_appends_summary_to_linked_who_result()
+    setup_env()
+    _G.LFRaiderData.realms.dreamscythe.lydya = { 696, 0 }
+
+    local linked = "|cff33ff99|Hplayer:Lydya-Dreamscythe:123:WHISPER:Lydya|h[Lydya]|h|r: Level 70 Undead Warlock <Shenangigans> - Orgrimmar"
+    local _, message = _G.LFRaider.ChatSystemMessageFilter(nil, "CHAT_MSG_SYSTEM", linked)
+    assert_true(string.find(message, "69.6%", 1, true), "linked /who chat results should include compact WCL percent")
+end
+
 local function test_who_chat_filter_skips_roll_messages()
     setup_env()
 
@@ -477,6 +494,8 @@ local tests = {
     test_lfg_browse_tooltip_annotation,
     test_who_list_annotation,
     test_who_chat_filter_appends_summary,
+    test_who_chat_filter_appends_summary_to_bracketed_who_result,
+    test_who_chat_filter_appends_summary_to_linked_who_result,
     test_who_chat_filter_skips_roll_messages,
     test_who_chat_filter_skips_plain_system_messages,
     test_minimap_button_opens_menu,
