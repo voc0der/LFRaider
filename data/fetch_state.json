@@ -4861,13 +4861,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 808872,
-      "name": "Aww Tysm",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 808979,
       "name": "Illusion of Confusion",
       "realm": "Dreamscythe",
@@ -7005,6 +6998,13 @@
     {
       "id": 813735,
       "name": "Fractum",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813738,
+      "name": "Straight Puggin",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
