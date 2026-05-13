@@ -1354,13 +1354,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 777675,
-      "name": "Death N Taxes",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 777678,
       "name": "Brigade",
       "realm": "Dreamscythe",
@@ -4651,13 +4644,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 806953,
-      "name": "Exiles",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 806971,
       "name": "Behind the Curve PUGs",
       "realm": "Dreamscythe",
@@ -7005,6 +6991,20 @@
     {
       "id": 813738,
       "name": "Straight Puggin",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813744,
+      "name": "I Panicked",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813750,
+      "name": "Kiss It",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
