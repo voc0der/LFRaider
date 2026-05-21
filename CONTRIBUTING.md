@@ -64,7 +64,7 @@ Do not enable scheduled Warcraft Logs data publication until the redistribution/
 
 The collector refuses to run unless `LFR_WCL_DISTRIBUTION_APPROVED=true` or `--distribution-approved` is passed. That flag should mean actual permission exists, not just "the code works."
 
-For multi-raid refreshes, use `WCL_ZONE_IDS` as a comma-separated list, for example `1047,1048`. The collector still accepts the legacy single-zone `WCL_ZONE_ID` variable or `--zone-id` argument.
+The current score refresh target is Warcraft Logs zone `1056` (SSC/TK). For multi-zone refreshes, use `WCL_ZONE_IDS` as a comma-separated list. The collector still accepts the legacy single-zone `WCL_ZONE_ID` variable or `--zone-id` argument.
 
 ## Project Expectations
 

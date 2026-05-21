@@ -5,8 +5,9 @@ Usage:
     python3 tools/scrape_scores.py
 
 Reads guild IDs from data/fetch_state.json, scrapes each guild's rankings
-page for zone 1047 and 1048 via headless Chromium, and writes data/scores.json
-in the same format as fetch_wcl_scores.py. No API credentials needed.
+page for the configured Warcraft Logs zone IDs via headless Chromium, and
+writes data/scores.json in the same format as fetch_wcl_scores.py. No API
+credentials needed.
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import random
 import shutil
 import sys
@@ -27,7 +29,7 @@ STATE_FILE = REPO_ROOT / "data" / "fetch_state.json"
 OUTPUT_FILE = REPO_ROOT / "data" / "scores.json"
 
 MAX_GUILDS = 1000
-ZONE_IDS = [1047, 1048]
+DEFAULT_ZONE_IDS = [1056]
 REALM = "Dreamscythe"
 CHROMIUM_EXECUTABLE = (
     shutil.which("chromium") or shutil.which("chromium-browser") or None
@@ -40,10 +42,37 @@ DELAY_MIN = 0.3
 DELAY_MAX = 1.2
 AJAX_TIMEOUT = 8.0
 SCORE_POLICY_VERSION = 4
-SCORE_POLICY = (
-    "Mean of WCL per-encounter rank percentiles across zones 1047 and 1048, "
-    "sourced from guild rankings pages."
-)
+
+
+def parse_zone_ids(value: str | None) -> list[int]:
+    if value is None:
+        return []
+    zone_ids: list[int] = []
+    seen: set[int] = set()
+    for raw_part in value.split(","):
+        part = raw_part.strip()
+        if not part:
+            continue
+        try:
+            zone_id = int(part)
+        except ValueError as exc:
+            raise ValueError(f"invalid zone ID {part!r}") from exc
+        if zone_id <= 0:
+            raise ValueError("zone IDs must be positive integers")
+        if zone_id in seen:
+            continue
+        seen.add(zone_id)
+        zone_ids.append(zone_id)
+    return zone_ids
+
+
+def format_score_policy(zone_ids: list[int]) -> str:
+    zone_label = "zone" if len(zone_ids) == 1 else "zones"
+    zone_text = ", ".join(str(zone_id) for zone_id in zone_ids)
+    return (
+        f"Mean of WCL per-encounter rank percentiles across {zone_label} {zone_text}, "
+        "sourced from guild rankings pages."
+    )
 
 
 def load_guild_ids() -> list[int]:
@@ -101,10 +130,10 @@ async def scrape_guild_zone(browser, guild_id: int, zone_id: int) -> list[tuple[
     return results
 
 
-async def scrape_guild(browser, guild_id: int) -> dict[str, float]:
+async def scrape_guild(browser, guild_id: int, zone_ids: list[int]) -> dict[str, float]:
     """Scrape all configured zones for a guild and return {name: avg_score}."""
     zone_scores: dict[str, list[float]] = {}
-    for zone_id in ZONE_IDS:
+    for zone_id in zone_ids:
         rows = await scrape_guild_zone(browser, guild_id, zone_id)
         for name, avg in rows:
             zone_scores.setdefault(name, []).append(avg)
@@ -117,6 +146,12 @@ async def main() -> None:
     parser.add_argument("--state-file", type=Path, default=STATE_FILE)
     parser.add_argument("--output", type=Path, default=OUTPUT_FILE)
     parser.add_argument(
+        "--zone-ids",
+        default=os.getenv("WCL_ZONE_IDS") or os.getenv("WCL_ZONE_ID"),
+        metavar="IDS",
+        help="comma-separated Warcraft Logs zone IDs; defaults to 1056",
+    )
+    parser.add_argument(
         "--failed-guilds", type=Path, default=None, metavar="PATH",
         help="write guild IDs that returned 0 results to this JSON file",
     )
@@ -125,6 +160,13 @@ async def main() -> None:
         help="scrape only guild IDs in this JSON file; pre-loads existing --output as base scores",
     )
     args = parser.parse_args()
+
+    try:
+        zone_ids = parse_zone_ids(args.zone_ids)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+    if not zone_ids:
+        zone_ids = DEFAULT_ZONE_IDS
 
     try:
         from playwright.async_api import async_playwright
@@ -140,7 +182,7 @@ async def main() -> None:
     else:
         guild_ids = load_guild_ids()[:args.max_guilds]
         print(f"Loaded {len(guild_ids)} guilds from {args.state_file.name}")
-    print(f"Scraping zones {ZONE_IDS} for each guild (recent=true) ...")
+    print(f"Scraping zones {zone_ids} for each guild (recent=true) ...")
     print()
 
     all_scores: dict[str, float] = {}
@@ -167,7 +209,7 @@ async def main() -> None:
             if done > 0:
                 await asyncio.sleep(random.uniform(DELAY_MIN, DELAY_MAX))
 
-            guild_scores = await scrape_guild(browser, guild_id)
+            guild_scores = await scrape_guild(browser, guild_id, zone_ids)
             for name, score in guild_scores.items():
                 if name not in all_scores or score > all_scores[name]:
                     all_scores[name] = score
@@ -210,10 +252,10 @@ async def main() -> None:
         "characters": characters,
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "metric": "dps",
-        "scorePolicy": SCORE_POLICY,
+        "scorePolicy": format_score_policy(zone_ids),
         "scorePolicyVersion": SCORE_POLICY_VERSION,
         "source": "warcraftlogs-scrape",
-        "zoneIDs": ZONE_IDS,
+        "zoneIDs": zone_ids,
     }
 
     with open(args.output, "w") as f:

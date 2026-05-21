@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+## [0.1.26] - 2026-05-21
+
+### Changed
+- Target SSC/TK Warcraft Logs zone 1056.
+
 ## [0.1.25] - 2026-05-20
 
 ### Changed

@@ -20,7 +20,7 @@ jobs:
       RELEASE_PAT: ${{ secrets.RELEASE_PAT }}
       WCL_CLIENT_ID: ${{ secrets.WCL_CLIENT_ID }}
       WCL_CLIENT_SECRET: ${{ secrets.WCL_CLIENT_SECRET }}
-      WCL_ZONE_IDS: ${{ vars.WCL_ZONE_IDS }}
+      WCL_ZONE_IDS: ${{ vars.WCL_ZONE_IDS || vars.WCL_ZONE_ID || '1056' }}
       WCL_ZONE_ID: ${{ vars.WCL_ZONE_ID }}
       WCL_METRIC: ${{ vars.WCL_METRIC || 'dps' }}
       WCL_MAX_GUILDS: ${{ vars.WCL_MAX_GUILDS || '1000' }}

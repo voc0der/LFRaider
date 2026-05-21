@@ -16,7 +16,7 @@
 - Keeps the runtime addon small: one Lua lookup file plus one generated Lua data file
 - Includes CI plumbing for weekly data refreshes and release packaging
 
-Current version: `0.1.25`
+Current version: `0.1.26`
 
 ## Install
 
@@ -31,7 +31,7 @@ The addon shell works today with the seed data in `LFRaider_Data.lua`.
 
 The Warcraft Logs collector is present but guarded. Do not enable scheduled data publishing until Warcraft Logs/RPGLogs approves this addon use case.
 
-The collector fetches the top ranked guilds for each configured zone and scores their members using recent logs (`timeframe: Recent`). Configure zones via the repository variable `WCL_ZONE_IDS` with a comma-separated value such as `1047,1048`. The older single-zone `WCL_ZONE_ID` variable still works.
+The collector fetches guilds and scores their members using recent Warcraft Logs rankings. The current data target is zone `1056` (SSC/TK). Configure alternate zones via the repository variable `WCL_ZONE_IDS` with a comma-separated value such as `1056`. The older single-zone `WCL_ZONE_ID` variable still works.
 
 By default the collector fetches all ranked guilds. Set `WCL_MAX_GUILDS` to cap the number of guilds per zone.
 

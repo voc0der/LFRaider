@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_PAT: ${{ secrets.RELEASE_PAT }}
+      WCL_ZONE_IDS: ${{ vars.WCL_ZONE_IDS || vars.WCL_ZONE_ID || '1056' }}
       WCL_MAX_GUILDS: ${{ vars.WCL_MAX_GUILDS || '1000' }}
       LFR_WCL_DISTRIBUTION_APPROVED: ${{ vars.LFR_WCL_DISTRIBUTION_APPROVED }}
 

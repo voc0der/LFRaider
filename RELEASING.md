@@ -30,7 +30,7 @@ Only configure these after Warcraft Logs/RPGLogs approves redistribution for thi
 - Secret `WCL_CLIENT_ID`
 - Secret `WCL_CLIENT_SECRET`
 - Repository variable `LFR_WCL_DISTRIBUTION_APPROVED=true`
-- Repository variable `WCL_ZONE_IDS`, comma-separated, for example `1047,1048`
+- Repository variable `WCL_ZONE_IDS`, comma-separated, currently `1056` for SSC/TK
 - Legacy repository variable `WCL_ZONE_ID` is still supported for a single zone
 - Optional repository variable `WCL_METRIC`, default `dps`
 - Optional repository variable `WCL_PARTITION`
