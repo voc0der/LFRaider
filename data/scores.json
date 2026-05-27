@@ -115676,7 +115676,7 @@
       "score": 64.2
     }
   ],
-  "generatedAt": "2026-05-27T11:35:13.572623+00:00",
+  "generatedAt": "2026-05-27T18:23:56.162112+00:00",
   "metric": "dps",
   "scorePolicy": "Mean of WCL per-encounter rank percentiles across zone 1056, sourced from guild rankings pages.",
   "scorePolicyVersion": 4,
