@@ -4497,13 +4497,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 804729,
-      "name": "Warped",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 804742,
       "name": "Devil Dogs",
       "realm": "Dreamscythe",
@@ -7005,6 +6998,13 @@
     {
       "id": 813750,
       "name": "Kiss It",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813757,
+      "name": "CINEMA",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
