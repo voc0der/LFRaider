@@ -424,7 +424,7 @@
     },
     {
       "id": 774641,
-      "name": "Asylum",
+      "name": "Asylum Fri/Mon",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
@@ -2798,13 +2798,6 @@
     {
       "id": 787125,
       "name": "Team Silent",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
-      "id": 787126,
-      "name": "Team Deadly",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
@@ -7005,6 +6998,13 @@
     {
       "id": 813757,
       "name": "CINEMA",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813759,
+      "name": "Baked Beans",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
