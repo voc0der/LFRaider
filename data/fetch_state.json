@@ -4441,13 +4441,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 803353,
-      "name": "Esprit de Corps",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 803857,
       "name": "Gondor",
       "realm": "Dreamscythe",
@@ -5415,7 +5408,7 @@
     },
     {
       "id": 810663,
-      "name": "ZugZug",
+      "name": "Zugzug",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
@@ -6486,7 +6479,7 @@
     },
     {
       "id": 813380,
-      "name": "Baja Blast",
+      "name": "Body Pillow Inc",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
@@ -6898,13 +6891,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 813664,
-      "name": "Casual Plus",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 813666,
       "name": "Loot Council Mafia",
       "realm": "Dreamscythe",
@@ -7005,6 +6991,20 @@
     {
       "id": 813759,
       "name": "Baked Beans",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813768,
+      "name": "Casually Addicted",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813787,
+      "name": "dig rats",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
