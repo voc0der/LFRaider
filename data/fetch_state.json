@@ -6142,13 +6142,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 813066,
-      "name": "Life Aggro",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 813072,
       "name": "Muddogs",
       "realm": "Dreamscythe",
@@ -7005,6 +6998,13 @@
     {
       "id": 813787,
       "name": "dig rats",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813790,
+      "name": "The Mystery Machine",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
