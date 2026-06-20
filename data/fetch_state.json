@@ -1795,13 +1795,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 779491,
-      "name": "Cthuna Matata",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 779573,
       "name": "Good Prog",
       "realm": "Dreamscythe",
@@ -4441,13 +4434,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 803857,
-      "name": "Gondor",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 804148,
       "name": "Purview",
       "realm": "Dreamscythe",
@@ -5547,13 +5533,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 811030,
-      "name": "Bloody Knights",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 811031,
       "name": "Calamitous Intent",
       "realm": "Dreamscythe",
@@ -6577,7 +6556,7 @@
     },
     {
       "id": 813437,
-      "name": "Displaced",
+      "name": "Moar Threat",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
@@ -7005,6 +6984,27 @@
     {
       "id": 813790,
       "name": "The Mystery Machine",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813796,
+      "name": "Kerbloughee",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813797,
+      "name": "Every Stat Counts",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813813,
+      "name": "Boys Night",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
