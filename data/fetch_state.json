@@ -4309,7 +4309,7 @@
     },
     {
       "id": 802687,
-      "name": "Red Sun: Vanguard",
+      "name": "Reaper - Vanguard",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
@@ -6394,13 +6394,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 813343,
-      "name": "Inwards",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 813345,
       "name": "The Contractors",
       "realm": "Dreamscythe",
@@ -7005,6 +6998,13 @@
     {
       "id": 813813,
       "name": "Boys Night",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813816,
+      "name": "Poached - Purple",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
