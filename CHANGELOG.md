@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+## [0.1.39] - 2026-07-04
+
+### Changed
+- Refreshed bundled score dataset.
+
 ## [0.1.38] - 2026-07-01
 
 ### Changed
