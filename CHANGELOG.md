@@ -1,5 +1,13 @@
 ## [Unreleased]
 
+## [0.1.40] - 2026-07-07
+
+### Changed
+- Bumped TOC interface to `20506` for the TBC Anniversary `2.5.6` (68502) client patch.
+
+### Tests
+- Verified against the `wow-ui-source` diff between `2.5.5` (68101) and `2.5.6` (68502): the `Who` pane hook (`WhoList_Update`), Premade Group Finder hooks (`LFGListSearchEntry_Update`, `LFGListApplicationViewer_UpdateApplicantMember`, `LFGListUtil_SetSearchEntryTooltip`), and the `C_LFGList` info APIs this addon reads are all unchanged. The only `LFGList.lua` changes add a retail-only "general playstyle" parameter explicitly marked not applicable to Classic. No code changes required.
+
 ## [0.1.39] - 2026-07-04
 
 ### Changed

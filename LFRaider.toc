@@ -1,8 +1,8 @@
-## Interface: 20505
+## Interface: 20506
 ## Title: LFRaider
 ## Notes: Shows bundled Warcraft Logs and last-known item score signals for TBC Anniversary Classic characters.
 ## Author: voc0der
-## Version: 0.1.39
+## Version: 0.1.40
 ## X-Curse-Project-ID: 1514107
 ## SavedVariables: LFRaiderDB
 

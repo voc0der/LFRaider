@@ -16,7 +16,7 @@
 - Keeps the runtime addon small: one Lua lookup file plus one generated Lua data file
 - Includes CI plumbing for weekly data refreshes and release packaging
 
-Current version: `0.1.39`
+Current version: `0.1.40`
 
 ## Install
 
@@ -111,5 +111,5 @@ Release workflow notes are in [`RELEASING.md`](RELEASING.md).
 ## Scope
 
 - Target client: TBC Anniversary Classic
-- TOC interface: `20505`
+- TOC interface: `20506`
 - Packaged runtime files: `LFRaider.toc`, `LFRaider_Data.lua`, `LFRaider.lua`
