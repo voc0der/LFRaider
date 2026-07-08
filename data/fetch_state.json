@@ -3286,20 +3286,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 791053,
-      "name": "Arabica",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
-      "id": 791054,
-      "name": "Robusta",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 791103,
       "name": "TPG",
       "realm": "Dreamscythe",
@@ -7005,6 +6991,20 @@
     {
       "id": 813816,
       "name": "Poached - Purple",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813819,
+      "name": "Transcended",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813821,
+      "name": "Spectre",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
