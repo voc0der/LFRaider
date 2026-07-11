@@ -6884,13 +6884,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 813721,
-      "name": "Silly Goose Guild",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 813722,
       "name": "Tokyo Manji Gang",
       "realm": "Dreamscythe",
@@ -7005,6 +6998,13 @@
     {
       "id": 813821,
       "name": "Spectre",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813823,
+      "name": "Comp Issue",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
