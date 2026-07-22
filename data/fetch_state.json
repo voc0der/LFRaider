@@ -648,7 +648,7 @@
     },
     {
       "id": 775428,
-      "name": "BlackWater",
+      "name": "What Remains",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
@@ -3958,13 +3958,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 800936,
-      "name": "Stay Behind Star",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 800941,
       "name": "Aussie",
       "realm": "Dreamscythe",
@@ -6464,13 +6457,6 @@
       "slug": "dreamscythe"
     },
     {
-      "id": 813404,
-      "name": "Raid 1",
-      "realm": "Dreamscythe",
-      "region": "US",
-      "slug": "dreamscythe"
-    },
-    {
       "id": 813405,
       "name": "Dawntower",
       "realm": "Dreamscythe",
@@ -7005,6 +6991,20 @@
     {
       "id": 813823,
       "name": "Comp Issue",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813824,
+      "name": "Poached - Green",
+      "realm": "Dreamscythe",
+      "region": "US",
+      "slug": "dreamscythe"
+    },
+    {
+      "id": 813828,
+      "name": "Fundead",
       "realm": "Dreamscythe",
       "region": "US",
       "slug": "dreamscythe"
