@@ -4943,7 +4943,7 @@
     {
       "name": "Atbownerd",
       "realm": "Dreamscythe",
-      "score": 52.1
+      "score": 57.6
     },
     {
       "name": "Ateinchgirth",
@@ -8488,7 +8488,7 @@
     {
       "name": "Betaswipe",
       "realm": "Dreamscythe",
-      "score": 42.9
+      "score": 52.9
     },
     {
       "name": "Betatwist",
@@ -23238,7 +23238,7 @@
     {
       "name": "Disarys",
       "realm": "Dreamscythe",
-      "score": 65.5
+      "score": 68.7
     },
     {
       "name": "Discbuttons",
@@ -59916,6 +59916,11 @@
       "score": 68.0
     },
     {
+      "name": "Moobet",
+      "realm": "Dreamscythe",
+      "score": 53.1
+    },
+    {
       "name": "Moobilecow",
       "realm": "Dreamscythe",
       "score": 45.5
@@ -70224,6 +70229,11 @@
       "name": "Poorlyrun",
       "realm": "Dreamscythe",
       "score": 9.1
+    },
+    {
+      "name": "Poorlytank",
+      "realm": "Dreamscythe",
+      "score": 68.5
     },
     {
       "name": "Poorpoppiinn",
@@ -91493,7 +91503,7 @@
     {
       "name": "Throg",
       "realm": "Dreamscythe",
-      "score": 48.6
+      "score": 55.0
     },
     {
       "name": "Throwinheals",
@@ -97659,6 +97669,11 @@
       "name": "Victoryx",
       "realm": "Dreamscythe",
       "score": 97.8
+    },
+    {
+      "name": "Victor\u00fdx",
+      "realm": "Dreamscythe",
+      "score": 40.9
     },
     {
       "name": "Victtra",
@@ -105391,7 +105406,7 @@
       "score": 19.5
     }
   ],
-  "generatedAt": "2026-08-05T10:00:53.664473+00:00",
+  "generatedAt": "2026-08-05T17:13:03.438492+00:00",
   "metric": "dps",
   "scorePolicy": "Mean of WCL per-encounter rank percentiles across zone 1056, sourced from guild rankings pages.",
   "scorePolicyVersion": 4,
